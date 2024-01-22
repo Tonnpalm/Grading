@@ -1,0 +1,33 @@
+.Scoring-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 80px;
+}
+
+.css-nzhj75-MuiButtonBase-root-MuiButton-root:hover {
+    background-color: #FFADCB !important; 
+}
+
+.css-11xur9t-MuiPaper-root-MuiTableContainer-root {
+    box-shadow: none !important;
+    margin-top: 30px;
+}
+
+.button-control {
+    width: 80%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+/* .css-ad3dsx-MuiTable-root {
+    display: table !important;
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+    min-width: 864px;
+    box-shadow: none;
+} */
+

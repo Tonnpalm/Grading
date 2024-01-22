@@ -1,0 +1,28 @@
+.content-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 70px;
+}
+
+.add-table-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    width: 80%;
+    height: auto;
+}
+
+.button-container {
+    width: 80%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between !important;
+    --bs-gutter-x: 3rem;
+    --bs-gutter-y: 0;
+    padding-right: calc(var(--bs-gutter-x) * .5);
+    padding-left: calc(var(--bs-gutter-x) * .5);
+    margin-bottom: 20px;
+}
+

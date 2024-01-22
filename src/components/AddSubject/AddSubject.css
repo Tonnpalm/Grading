@@ -1,0 +1,45 @@
+.svgPosition {
+    margin-top: 200px;
+    height: auto;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
+.add-form {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    border-radius: 6px;
+    margin-top: 6px;
+}
+
+.add-container {
+    display: flex;
+    justify-content: flex-end;
+    flex-direction: row;
+    align-items: flex-start;
+
+  }
+
+.style-modal {
+    position: 'absolute';
+    top: '50%';
+    left: '50%';
+    transform: 'translate(-50%, -50%)';
+    width: 400;
+    background-color: 'background.paper';
+    
+}
+
+.fill-in {
+    display: flex;
+    flex-direction: row;
+}
+
+.add-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 196px;
+}
