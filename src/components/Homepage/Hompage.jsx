@@ -31,7 +31,7 @@ function Homepage() {
                     </CardContent>
                 </CardActionArea>
                 </Card>
-
+{/* testgit */}
                 <Card sx={{ maxWidth: 271, ml: 12, backgroundColor: PinkPallette.main }}>
                 <CardActionArea sx={{ p: 3, paddingRight: 7, paddingLeft: 7, '&:hover': {backgroundColor: PinkPallette.light,}}} onClick = { () => {navigate('/')}}>     
                     <CardContent sx={{ color: 'white' }}>
