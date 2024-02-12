@@ -6,6 +6,10 @@ import AddSubject from "./components/AddSubject/AddSubject";
 import SelectSubject from "./components/AddSubject/SelectSubject/SelectSubject";
 import Table from "./components/Excel/tableTest";
 import Scoring from "./components/Scoring/Scoring";
+import AddMoreSubject from "./components/AddSubject/AddMoreSubject/AddMoreSubject";
+import TestTable from "./components/Scoring/TestTable"
+import SelectSubject2Grading from "./components/Grading/SelectSubject2Grading";
+import TryTo from "./components/AddSubject/SelectSubject/TryTo";
 import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
 import { ThemeProvider, createTheme } from "@mui/material";
 import "./App.css";
@@ -26,6 +30,10 @@ function App() {
         <Route path="selectSubject" element={<SelectSubject />} />
         <Route path="table" element={<Table />} />
         <Route path="scoring" element={<Scoring />} />
+        <Route path="addMoreSubject" element={<AddMoreSubject />} />
+        <Route path="testTable" element={<TestTable />} />
+        <Route path="selectSubject2grading" element={<SelectSubject2Grading />} />
+        <Route path="tryTo" element={<TryTo />} />
       </Routes>
     </ThemeProvider>
   );

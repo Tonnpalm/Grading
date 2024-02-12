@@ -33,7 +33,7 @@ function Homepage() {
                 </Card>
 {/* testgit */}
                 <Card sx={{ maxWidth: 271, ml: 12, backgroundColor: PinkPallette.main }}>
-                <CardActionArea sx={{ p: 3, paddingRight: 7, paddingLeft: 7, '&:hover': {backgroundColor: PinkPallette.light,}}} onClick = { () => {navigate('/')}}>     
+                <CardActionArea sx={{ p: 3, paddingRight: 7, paddingLeft: 7, '&:hover': {backgroundColor: PinkPallette.light,}}} onClick = { () => {navigate('/selectSubject2grading')}}>     
                     <CardContent sx={{ color: 'white' }}>
                         <CardMedia sx={{  display: 'flex', justifyContent: 'center' }}>
                             <BeenhereIcon sx={{ width: '109px', height: '109px' }}></BeenhereIcon>

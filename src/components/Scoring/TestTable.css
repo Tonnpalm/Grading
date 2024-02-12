@@ -1,0 +1,10 @@
+/* CSS */
+
+.hidden-column {
+    display: none;
+  }
+  
+  .show-column {
+    display: table-cell;
+  }
+  

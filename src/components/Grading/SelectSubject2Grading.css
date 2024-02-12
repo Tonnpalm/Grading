@@ -1,0 +1,9 @@
+.select-subject-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding-left: 20%;
+    padding-right: 20%;
+    padding-top: 5%;
+}
+

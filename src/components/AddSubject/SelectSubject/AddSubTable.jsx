@@ -40,50 +40,38 @@ function TableTest()
         <React.Fragment>
               <Container className="content custom-container">
                <div className="row fthight custom-row">               
-               <div className="col-md-4 custom-col-md-4">
-                  {/* <input type="file" className="form-control custom-form-control" onChange={ (e)=>readExcel(e)}  /> */}
-                  <Button component="label" variant="contained" className="import-style" sx={{ backgroundColor: PinkPallette.main }} startIcon={<CloudUploadIcon />}>
-                     Upload file
-                     <VisuallyHiddenInput type="file" className="form-control custom-form-control" onChange={ (e)=>readExcel(e)} />
-                  </Button>
-
-                  {/* เอาปุ่มเลือกทวิภาคและนานาชาติออก */}
-                  {/* <ButtonGroup
-                     disableElevation
-                     variant="contained"
-                     aria-label="Disabled elevation buttons"
-                  >
-                     <Button style={{ borderRadius: '6px 0 0 6px' }}>ทวิภาค</Button>
-                     <Button style={{ borderRadius: '0 6px 6px 0', marginLeft:'1px',  }}>นานาชาติ</Button>
-                  </ButtonGroup> */}
-               </div>
-              
-               <div className="col-md-12 mt-3">   
-               {(
-                <table className="table">
-                  <thead>
-                     <tr>
-                        <th style={{ backgroundColor: '#ff79a9', borderRadius: '10px  0 0 0'}}>รหัสวิชา</th>
-                        <th style={{ backgroundColor: '#ff79a9'}}>ชื่อวิชา</th>
-                        <th style={{ backgroundColor: '#ff79a9'}}>ตอนเรียน</th>
-                        <th style={{ backgroundColor: '#ff79a9', borderRadius: '0 10px 0 0' }}>ผู้ประสานงานรายวิชา</th>
-                     </tr>
-                  </thead>
-                  <tbody style={{ border: '1px solid', borderBottom: 'transparent' }}>
-                    { excelData.length > 1 &&                 
-                    excelData.map( (getdata, index)=>(
-                     <tr key={index}>
-                        <td>{ getdata.ID } </td>
-                        <td>{ getdata.Name } </td>
-                        <td>{ getdata.Section } </td>
-                        <td style={{ display: 'flex', justifyContent: 'center' }}><CheckboxesTags/> </td>
-                     </tr>
-                     ) ) }
-                  </tbody>
-                </table>
-               )
-}
-               </div>
+                  <div className="col-md-4 custom-col-md-4">
+                     {/* <input type="file" className="form-control custom-form-control" onChange={ (e)=>readExcel(e)}  /> */}
+                     <Button component="label" variant="contained" className="import-style" sx={{ backgroundColor: PinkPallette.main }} startIcon={<CloudUploadIcon />}>
+                        Upload file
+                        <VisuallyHiddenInput type="file" className="form-control custom-form-control" onChange={ (e)=>readExcel(e)} />
+                     </Button>
+                  </div>
+                  <div className="col-md-12 mt-3">   
+                     {(
+                     <table className="table">
+                        <thead>
+                           <tr>
+                              <th style={{ backgroundColor: '#ff79a9', borderRadius: '10px  0 0 0'}}>รหัสวิชา</th>
+                              <th style={{ backgroundColor: '#ff79a9'}}>ชื่อวิชา</th>
+                              <th style={{ backgroundColor: '#ff79a9'}}>ตอนเรียน</th>
+                              <th style={{ backgroundColor: '#ff79a9', borderRadius: '0 10px 0 0' }}>ผู้ประสานงานรายวิชา</th>
+                           </tr>
+                        </thead>
+                        <tbody style={{ border: '1px solid', borderBottom: 'transparent' }}>
+                        { excelData.length > 1 &&                 
+                        excelData.map( (getdata, index)=>(
+                           <tr key={index}>
+                              <td>{ getdata.ID } </td>
+                              <td>{ getdata.Name } </td>
+                              <td>{ getdata.Section } </td>
+                              <td style={{ display: 'flex', justifyContent: 'center' }}><CheckboxesTags/> </td>
+                           </tr>
+                           ) ) }
+                        </tbody>
+                     </table>
+                     )}
+                  </div>
                </div>
              </Container>
         </React.Fragment>
