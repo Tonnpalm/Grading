@@ -1,6 +1,6 @@
 // eslint-disable-next-line no-unused-vars
 import React, { useState } from 'react';
-import SearchAppBar from '/Users/pongpipatsrimuang/Desktop/GradingFront/src/components/AppBar/ButtonAppBar.jsx';
+import ResponsiveAppBar from '../../AppBar/ButtonAppBar';
 // import AddSubTable from './AddSubTable'
 import AddOfficer from './AddOfficer'
 import './SelectSubject.css'
@@ -15,7 +15,7 @@ function SelectSubject() {
   
   return (
     <div>
-        <SearchAppBar/>
+        <ResponsiveAppBar/>
         <div className='content-container'>
           <h style={{ fontSize: '30px'}}>นำเข้ารายวิชา</h>
           <div className='add-table-container'>

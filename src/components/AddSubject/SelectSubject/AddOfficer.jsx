@@ -31,6 +31,8 @@ const Example = () => {
     reader.readAsArrayBuffer(file);
   };
 
+  const [validationErrors, setValidationErrors] = useState({});
+  const [editedSubjects, setEditedSubjects] = useState({});
 
   const columns = useMemo(
     () => [
@@ -43,7 +45,25 @@ const Example = () => {
           },
         muiTableBodyCellProps: {
             align: 'center'
-          }
+          },
+          muiEditTextFieldProps: ({ cell, row }) => ({
+            type: 'text',
+            required: true,
+            error: !!validationErrors?.[cell.id],
+            helperText: validationErrors?.[cell.id],
+            //store edited user in state to be saved later
+            onBlur: (event) => {
+              const validationError = !validateRequired(event.currentTarget.value)
+                ? 'Required'
+                : undefined;
+              setValidationErrors({
+                ...validationErrors,
+                [cell.id]: validationError,
+              });
+              setEditedSubjects({ ...editedSubjects, [row.id]: row.original });
+            },
+          }),
+        
       },
       {
         accessorKey: 'Name',
@@ -78,7 +98,8 @@ const Example = () => {
           }
       },
     ],
-    []
+    [editedSubjects, validationErrors],
+
   );
 
   const table = useMaterialReactTable({
@@ -144,3 +165,14 @@ const Example = () => {
 };
 
 export default Example;
+
+const validateRequired = (value) => !!value.length;
+
+function validateSubject(excelData) {
+  return {
+    ID: !validateRequired(excelData.ID)
+      ? 'Subject Name is Required'
+      : '',
+    Name: !validateRequired(excelData.Name) ? 'Last Name is Required' : '',
+  };
+}

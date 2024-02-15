@@ -10,8 +10,11 @@ import TextField from '@mui/material/TextField';
 import ComboBox from './ComboBox';
 import { PinkPallette } from '../../assets/pallettes';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import { useNavigate } from 'react-router';
 
 export default function SelectSubject2Grading() {
+    const navigate = useNavigate();
+
     const VisuallyHiddenInput = styled('input')({
         clip: 'rect(0 0 0 0)',
         clipPath: 'inset(50%)',
@@ -43,7 +46,7 @@ export default function SelectSubject2Grading() {
     <div>
         <ResponsiveAppBar/>
         <div  className='select-subject-container'>
-            <Button variant='contained'>
+            <Button variant='contained' onClick={() => {navigate('/homepage')}}>
                 กลับ
             </Button>
             <Typography sx={{ marginTop: '20px'}}>การประเมิมผลการศึกษาภาคปลาย ปีการศึกษา 2566</Typography>

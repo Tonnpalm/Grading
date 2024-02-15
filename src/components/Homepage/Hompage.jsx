@@ -1,7 +1,7 @@
 // eslint-disable-next-line no-unused-vars
 import React from 'react';
 import './HomepageC.css';
-import SearchAppBar from "../AppBar/ButtonAppBar";
+import ResponsiveAppBar from "../AppBar/ButtonAppBar";
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
@@ -16,7 +16,7 @@ function Homepage() {
     const navigate = useNavigate();
     return (
         <div>
-            <SearchAppBar/>
+            <ResponsiveAppBar/>
             <section className="wallpaperHomepage">
                 <div className='content'>
                 <Card sx={{ maxWidth: 271, mr: 12, backgroundColor: PinkPallette.main, '&:hover': {backgroundColor: PinkPallette.light,}}}>
