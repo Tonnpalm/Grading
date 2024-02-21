@@ -67,22 +67,11 @@ export default function AddSubjectCard() {
                   autoWidth
                   
                 >
-                  <MenuItem value={10}>ภาคต้น</MenuItem>
-                  <MenuItem value={21}>ภาคปลาย</MenuItem>
-                  <MenuItem value={22}>ภาคฤดูร้อน</MenuItem>
+                  <MenuItem value={1}>ภาคต้น</MenuItem>
+                  <MenuItem value={2}>ภาคปลาย</MenuItem>
+                  <MenuItem value={3}>ภาคฤดูร้อน</MenuItem>
                 </Select>
               </FormControl>
-
-              {/* <select id="dropdown" style={{ height: '59.1px',
-                width: '249.1px',
-                // backgroundColor: 'white',
-                border: '1px solid rgba(0, 0,0,0.2)',
-                borderRadius: '6px'}}>
-                <option value="">Select...</option>
-                <option value="option1">ภาคต้น</option>
-                <option value="option2">ภาคปลาย</option>
-                <option value="option3">ภาคฤดูร้อน</option>   
-              </select> */}
             </Grid>
           </Grid>
           

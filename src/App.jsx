@@ -1,15 +1,16 @@
 import { Routes, Route } from "react-router-dom";
 import LoginT from "./components/LoginPage/Login";
 import Homepage from "./components/Homepage/Hompage";
-import Histogram from "./components/Histogram/Histogram";
+import Histogram from "./components/Grading/Histogram/Histogram"
 import AddSubject from "./components/AddSubject/AddSubject";
 import SelectSubject from "./components/AddSubject/SelectSubject/SelectSubject";
 import Table from "./components/Excel/tableTest";
 import Scoring from "./components/Scoring/Scoring";
 import AddMoreSubject from "./components/AddSubject/AddMoreSubject/AddMoreSubject";
 import TestTable from "./components/Scoring/TestTable"
-import SelectSubject2Grading from "./components/Grading/SelectSubject2Grading";
+import SelectSubject2Grading from "./components/Grading/SubjectSelection/SelectSubject2Grading";
 import TryTo from "./components/AddSubject/SelectSubject/TryTo";
+import GradeAdjustment from "./components/Grading/Histogram/GradeAdjustment";
 import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
 import { ThemeProvider, createTheme } from "@mui/material";
 import "./App.css";
@@ -34,6 +35,7 @@ function App() {
         <Route path="testTable" element={<TestTable />} />
         <Route path="selectSubject2grading" element={<SelectSubject2Grading />} />
         <Route path="tryTo" element={<TryTo />} />
+        <Route path="gradeAdjustment" element={<GradeAdjustment />} />
       </Routes>
     </ThemeProvider>
   );

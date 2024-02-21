@@ -22,7 +22,7 @@ for (let i = 1; i <= 100; i++) {
   data.push({ x: i, จำนวนนักเรียน: Math.random() * 100});
 }
 
-function testChart() {
+function TestChart() {
   return (
     <div className="App">
     <h1>Example chart</h1>
@@ -40,4 +40,4 @@ function testChart() {
   );
 }
 
-export default testChart;
+export default TestChart;

@@ -9,7 +9,7 @@ export default function ComboBox() {
       disablePortal
       id="combo-box-demo"
       options={top100Films}
-      sx={{ width: 300 }}
+      sx={{ width: 510 }}
       renderInput={(params) => <TextField {...params} placeholder="ค้นหารหัส/ชื่อวิชา" />}
     />
   );
