@@ -5,7 +5,7 @@ import "./Scoring.css";
 import { Button } from "@mui/material";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import { useNavigate } from 'react-router-dom';
-import BasicModal from './Modal'
+// import BasicModal from './Modal'
 import Example from './ModuleTable'
 
 
@@ -27,7 +27,7 @@ function Scoring() {
           >
             กลับ
           </Button>
-          <BasicModal></BasicModal>
+          {/* <BasicModal></BasicModal> */}
         </div>
         <div className="scoring-table-container">
           <Example/>

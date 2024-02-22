@@ -2,7 +2,7 @@
 import React, { useMemo, useState } from 'react';
 import { MaterialReactTable, useMaterialReactTable } from 'material-react-table';
 import * as XLSX from 'xlsx';
-import CheckboxesTags from './Select';
+// import CheckboxesTags from './Select';
 import './AddOfficer.css'
 import { styled } from '@mui/material/styles';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
@@ -86,9 +86,9 @@ const Example = () => {
           onChange: (event) =>
             setEditedUsers({
               ...editedUsers,
-              [row.id]: { ...row.original, officer : event.target.value },
+              [row.id]: { ...row.original, state: event.target.value },
             }),
-        }),      
+        }),
       },
     ],
     [editedUsers],

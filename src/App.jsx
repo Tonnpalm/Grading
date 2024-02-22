@@ -9,7 +9,7 @@ import Scoring from "./components/Scoring/Scoring";
 import AddMoreSubject from "./components/AddSubject/AddMoreSubject/AddMoreSubject";
 import TestTable from "./components/Scoring/TestTable"
 import SelectSubject2Grading from "./components/Grading/SubjectSelection/SelectSubject2Grading";
-import TryTo from "./components/AddSubject/SelectSubject/TryTo";
+// import TryTo from "./components/AddSubject/SelectSubject/TryTo";
 import GradeAdjustment from "./components/Grading/Histogram/GradeAdjustment";
 import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
 import { ThemeProvider, createTheme } from "@mui/material";
@@ -34,7 +34,7 @@ function App() {
         <Route path="addMoreSubject" element={<AddMoreSubject />} />
         <Route path="testTable" element={<TestTable />} />
         <Route path="selectSubject2grading" element={<SelectSubject2Grading />} />
-        <Route path="tryTo" element={<TryTo />} />
+        {/* <Route path="tryTo" element={<TryTo />} /> */}
         <Route path="gradeAdjustment" element={<GradeAdjustment />} />
       </Routes>
     </ThemeProvider>

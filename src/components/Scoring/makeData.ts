@@ -1,12 +1,12 @@
-export type Person = {
-    firstName: string;
-    lastName: string;
-    address: string;
-    city: string;
+export type Subject = {
+    moduleName: string;
+    year_semester: string;
+    duration: string;
+    hours: string;
     
   };
   
-  export const data = [
+  export const fakeData: Subject[] = [
     {
       moduleName: 'A',
       year_semester: '2566/1',
