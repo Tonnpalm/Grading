@@ -23,7 +23,7 @@ function Scoring() {
             variant="contained"
             sx={{ backgroundColor: "white", color: "black" }}
             startIcon={<ArrowBackIosIcon />}
-            onClick = { () => {navigate('/homepage')}}
+            onClick = { () => {navigate('/')}}
           >
             กลับ
           </Button>

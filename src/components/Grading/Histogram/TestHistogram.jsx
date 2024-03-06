@@ -309,7 +309,10 @@ export default function SimpleBarChart() {
                 </Grid>
                 <Grid item xs={4} md={2}>
                     <Item>
-
+                        <Typography>เวอร์ชัน 1</Typography>
+                    </Item>
+                    <Item>
+                        <Typography>เวอร์ชัน 2</Typography>
                     </Item>
                 </Grid>
             </Grid>
@@ -317,14 +320,3 @@ export default function SimpleBarChart() {
 
     );
 }
-
-
-/* <Typography>เกรด</Typography>
-                            <Typography>I</Typography>
-                            <Typography>M</Typography>
-                            <Typography>W</Typography>
-                            <Typography>S</Typography>
-                            <Typography>U</Typography>
-                            <Typography>V</Typography>
-                            <Typography>รวม</Typography>
-                            <Typography>เกรดเฉลี่ย</Typography> */

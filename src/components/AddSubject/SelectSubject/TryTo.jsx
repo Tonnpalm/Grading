@@ -343,5 +343,3 @@ function validateUser(user) {
     email: !validateEmail(user.email) ? 'Incorrect Email Format' : '',
   };
 }
-
-//ได้สักทีอีสัส

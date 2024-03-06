@@ -1,5 +1,5 @@
 import { Routes, Route } from "react-router-dom";
-import LoginT from "./components/LoginPage/Login";
+// import LoginT from "./components/LoginPage/Login";
 import Homepage from "./components/Homepage/Hompage";
 import Histogram from "./components/Grading/Histogram/Histogram"
 import AddSubject from "./components/AddSubject/AddSubject";
@@ -9,8 +9,9 @@ import Scoring from "./components/Scoring/Scoring";
 import AddMoreSubject from "./components/AddSubject/AddMoreSubject/AddMoreSubject";
 import TestTable from "./components/Scoring/TestTable"
 import SelectSubject2Grading from "./components/Grading/SubjectSelection/SelectSubject2Grading";
-// import TryTo from "./components/AddSubject/SelectSubject/TryTo";
 import GradeAdjustment from "./components/Grading/Histogram/GradeAdjustment";
+import TTT from './components/EverythingTest/testAddOfficer'
+import ScoringTable from "./components/Scoring/ScoringTable";
 import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
 import { ThemeProvider, createTheme } from "@mui/material";
 import "./App.css";
@@ -24,8 +25,8 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <Routes>
-        <Route path="/" element={<LoginT />} />
-        <Route path="homepage" element={<Homepage />} />
+        <Route path="/" element={<Homepage />} />
+        {/* <Route path="homepage" element={<Homepage />} /> */}
         <Route path="histogram" element={<Histogram />} />
         <Route path="addSubject" element={<AddSubject />} />
         <Route path="selectSubject" element={<SelectSubject />} />
@@ -34,8 +35,9 @@ function App() {
         <Route path="addMoreSubject" element={<AddMoreSubject />} />
         <Route path="testTable" element={<TestTable />} />
         <Route path="selectSubject2grading" element={<SelectSubject2Grading />} />
-        {/* <Route path="tryTo" element={<TryTo />} /> */}
         <Route path="gradeAdjustment" element={<GradeAdjustment />} />
+        <Route path="ttt" element={<TTT />} />
+        <Route path="scoringTable" element={<ScoringTable />} />
       </Routes>
     </ThemeProvider>
   );

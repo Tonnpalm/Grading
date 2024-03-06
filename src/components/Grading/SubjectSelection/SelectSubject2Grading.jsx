@@ -59,7 +59,7 @@ export default function SelectSubject2Grading() {
                 variant='contained' 
                 sx={{ backgroundColor: "white", color: "black" }}
                 startIcon={<ArrowBackIosIcon />} 
-                onClick={() => {navigate('/homepage')}}>
+                onClick={() => {navigate('/')}}>
                 กลับ
             </Button>
             <Typography sx={{ marginTop: '20px'}}>การประเมิมผลการศึกษาภาคปลาย ปีการศึกษา 2566</Typography>

@@ -13,16 +13,24 @@ import {
   Box,
   Button,
   CircularProgress,
-  IconButton,
-  Tooltip,
+  // IconButton,
+  // Tooltip,
   Typography,
 } from '@mui/material';
 import './ModuleTable.css'
+import { Edit } from '@mui/icons-material';
+import { MenuItem } from '@mui/material';
+import ChecklistIcon from '@mui/icons-material/Checklist';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { PinkPallette } from '../../assets/pallettes';
+import { useNavigate } from 'react-router-dom';
+
 
 const Example = () => {
+  const navigate = useNavigate();
+
   const [validationErrors, setValidationErrors] = useState({});
   const [editedSubjects, setEditedSubjects] = useState({});
 
@@ -180,14 +188,49 @@ const Example = () => {
     },
     onCreatingRowCancel: () => setValidationErrors({}),
     onCreatingRowSave: handleAddSubject,
-    renderRowActions: ({ row }) => (
-      <Box sx={{ display: 'flex', gap: '1rem', paddingLeft: '1rem' }}>
-        <Tooltip title="Delete">
-          <IconButton color="error" onClick={() => openDeleteConfirmModal(row)}>
-            <DeleteIcon />
-          </IconButton>
-        </Tooltip>
+    renderRowActionMenuItems: ({ row }) => (
+      <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+        <MenuItem 
+          key="edit" 
+          onClick={() => console.info('Edit')}
+          sx={{ display: 'flex', flexDirection: 'row', gap: '1rem' }}
+        >
+          <Edit /> 
+          <Typography>แก้ไข</Typography> 
+        </MenuItem>
+        <MenuItem 
+          key="delete" 
+          onClick={() => openDeleteConfirmModal(row)}
+          sx={{ display: 'flex', flexDirection: 'row', gap: '1rem' }}
+        >
+          <DeleteIcon />
+          <Typography>ลบ</Typography>
+        </MenuItem>
+        <MenuItem 
+          key="delete" 
+          onClick={() => console.info('Duplicate')}
+          sx={{ display: 'flex', flexDirection: 'row', gap: '1rem' }}
+        >
+          <ContentCopyIcon />
+          <Typography>คัดลอก</Typography>
+        </MenuItem>
+        <MenuItem 
+          key="scoring" 
+          onClick={() => navigate('/scoringTable')}
+          sx={{ display: 'flex', flexDirection: 'row', gap: '1rem' }}
+        >
+          <ChecklistIcon />
+          <Typography>ให้คะแนน</Typography>
+        </MenuItem>
       </Box>
+      
+      // <Box sx={{ display: 'flex', gap: '1rem', paddingLeft: '1rem' }}>
+      //   <Tooltip title="Delete">
+      //     <IconButton color="error" onClick={() => openDeleteConfirmModal(row)}>
+      //       <DeleteIcon />
+      //     </IconButton>
+      //   </Tooltip>
+      // </Box>
     ),
     renderTopToolbarCustomActions: ({ table }) => (
       <Button
@@ -231,32 +274,7 @@ const Example = () => {
 
   });
   return (
-    <MaterialReactTable
-      table = {table}
-      // renderRowActionMenuItems={({ row, table }) => [
-      //   <MRT_ActionMenuItem //or just use a normal MUI MenuItem component
-      //     icon={<EditIcon />}
-      //     key="edit"
-      //     label="Edit"
-      //     onClick={() => {
-      //       table.setEditingRow(row);
-      //     }}
-      //     table={table}
-      //   />,
-      //   <MRT_ActionMenuItem
-      //     icon={<DeleteIcon />}
-      //     key="delete"
-      //     label="Delete"
-      //     // onClick={() => {
-      //     //   data.splice(row.index, 1); //assuming simple data table
-      //     //   setData([...data]);
-      //     // }}
-      //     onClick={() => openDeleteConfirmModal(row)}
-      //     table={table}
-      //   />,
-      // ]}
-      
-    />
+    <MaterialReactTable table = {table}/>
   );
 };
 

@@ -119,8 +119,7 @@ const Example = () => {
   );
 
   //call CREATE hook
-  const { mutateAsync: createUser, isPending: isCreatingUser } =
-    useCreateUser();
+  const { mutateAsync: createUser, isPending: isCreatingUser } = useCreateUser();
   //call READ hook
   const {
     data: fetchedUsers = [],
@@ -239,81 +238,81 @@ const Example = () => {
 
 //CREATE hook (post new user to api)
 function useCreateUser() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (user) => {
-      //send api update request here
-      await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
-      return Promise.resolve();
-    },
-    //client side optimistic update
-    onMutate: (newUserInfo) => {
-      queryClient.setQueryData(['users'], (prevUsers) => [
-        ...prevUsers,
-        {
-          ...newUserInfo,
-          id: (Math.random() + 1).toString(36).substring(7),
-        },
-      ]);
-    },
-    // onSettled: () => queryClient.invalidateQueries({ queryKey: ['users'] }), //refetch users after mutation, disabled for demo
-  });
-}
+    const queryClient = useQueryClient();
+    return useMutation({
+      mutationFn: async (user) => {
+        //send api update request here
+        await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
+        return Promise.resolve();
+      },
+      //client side optimistic update
+      onMutate: (newUserInfo) => {
+        queryClient.setQueryData(['users'], (prevUsers) => [
+          ...prevUsers,
+          {
+            ...newUserInfo,
+            id: (Math.random() + 1).toString(36).substring(7),
+          },
+        ]);
+      },
+      // onSettled: () => queryClient.invalidateQueries({ queryKey: ['users'] }), //refetch users after mutation, disabled for demo
+    });
+  }
+  
 
 //READ hook (get users from api)
 function useGetUsers() {
-  return useQuery({
-    queryKey: ['users'],
-    queryFn: async () => {
-      //send api request here
-      await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
-      return Promise.resolve(fakeData);
-    },
-    refetchOnWindowFocus: false,
-  });
-}
-
-//UPDATE hook (put user in api)
-function useUpdateUsers() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (users) => {
-      //send api update request here
-      await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
-      return Promise.resolve();
-    },
-    //client side optimistic update
-    onMutate: (newUsers) => {
-      queryClient.setQueryData(['users'], (prevUsers) =>
-        prevUsers?.map((user) => {
-          const newUser = newUsers.find((u) => u.id === user.id);
-          return newUser ? newUser : user;
-        }),
-      );
-    },
-    // onSettled: () => queryClient.invalidateQueries({ queryKey: ['users'] }), //refetch users after mutation, disabled for demo
-  });
-}
-
+    return useQuery({
+      queryKey: ['users'],
+      queryFn: async () => {
+        //send api request here
+        await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
+        return Promise.resolve(fakeData);
+      },
+      refetchOnWindowFocus: false,
+    });
+  }
+  
+  //UPDATE hook (put user in api)
+  function useUpdateUsers() {
+    const queryClient = useQueryClient();
+    return useMutation({
+      mutationFn: async (users) => {
+        //send api update request here
+        await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
+        return Promise.resolve();
+      },
+      //client side optimistic update
+      onMutate: (newUsers) => {
+        queryClient.setQueryData(['users'], (prevUsers) =>
+          prevUsers?.map((user) => {
+            const newUser = newUsers.find((u) => u.id === user.id);
+            return newUser ? newUser : user;
+          }),
+        );
+      },
+      // onSettled: () => queryClient.invalidateQueries({ queryKey: ['users'] }), //refetch users after mutation, disabled for demo
+    });
+  }
+  
 //DELETE hook (delete user in api)
 function useDeleteUser() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (userId) => {
-      //send api update request here
-      await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
-      return Promise.resolve();
-    },
-    //client side optimistic update
-    onMutate: (userId) => {
-      queryClient.setQueryData(['users'], (prevUsers) =>
-        prevUsers?.filter((user) => user.id !== userId),
-      );
-    },
-    // onSettled: () => queryClient.invalidateQueries({ queryKey: ['users'] }), //refetch users after mutation, disabled for demo
-  });
-}
-
+    const queryClient = useQueryClient();
+    return useMutation({
+      mutationFn: async (userId) => {
+        //send api update request here
+        await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
+        return Promise.resolve();
+      },
+      //client side optimistic update
+      onMutate: (userId) => {
+        queryClient.setQueryData(['users'], (prevUsers) =>
+          prevUsers?.filter((user) => user.id !== userId),
+        );
+      },
+      // onSettled: () => queryClient.invalidateQueries({ queryKey: ['users'] }), //refetch users after mutation, disabled for demo
+    });
+  }
 const queryClient = new QueryClient();
 
 const ExampleWithProviders = () => (

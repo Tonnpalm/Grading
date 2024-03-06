@@ -7,8 +7,10 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import Grid from "@mui/material/Grid";
+import { useCookies } from "react-cookie";
 import { useNavigate } from "react-router-dom";
-import { TextField } from "@mui/material";
+import { TextField, Button, Box } from "@mui/material";
+import { PinkPallette } from "../../../assets/pallettes"; 
 
 const contentSx = {
   textAlign: "right",
@@ -16,10 +18,13 @@ const contentSx = {
 
 export default function AddSubjectCard() {
   const navigate = useNavigate();
-  const [term, setTerm] = React.useState('');
+  const [year, setYear] = React.useState('');
+  const [semester, setSemester] = React.useState('');
+
+  const [cookies, setCookie] = useCookies([]);
 
   const handleChange = (event) => {
-    setTerm(event.target.value);
+    setSemester(event.target.value);
   };
 
   return (
@@ -50,7 +55,12 @@ export default function AddSubjectCard() {
               <Typography sx={contentSx}>ปีการศึกษา</Typography>
             </Grid>
             <Grid item xs={8}>
-              <TextField/>
+              <TextField 
+                value={year} 
+                onChange={(event) => {
+                  setYear(event.target.value)
+                }}
+              />
             </Grid>
             <Grid item xs={4}>
               <Typography sx={contentSx}>ภาคการศึกษา</Typography>
@@ -62,7 +72,7 @@ export default function AddSubjectCard() {
                 <Select
                   labelId="demo-simple-select-autowidth-label"
                   id="demo-simple-select-autowidth"
-                  value={term}
+                  value={semester}
                   onChange={handleChange}
                   autoWidth
                   
@@ -84,12 +94,44 @@ export default function AddSubjectCard() {
             mb: 5,
           }}
         >
-          <input
-            type="submit"
-            onClick={() => {
-              navigate("/selectSubject");
-            }}
-          />
+          <Box sx={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+            <Button
+              variant="outlined"
+              size="large"
+              sx={{ color: 'black', borderColor: 'black' }}
+              onClick={() => {navigate('/')}}
+            >
+              ยกเลิก
+            </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              size="large"
+              // color="error"
+              sx={{ color: 'white', backgroundColor: PinkPallette.main }}
+              onClick={() => {
+                setCookie("year", year)
+                let semesterValue;
+                switch (semester) {
+                  case 1:
+                    semesterValue = 'ภาคต้น';
+                    break;
+                  case 2:
+                    semesterValue = 'ภาคปลาย';
+                    break;
+                  case 3:
+                    semesterValue = 'ภาคฤดูร้อน';
+                    break;
+                  default:
+                    semesterValue = 0;
+                }
+                setCookie("semester", semesterValue);
+                navigate("/selectSubject");
+              }}
+            >
+              ตกลง
+            </Button>
+          </Box>
         </CardActions>
       </Card>
     </>
