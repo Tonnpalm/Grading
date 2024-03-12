@@ -1,5 +1,5 @@
 import { Routes, Route } from "react-router-dom";
-// import LoginT from "./components/LoginPage/Login";
+import TestAPI from "./components/EverythingTest/TestAPI";
 import Homepage from "./components/Homepage/Hompage";
 import Histogram from "./components/Grading/Histogram/Histogram"
 import AddSubject from "./components/AddSubject/AddSubject";
@@ -12,6 +12,7 @@ import SelectSubject2Grading from "./components/Grading/SubjectSelection/SelectS
 import GradeAdjustment from "./components/Grading/Histogram/GradeAdjustment";
 import TTT from './components/EverythingTest/testAddOfficer'
 import ScoringTable from "./components/Scoring/ScoringTable";
+import TestAutocomplete from "./components/EverythingTest/TestAutocomplete"
 import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
 import { ThemeProvider, createTheme } from "@mui/material";
 import "./App.css";
@@ -26,7 +27,8 @@ function App() {
     <ThemeProvider theme={theme}>
       <Routes>
         <Route path="/" element={<Homepage />} />
-        {/* <Route path="homepage" element={<Homepage />} /> */}
+        <Route path="testAPI" element={<TestAPI />} />
+        <Route path="testAutocomplete" element={<TestAutocomplete />} />
         <Route path="histogram" element={<Histogram />} />
         <Route path="addSubject" element={<AddSubject />} />
         <Route path="selectSubject" element={<SelectSubject />} />

@@ -24,7 +24,7 @@ import { PinkPallette } from '../../assets/pallettes';
 
 const ScoringTable = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [scorePartCount, setScorePartCount] = useState(1);
+    const [scorePartCount, setScorePartCount] = useState(4);
     const [newColumnName, setNewColumnName] = useState({ name: '', score: '' }); // เพิ่ม state สำหรับเก็บชื่อ column ใหม่
     const [scoreType, setScoreType] = React.useState('');
 
@@ -88,9 +88,23 @@ const ScoringTable = () => {
             size: 200
         },
         {
-            accessorKey: 'Section',
-            header: 'ตอนเรียน',
-            enableEditing: false,
+            accessorKey: 'Score_1',
+            header: 'คะแนน 1',
+            enableEditing: true,
+            enableColumnActions: false,
+            size: 70
+        },
+        {
+            accessorKey: 'Score_2',
+            header: 'คะแนน 2',
+            enableEditing: true,
+            enableColumnActions: false,
+            size: 70
+        },
+        {
+            accessorKey: 'Score_3',
+            header: 'คะแนน 3',
+            enableEditing: true,
             enableColumnActions: false,
             size: 70
         },
@@ -113,10 +127,12 @@ const ScoringTable = () => {
         }
     ]);
 
+    console.log(columns.map((item)=>item.accessorKey))
+
     const handleAddColumn = () => {
         if (!newColumnName.name.trim() || !newColumnName.score.trim()) return;
     
-        const newAccessorKey = `Score_Part${scorePartCount}`;
+        const newAccessorKey = `Score_${scorePartCount}`;
 
         const newColumn = {
             accessorKey: newAccessorKey, // ใช้ชื่อ Name เป็นส่วนหลักของ accessorKey
@@ -207,7 +223,7 @@ const ScoringTable = () => {
                 onClick={() => setIsModalOpen(true)}
                 sx={{ ml: 'auto' }} // ใช้ margin-left: auto เพื่อให้ปุ่มอยู่ทางขวา
             >
-                Add Column
+                เพิ่มคอลัมน์
             </Button>
             </>
         ),
@@ -259,7 +275,7 @@ const ScoringTable = () => {
                                 mb={2}
                             />
                             <FormControl fullWidth>
-                                <InputLabel id="demo-simple-select-label">Age</InputLabel>
+                                <InputLabel id="demo-simple-select-label">ประเภท</InputLabel>
                                 <Select
                                 labelId="demo-simple-select-label"
                                 id="demo-simple-select"
@@ -267,9 +283,9 @@ const ScoringTable = () => {
                                 label="ประเภท"
                                 onChange={handleChange}
                                 >
-                                <MenuItem value={10}>Ten</MenuItem>
-                                <MenuItem value={20}>Twenty</MenuItem>
-                                <MenuItem value={30}>Thirty</MenuItem>
+                                <MenuItem value={'hw'}>การบ้าน</MenuItem>
+                                <MenuItem value={'mid'}>กลางภาค</MenuItem>
+                                <MenuItem value={'fi'}>ปลายภาค</MenuItem>
                                 </Select>
                             </FormControl>
                             <Button

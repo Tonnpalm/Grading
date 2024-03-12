@@ -1,4 +1,3 @@
-// eslint-disable-next-line no-unused-vars
 import * as React from 'react';
 import { BarChart } from '@mui/x-charts/BarChart';
 import { Grid, Paper, TextField, Typography } from '@mui/material';

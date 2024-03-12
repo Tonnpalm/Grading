@@ -27,7 +27,7 @@ function Homepage() {
                             <AddToPhotosIcon sx={{ width: '107px', height: '107px' }}></AddToPhotosIcon>
                         </CardMedia>
                         <Typography variant="body2" whiteSpace="nowrap"  sx={{ display: 'flex', justifyContent: 'center' }}>
-                            นำเข้ารายวิชา
+                            นำเข้ารายวิชาทั้งหมด
                         </Typography>
                     </CardContent>
                 </CardActionArea>

@@ -1,6 +1,7 @@
 // eslint-disable-next-line no-unused-vars
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
+  MRT_EditActionButtons,
   MaterialReactTable,
   // createRow,
   useMaterialReactTable,
@@ -8,17 +9,23 @@ import {
 import * as XLSX from "xlsx";
 import "./AddOfficer.css";
 import { styled } from "@mui/material/styles";
+import EditIcon from '@mui/icons-material/Edit';
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { Delete as DeleteIcon } from "@mui/icons-material";
 import { PinkPallette } from "../../../assets/pallettes";
-import { staffName } from "./makeData";
+import { mockStaffName } from "./makeData";
 import {
+  // Autocomplete,
   Box,
   Button,
   CircularProgress,
   IconButton,
   Tooltip,
   Typography,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  // TextField,
 } from "@mui/material";
 import {
   QueryClient,
@@ -28,14 +35,35 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 // import { useCookies } from "react-cookie";
+import axios from 'axios';
 
 const Example = () => {
   const [validationErrors, setValidationErrors] = useState({});
   //keep track of rows that have been edited
   const [editedUsers, setEditedUsers] = useState({});
   const [excelData, setExcelData] = useState([]);
-
+  const [staffs, setStaffs] = useState([]);
+  // const staffsTemp = [...staffs];
   // const [cookies, setCookie] = useCookies([]);
+
+  function getStaffs() {
+    axios.get(`http://localhost:8000/api/staffs/?staffName=&page=1&perPage=5`)
+        .then((response) => {
+            const staffNameList = []
+            response.data.staffs.map((item) => {
+              staffNameList.push(item.staffName)
+            })
+            setStaffs(staffNameList)
+        }) 
+        .catch((error) => {
+            console.log(error)
+        })
+  }
+  // console.log(mockStaffName)
+  console.log(staffs)
+  useEffect(() => {
+    getStaffs()
+  }, [])
 
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
@@ -79,56 +107,17 @@ const Example = () => {
         accessorKey: "ID",
         header: "รหัสวิชา",
         size: 40,
-        // muiEditTextFieldProps: ({ cell, row }) => ({
-        //   type: "text",
-        //   required: true,
-        //   error: !!validationErrors?.[cell.id],
-        //   helperText: validationErrors?.[cell.id],
-        //   //store edited user in state to be saved later
-        //   onBlur: (event) => {
-        //     const validationError = !validateRequired(event.currentTarget.value)
-        //       ? "Required"
-        //       : undefined;
-        //     setValidationErrors({
-        //       ...validationErrors,
-        //       [cell.id]: validationError,
-        //     });
-        //     setEditedUsers({ ...editedUsers, [row.id]: row.original });
-        //   },
-        // }),
-        enableEditing: false
-      },
-      {
-        accessorKey: "Name",
-        header: "ชื่อวิชา",
-        size: 200,
-        // muiEditTextFieldProps: ({ cell, row }) => ({
-        //   type: "text",
-        //   required: true,
-        //   error: !!validationErrors?.[cell.id],
-        //   helperText: validationErrors?.[cell.id],
-        //   //store edited user in state to be saved later
-        //   onBlur: (event) => {
-        //     const validationError = !validateRequired(event.currentTarget.value)
-        //       ? "Required"
-        //       : undefined;
-        //     setValidationErrors({
-        //       ...validationErrors,
-        //       [cell.id]: validationError,
-        //     });
-        //     setEditedUsers({ ...editedUsers, [row.id]: row.original });
-        //   },
-        // }),
-        enableEditing: false
-      },
-      {
-        accessorKey: "Section",
-        header: "ตอนเรียน",
-        size: 20,
-        muiTableBodyCellProps: {
-          sx: {
-            alignItems: 'center'
-          }
+        muiEditTextFieldProps: {
+          required: true,
+          error: !!validationErrors?.ID,
+          helperText: validationErrors?.ID,
+          //remove any previous validation errors when user focuses on the input
+          onFocus: () =>
+            setValidationErrors({
+              ...validationErrors,
+              ID: undefined,
+            }),
+          //optionally add validation checking for onBlur or onChange
         },
         // muiEditTextFieldProps: ({ cell, row }) => ({
         //   type: "text",
@@ -147,13 +136,88 @@ const Example = () => {
         //     setEditedUsers({ ...editedUsers, [row.id]: row.original });
         //   },
         // }),
-        enableEditing: false
+        enableEditing: true
+      },
+      {
+        accessorKey: "Name",
+        header: "ชื่อวิชา",
+        size: 200,
+        muiEditTextFieldProps: {
+          required: true,
+          error: !!validationErrors?.Name,
+          helperText: validationErrors?.Name,
+          //remove any previous validation errors when user focuses on the input
+          onFocus: () =>
+            setValidationErrors({
+              ...validationErrors,
+              Name: undefined,
+            }),
+          //optionally add validation checking for onBlur or onChange
+        },
+        // muiEditTextFieldProps: ({ cell, row }) => ({
+        //   type: "text",
+        //   required: true,
+        //   error: !!validationErrors?.[cell.id],
+        //   helperText: validationErrors?.[cell.id],
+        //   //store edited user in state to be saved later
+        //   onBlur: (event) => {
+        //     const validationError = !validateRequired(event.currentTarget.value)
+        //       ? "Required"
+        //       : undefined;
+        //     setValidationErrors({
+        //       ...validationErrors,
+        //       [cell.id]: validationError,
+        //     });
+        //     setEditedUsers({ ...editedUsers, [row.id]: row.original });
+        //   },
+        // }),
+        enableEditing: true
+      },
+      {
+        accessorKey: "Section",
+        header: "ตอนเรียน",
+        size: 20,
+        muiTableBodyCellProps: {
+          sx: {
+            alignItems: 'center'
+          }
+        },
+        muiEditTextFieldProps: {
+          required: true,
+          error: !!validationErrors?.Section,
+          helperText: validationErrors?.Section,
+          //remove any previous validation errors when user focuses on the input
+          onFocus: () =>
+            setValidationErrors({
+              ...validationErrors,
+              Section: undefined,
+            }),
+          //optionally add validation checking for onBlur or onChange
+        },
+        // muiEditTextFieldProps: ({ cell, row }) => ({
+        //   type: "text",
+        //   required: true,
+        //   error: !!validationErrors?.[cell.id],
+        //   helperText: validationErrors?.[cell.id],
+        //   //store edited user in state to be saved later
+        //   onBlur: (event) => {
+        //     const validationError = !validateRequired(event.currentTarget.value)
+        //       ? "Required"
+        //       : undefined;
+        //     setValidationErrors({
+        //       ...validationErrors,
+        //       [cell.id]: validationError,
+        //     });
+        //     setEditedUsers({ ...editedUsers, [row.id]: row.original });
+        //   },
+        // }),
+        enableEditing: true
       },
       {
         accessorKey: "officer",
         header: "ผู้ประสานงานรายวิชา",
         editVariant: "select", // กำหนดให้เป็น multi-select
-        editSelectOptions: staffName, // กำหนดตัวเลือกให้กับ multi-select
+        editSelectOptions: staffs, // กำหนดตัวเลือกให้กับ multi-select
         muiEditTextFieldProps: ({ row }) => ({
           select: true, // ให้สามารถเลือกหลายตัวเลือกได้
           error: !!validationErrors?.officer,
@@ -167,8 +231,8 @@ const Example = () => {
         }),
       },
     ],
-    [editedUsers, validationErrors],
-    console.log(editedUsers)
+    [editedUsers, validationErrors, staffs],
+    // console.log(editedUsers)
   );
 
   //call CREATE hook
@@ -185,19 +249,19 @@ const Example = () => {
 
   const handleCreateUser = async ({ values, table }) => {
     const newValidationErrors = validateUser(values);
-    if (Object.values(newValidationErrors).some((error) => error)) {
-      setValidationErrors(newValidationErrors);
-      return;
-    }
-    setValidationErrors({});
-  
-    try {
-      await createUser(values); // เรียกใช้ createUser ด้วย await เพื่อรอการดำเนินการเสร็จสิ้น
-      table.setCreatingRow(null); // ออกจากโหมดการสร้าง
-    } catch (error) {
-      console.error("Error creating user:", error);
-      // จัดการข้อผิดพลาดที่เกิดขึ้น อาจต้องแสดงข้อความผิดพลาดให้กับผู้ใช้
-    }
+        if (Object.values(newValidationErrors).some((error) => error)) {
+            setValidationErrors(newValidationErrors);
+            return;
+        }
+        const newRow = {
+            ID: values.ID,
+            Name: values.Name,
+            Section: values.Section,
+            officer: values.officer,
+        };
+        setExcelData((prevData) => [...prevData, newRow]); // Add new row to existing data
+        table.setCreatingRow(null); //exit creating mode
+        console.log(values)
   };
   
 
@@ -206,6 +270,14 @@ const Example = () => {
     if (Object.values(validationErrors).some((error) => !!error)) return;
     await updateUsers(excelData);
     setEditedUsers({});
+    updateOldUsers()
+  };
+  const updateOldUsers = (index) => {
+    setExcelData((prevData) => 
+      prevData.map((rowData, i) => 
+        i === index ? { ...rowData, /* ทำการอัปเดตข้อมูลที่ต้องการ */ } : rowData
+      )
+    );
   };
   
 
@@ -219,9 +291,9 @@ const Example = () => {
   const table = useMaterialReactTable({
     columns,
     data: excelData,
-    createDisplayMode: "row", // ('modal', and 'custom' are also available)
-    editDisplayMode: "table", // ('modal', 'row', 'cell', and 'custom' are also
-    enableEditing: true,
+    createDisplayMode: "modal", // ('modal', and 'custom' are also available)
+    editDisplayMode: "modal", // ('modal', 'row', 'cell', and 'custom' are also
+    // enableEditing: true,
     enableColumnActions: false,
     enableRowActions: true,
     positionActionsColumn: "last",
@@ -246,8 +318,39 @@ const Example = () => {
     },
     onCreatingRowCancel: () => setValidationErrors({}),
     onCreatingRowSave: handleCreateUser,
+    renderCreateRowDialogContent: ({ table, row, internalEditComponents }) => (
+      <>
+        <DialogTitle variant="h3" sx={{ display: 'flex', justifyContent: 'center' }}>เพิ่มรายวิชา</DialogTitle>
+        <DialogContent
+          sx={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
+        >
+          {internalEditComponents} {/* or render custom edit components here */}
+        </DialogContent>
+        <DialogActions>
+          <MRT_EditActionButtons variant="text" table={table} row={row} />
+        </DialogActions>
+      </>
+    ),
+    renderEditRowDialogContent: ({ table, row, internalEditComponents }) => (
+      <>
+        <DialogTitle variant="h3">แก้ไขข้อมูล</DialogTitle>
+        <DialogContent
+          sx={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}
+        >
+          {internalEditComponents} {/* or render custom edit components here */}
+        </DialogContent>
+        <DialogActions>
+          <MRT_EditActionButtons variant="text" table={table} row={row} />
+        </DialogActions>
+      </>
+    ),
     renderRowActions: ({ row }) => (
       <Box sx={{ display: "flex", gap: "1rem" }}>
+        <Tooltip title="Edit">
+          <IconButton onClick={() => table.setEditingRow(row)}>
+            <EditIcon />
+          </IconButton>
+        </Tooltip>
         <Tooltip title="Delete">
           <IconButton color="error" onClick={() => openDeleteConfirmModal(row)}>
             <DeleteIcon />
@@ -348,14 +451,20 @@ function useCreateUser() {
     onMutate: (newUserInfo) => {
       // ดึงข้อมูลผู้ใช้ล่าสุด
       let prevUsers = queryClient.getQueryData(['users']); // ดึงข้อมูลผู้ใช้ที่อาจจะเป็น null หรือ undefined ออกมา
+      console.log(prevUsers)
       if (!prevUsers) { // ตรวจสอบว่า prevUsers เป็น null หรือ undefined หรือไม่
         prevUsers = []; // ถ้าเป็นให้กำหนดให้เป็นอาร์เรย์เปล่า
       }
       // เพิ่มข้อมูลผู้ใช้ใหม่เข้าไปในอาร์เรย์
-      const updatedUsers = prevUsers.concat({
-        ...newUserInfo,
+      let temp = {
+        ...newUserInfo, 
         id: (Math.random() + 1).toString(36).substring(7),
-      });
+      }
+      // const updatedUsers = prevUsers.concat({
+      //   ...newUserInfo,
+      //   id: (Math.random() + 1).toString(36).substring(7),
+      // });
+      const updatedUsers = prevUsers+temp;
       // อัปเดตข้อมูลผู้ใช้ในแคช
       queryClient.setQueryData(['users'], updatedUsers);
     },

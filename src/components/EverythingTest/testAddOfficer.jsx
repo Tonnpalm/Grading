@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   MaterialReactTable,
   // createRow,
@@ -17,17 +17,33 @@ import {
     Tooltip,
     Typography,
   } from "@mui/material";
-  import {
-    QueryClient,
-    QueryClientProvider,
-    useMutation,
-    useQuery,
-    useQueryClient,
-  } from "@tanstack/react-query";
+import axios from "axios";
   
   
 const TestAddOfficer = () => {
+    const [validationErrors, setValidationErrors] = useState({});
+    const [editedSubjects, setEditedSubjects] = useState({});
     const [excelData, setExcelData] = useState([]);
+    const [staffs, setStaffs] = useState([]);
+
+    function getStaffs() {
+      axios.get(`http://localhost:8000/api/staffs/?staffName=&page=1&perPage=5`)
+          .then((response) => {
+              const staffNameList = []
+              response.data.staffs.map((item) => {
+                staffNameList.push(item.staffName)
+              })
+              setStaffs(staffNameList)
+          }) 
+          .catch((error) => {
+              console.log(error)
+          })
+    }
+    console.log(staffs)
+    useEffect(() => {
+      getStaffs()
+    }, [])
+
     const handleFileUpload = (event) => {
         const file = event.target.files[0];
         const reader = new FileReader();
@@ -110,15 +126,27 @@ const TestAddOfficer = () => {
                   }),
             },
             {
-                accessorKey: "officer",
-                header: 'ผู้ประสานงาน',
-                
+              accessorKey: "officer",
+              header: "ผู้ประสานงานรายวิชา",
+              editVariant: "select", // กำหนดให้เป็น multi-select
+              editSelectOptions: staffs, // กำหนดตัวเลือกให้กับ multi-select
+              enableEditing: true,
+              muiEditTextFieldProps: ({ row }) => ({
+                select: true, // ให้สามารถเลือกหลายตัวเลือกได้
+                error: !!validationErrors?.officer,
+                helperText: validationErrors?.officer,
+                onChange: (event) => {
+                  setEditedSubjects({
+                    ...editedSubjects,
+                    [row.id]: { ...row.original, officer: event.target.value },
+                  });
+                },
+              }),
+                      
             },
         ],
-        [editedSubjects, validationErrors] //กลับมาแก้ด้วย
+        [editedSubjects, validationErrors, staffs] //กลับมาแก้ด้วย
     )    
-    const [validationErrors, setValidationErrors] = useState({});
-    const [editedSubjects, setEditedSubjects] = useState({});
 
     //CREATE action
     const handleCreateSubject = async ({ values, table }) => {
@@ -142,22 +170,25 @@ const TestAddOfficer = () => {
     const handleSaveSubjects = async () => {
         if (Object.values(validationErrors).some((error) => !!error)) return;
         setEditedSubjects({});
+
     };
     //DELETE action
-    const openDeleteConfirmModal = (row) => {
-        if (window.confirm("Are you sure you want to delete this user?")) {
-            deleteSubject(row.original.id);
-        }
-    };
-    const deleteSubject = (id) => {
-        setExcelData((prevData) => prevData.filter((row) => row.ID !== id));
+    const deleteSubject = (index) => {
+      setExcelData((prevData) => prevData.filter((_, i) => i !== index));
     };
     
+    const openDeleteConfirmModal = (index) => {
+      if (window.confirm("Are you sure you want to delete this row?")) {
+        deleteSubject(index);
+      }
+    };
+            
 
     const table = useMaterialReactTable ({
         columns,
         data: excelData,
         createDisplayMode: "row", // ('modal', and 'custom' are also available)
+        editDisplayMode: "table", // ('modal', 'row', 'cell', and 'custom' are also
         enableEditing: true,
         enableRowActions: true,
         positionActionsColumn: "last",
@@ -167,17 +198,12 @@ const TestAddOfficer = () => {
               grow: false,
             },
         },
-        onEditingRowSave: ({ table, values }) => {
-            //validate data
-            //save data to api
-            table.setEditingRow(null); //exit editing mode
-        },
         onCreatingRowSave: handleCreateSubject,        
         onCreatingRowCancel: () => setValidationErrors({}),
         renderRowActions: ({ row }) => (
             <Box sx={{ display: "flex", gap: "1rem" }}>
               <Tooltip title="Delete">
-                <IconButton color="error" onClick={() => openDeleteConfirmModal(row)}>
+                <IconButton color="error" onClick={() => openDeleteConfirmModal(row.index)}>
                   <DeleteIcon />
                 </IconButton>
               </Tooltip>

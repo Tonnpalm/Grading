@@ -7,7 +7,7 @@ export type User = {
   };
     
   //50 us states array
-  export const staffName = [
+  export const mockStaffName = [
     'ผศ.ดร.ภควรรณ ปักษี',
     'ผศ.ดร.อธิปัตย์ ธำรงค์ธัญลักษณ์',
     'ผศ.ดร.ณัฐพงศ์ ไพบูลย์วรชาติ' ,
