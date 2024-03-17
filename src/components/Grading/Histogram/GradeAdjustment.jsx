@@ -4,8 +4,12 @@ import ResponsiveAppBar from '../../AppBar/ButtonAppBar'
 import SimpleBarChart from './TestHistogram'
 import ScoreTable from './ScoreTable'
 import { Typography } from '@mui/material'
+import { useCookies } from 'react-cookie';
 
 export default function GradeAdjustment() {
+    const [cookies, setCookie] = useCookies([]);
+    const course = cookies['course']
+    
   return (
     <div>
         <ResponsiveAppBar/>

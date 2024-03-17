@@ -5,16 +5,17 @@ import {
 } from 'material-react-table';
 import { MenuItem } from '@mui/material';
 import { data } from './makeData';
+import { useCookies } from 'react-cookie';
 import Modal from './Modal';
 
 const Example = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [cookies, setCookie] = useCookies([]);
+  const CR58 = cookies['CR58']
 
   const handleHeaderClick = () => {
     setIsModalOpen(true);
   };
-  
-  
 
   const columns = useMemo(
     () => [
@@ -91,7 +92,7 @@ const Example = () => {
 
   const table = useMaterialReactTable({
     columns,
-    data,
+    data: CR58,
     enableColumnPinning: true,
     // enableColumnActions: false,
     layoutMode: 'grid-no-grow', //constant column widths

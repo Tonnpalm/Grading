@@ -1,9 +1,7 @@
-// eslint-disable-next-line no-unused-vars
 import { useMemo, useState, useEffect } from "react";
+import { useNavigate } from 'react-router';
 import {
-  MRT_EditActionButtons,
   MaterialReactTable,
-  // createRow,
   useMaterialReactTable,
 } from "material-react-table";
 import * as XLSX from "xlsx";
@@ -13,37 +11,26 @@ import EditIcon from '@mui/icons-material/Edit';
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { Delete as DeleteIcon } from "@mui/icons-material";
 import { PinkPallette } from "../../../assets/pallettes";
-import { mockStaffName } from "./makeData";
+// import { mockStaffName } from "./makeData";
 import {
-  // Autocomplete,
   Box,
   Button,
-  CircularProgress,
   IconButton,
   Tooltip,
-  Typography,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  // TextField,
 } from "@mui/material";
-import {
-  QueryClient,
-  QueryClientProvider,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
 // import { useCookies } from "react-cookie";
 import axios from 'axios';
+import ModalForAddSubject from "./DialogAddSubject";
+import ReCheckModal from "../../utility/Recheck";
 
 const Example = () => {
-  const [validationErrors, setValidationErrors] = useState({});
-  //keep track of rows that have been edited
-  const [editedUsers, setEditedUsers] = useState({});
   const [excelData, setExcelData] = useState([]);
   const [staffs, setStaffs] = useState([]);
-  // const staffsTemp = [...staffs];
+  const [addSubjectModalOpen, setAddSubjectModalOpen] = useState(false);
+  const [deleteSubjectModalOpen, setDeleteSubjectModalOpen] = useState(false);
+  const [editSubjectModalOpen, setEditSubjectModalOpen] = useState(false);
+  const [rowData, setRowData] = useState({})
+  const navigate = useNavigate();
   // const [cookies, setCookie] = useCookies([]);
 
   function getStaffs() {
@@ -59,11 +46,77 @@ const Example = () => {
             console.log(error)
         })
   }
-  // console.log(mockStaffName)
   console.log(staffs)
   useEffect(() => {
     getStaffs()
   }, [])
+
+  const handleAddSubjectModalClose = () => {
+    setAddSubjectModalOpen(false)
+  }
+
+  const handleAddSubjectModalOpen = () => {
+    setAddSubjectModalOpen(true)
+  }
+
+  const handleAddSubjectModalSubmit = (data) => {
+    console.log(data)
+    setExcelData((prevState) => {
+      const newDataSet = [
+        ...prevState, 
+        data, 
+      ]
+      return newDataSet
+    })
+  }
+
+  const handleDeleteSubjectModalOpen = () => {
+    setDeleteSubjectModalOpen(true)
+  }
+
+  const handleDeleteSubjectModalClose = () => {
+    setDeleteSubjectModalOpen(false)
+  }
+
+  const handleDeleteSubjectModalSubmit = (row) => {
+    excelData.splice(row.index, 1); //assuming simple data table
+    setExcelData([...excelData]);
+    handleDeleteSubjectModalClose();
+  }
+
+  const handleEditSubjectModalOpen = () => {
+    setEditSubjectModalOpen(true)
+
+  }
+
+  const handleEditSubjectModalClose = () => {
+    setEditSubjectModalOpen(false)
+  }
+  
+  const handleEditSubjectModalSubmit = (data) => {
+    setExcelData((prevState) => {
+      // คัดลอกข้อมูลเก่าทั้งหมด
+      const newDataSet = [...prevState];
+      // ค้นหา index ของแถวที่ต้องการแก้ไข
+      const rowIndex = newDataSet.findIndex(row => row.ID === data.ID);
+      // หากพบแถวที่ต้องการแก้ไข
+      if (rowIndex !== -1) {
+        // ลบแถวเก่าออกจากข้อมูล
+        newDataSet.splice(rowIndex, 1);
+      }
+      // เพิ่มแถวใหม่เข้าไปในข้อมูล
+      newDataSet.push(data);
+      // ส่งข้อมูลใหม่กลับ
+      return newDataSet;
+    });
+    // ปิด Modal หลังจากทำการแก้ไขข้อมูลเสร็จสิ้น
+    setEditSubjectModalOpen(false);
+  };
+  
+
+  const handleCheckRowData = () => {
+    if (rowData) handleEditSubjectModalOpen()
+  }
 
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
@@ -82,95 +135,18 @@ const Example = () => {
     reader.readAsArrayBuffer(file);
   };
 
-  // const handleEditChange = (event, id, key) => {
-  //   const value = event.target.value;
-  //   setEditedUsers(prevEditedUsers => ({
-  //     ...prevEditedUsers,
-  //     [id]: { ...prevEditedUsers[id], [key]: value }
-  //   }));
-  //   setExcelData(prevExcelData => {
-  //     const updatedExcelData = prevExcelData.map(row => {
-  //       if (row.id === id) {
-  //         return { ...row, [key]: value };
-  //       }
-  //       return row;
-  //     });
-  //     return updatedExcelData;
-      
-  //   });
-  // };
-
-
   const columns = useMemo(
     () => [
       {
         accessorKey: "ID",
         header: "รหัสวิชา",
         size: 40,
-        muiEditTextFieldProps: {
-          required: true,
-          error: !!validationErrors?.ID,
-          helperText: validationErrors?.ID,
-          //remove any previous validation errors when user focuses on the input
-          onFocus: () =>
-            setValidationErrors({
-              ...validationErrors,
-              ID: undefined,
-            }),
-          //optionally add validation checking for onBlur or onChange
-        },
-        // muiEditTextFieldProps: ({ cell, row }) => ({
-        //   type: "text",
-        //   required: true,
-        //   error: !!validationErrors?.[cell.id],
-        //   helperText: validationErrors?.[cell.id],
-        //   //store edited user in state to be saved later
-        //   onBlur: (event) => {
-        //     const validationError = !validateRequired(event.currentTarget.value)
-        //       ? "Required"
-        //       : undefined;
-        //     setValidationErrors({
-        //       ...validationErrors,
-        //       [cell.id]: validationError,
-        //     });
-        //     setEditedUsers({ ...editedUsers, [row.id]: row.original });
-        //   },
-        // }),
         enableEditing: true
       },
       {
-        accessorKey: "Name",
+        accessorKey: "subjectName",
         header: "ชื่อวิชา",
         size: 200,
-        muiEditTextFieldProps: {
-          required: true,
-          error: !!validationErrors?.Name,
-          helperText: validationErrors?.Name,
-          //remove any previous validation errors when user focuses on the input
-          onFocus: () =>
-            setValidationErrors({
-              ...validationErrors,
-              Name: undefined,
-            }),
-          //optionally add validation checking for onBlur or onChange
-        },
-        // muiEditTextFieldProps: ({ cell, row }) => ({
-        //   type: "text",
-        //   required: true,
-        //   error: !!validationErrors?.[cell.id],
-        //   helperText: validationErrors?.[cell.id],
-        //   //store edited user in state to be saved later
-        //   onBlur: (event) => {
-        //     const validationError = !validateRequired(event.currentTarget.value)
-        //       ? "Required"
-        //       : undefined;
-        //     setValidationErrors({
-        //       ...validationErrors,
-        //       [cell.id]: validationError,
-        //     });
-        //     setEditedUsers({ ...editedUsers, [row.id]: row.original });
-        //   },
-        // }),
         enableEditing: true
       },
       {
@@ -182,111 +158,15 @@ const Example = () => {
             alignItems: 'center'
           }
         },
-        muiEditTextFieldProps: {
-          required: true,
-          error: !!validationErrors?.Section,
-          helperText: validationErrors?.Section,
-          //remove any previous validation errors when user focuses on the input
-          onFocus: () =>
-            setValidationErrors({
-              ...validationErrors,
-              Section: undefined,
-            }),
-          //optionally add validation checking for onBlur or onChange
-        },
-        // muiEditTextFieldProps: ({ cell, row }) => ({
-        //   type: "text",
-        //   required: true,
-        //   error: !!validationErrors?.[cell.id],
-        //   helperText: validationErrors?.[cell.id],
-        //   //store edited user in state to be saved later
-        //   onBlur: (event) => {
-        //     const validationError = !validateRequired(event.currentTarget.value)
-        //       ? "Required"
-        //       : undefined;
-        //     setValidationErrors({
-        //       ...validationErrors,
-        //       [cell.id]: validationError,
-        //     });
-        //     setEditedUsers({ ...editedUsers, [row.id]: row.original });
-        //   },
-        // }),
         enableEditing: true
       },
       {
         accessorKey: "officer",
         header: "ผู้ประสานงานรายวิชา",
-        editVariant: "select", // กำหนดให้เป็น multi-select
-        editSelectOptions: staffs, // กำหนดตัวเลือกให้กับ multi-select
-        muiEditTextFieldProps: ({ row }) => ({
-          select: true, // ให้สามารถเลือกหลายตัวเลือกได้
-          error: !!validationErrors?.officer,
-          helperText: validationErrors?.officer,
-          onChange: (event) => {
-            setEditedUsers({
-              ...editedUsers,
-              [row.id]: { ...row.original, officer: event.target.value },
-            });
-          },
-        }),
       },
     ],
-    [editedUsers, validationErrors, staffs],
-    // console.log(editedUsers)
+    [],
   );
-
-  //call CREATE hook
-  const { mutateAsync: createUser, isPending: isCreatingUser } = useCreateUser();
-
-  //call READ hook
-  const { isError: isLoadingUsersError, isFetching: isFetchingUsers, isLoading: isLoadingUsers } = useGetUsers();
-
-  //call UPDATE hook
-  const { mutateAsync: updateUsers, isPending: isUpdatingUsers } = useUpdateUsers();
-
-  //call DELETE hook
-  const { mutateAsync: deleteUser, isPending: isDeletingUser } = useDeleteUser();
-
-  const handleCreateUser = async ({ values, table }) => {
-    const newValidationErrors = validateUser(values);
-        if (Object.values(newValidationErrors).some((error) => error)) {
-            setValidationErrors(newValidationErrors);
-            return;
-        }
-        const newRow = {
-            ID: values.ID,
-            Name: values.Name,
-            Section: values.Section,
-            officer: values.officer,
-        };
-        setExcelData((prevData) => [...prevData, newRow]); // Add new row to existing data
-        table.setCreatingRow(null); //exit creating mode
-        console.log(values)
-  };
-  
-
-  //UPDATE action
-  const handleSaveUsers = async () => {
-    if (Object.values(validationErrors).some((error) => !!error)) return;
-    await updateUsers(excelData);
-    setEditedUsers({});
-    updateOldUsers()
-  };
-  const updateOldUsers = (index) => {
-    setExcelData((prevData) => 
-      prevData.map((rowData, i) => 
-        i === index ? { ...rowData, /* ทำการอัปเดตข้อมูลที่ต้องการ */ } : rowData
-      )
-    );
-  };
-  
-
-  //DELETE action
-  const openDeleteConfirmModal = (row) => {
-    if (window.confirm("Are you sure you want to delete this user?")) {
-      deleteUser(row.original.id);
-    }
-  };
 
   const table = useMaterialReactTable({
     columns,
@@ -298,17 +178,6 @@ const Example = () => {
     enableRowActions: true,
     positionActionsColumn: "last",
     getRowId: (row) => row.id,
-    muiToolbarAlertBannerProps: isLoadingUsersError
-      ? {
-          color: "error",
-          children: "Error loading data",
-        }
-      : undefined,
-    muiTableContainerProps: {
-      sx: {
-        minHeight: "500px",
-      },
-    },
     displayColumnDefOptions: {
       "mrt-row-actions": {
         header: "ลบ", //change header text
@@ -316,43 +185,25 @@ const Example = () => {
         grow: false,
       },
     },
-    onCreatingRowCancel: () => setValidationErrors({}),
-    onCreatingRowSave: handleCreateUser,
-    renderCreateRowDialogContent: ({ table, row, internalEditComponents }) => (
-      <>
-        <DialogTitle variant="h3" sx={{ display: 'flex', justifyContent: 'center' }}>เพิ่มรายวิชา</DialogTitle>
-        <DialogContent
-          sx={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
-        >
-          {internalEditComponents} {/* or render custom edit components here */}
-        </DialogContent>
-        <DialogActions>
-          <MRT_EditActionButtons variant="text" table={table} row={row} />
-        </DialogActions>
-      </>
-    ),
-    renderEditRowDialogContent: ({ table, row, internalEditComponents }) => (
-      <>
-        <DialogTitle variant="h3">แก้ไขข้อมูล</DialogTitle>
-        <DialogContent
-          sx={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}
-        >
-          {internalEditComponents} {/* or render custom edit components here */}
-        </DialogContent>
-        <DialogActions>
-          <MRT_EditActionButtons variant="text" table={table} row={row} />
-        </DialogActions>
-      </>
-    ),
     renderRowActions: ({ row }) => (
       <Box sx={{ display: "flex", gap: "1rem" }}>
         <Tooltip title="Edit">
-          <IconButton onClick={() => table.setEditingRow(row)}>
-            <EditIcon />
+          <IconButton 
+            onClick={() => {
+              setRowData(row.original)
+              console.log('rowData', typeof rowData)
+              handleCheckRowData()
+              // handleEditSubjectModalOpen()
+            }}
+          >
+            <EditIcon/>
           </IconButton>
         </Tooltip>
         <Tooltip title="Delete">
-          <IconButton color="error" onClick={() => openDeleteConfirmModal(row)}>
+          <IconButton 
+            color="error" 
+            onClick={handleDeleteSubjectModalOpen}
+          >
             <DeleteIcon />
           </IconButton>
         </Tooltip>
@@ -364,13 +215,7 @@ const Example = () => {
           variant="text"
           style={{ textDecoration: "underline", color: PinkPallette.main }}
           onClick={() => {
-            table.setCreatingRow(true); //simplest way to open the create row modal with no default values
-            //or you can pass in a row object to set default values with the `createRow` helper function
-            // table.setCreatingRow(
-            //   createRow(table, {
-            //     //optionally pass in default values for the new row, useful for nested data or other complex scenarios
-            //   }),
-            // );
+            handleAddSubjectModalOpen()
           }}
         >
           เพิ่มรายวิชา
@@ -378,28 +223,15 @@ const Example = () => {
         <Button
           color="success"
           variant="contained"
-          onClick = {
-            handleSaveUsers
-            // handleEditChange()
-          }
-          disabled={
-            Object.keys(editedUsers).length === 0 ||
-            Object.values(validationErrors).some((error) => !!error)
-          }
+          onClick={() => {
+
+            navigate("/")
+          }}
         >
-          {isUpdatingUsers ? <CircularProgress size={25} /> : "บันทึก"}
+          บันทึก
         </Button>
-        {Object.values(validationErrors).some((error) => !!error) && (
-          <Typography color="error">Fix errors before submitting</Typography>
-        )}
       </Box>
     ),
-    state: {
-      isLoading: isLoadingUsers,
-      isSaving: isCreatingUser || isUpdatingUsers || isDeletingUser,
-      showAlertBanner: isLoadingUsersError,
-      showProgressBars: isFetchingUsers,
-    },
   });
 
   const VisuallyHiddenInput = styled("input")({
@@ -414,9 +246,35 @@ const Example = () => {
     width: 1,
   });
 
+  // useEffect(() => {
+  //   handleEditSubjectModalOpen()
+  // },[rowData])
+
   return (
     <div className="import-space">
-      {/* <input type="file" accept=".xlsx, .xls" onChange={handleFileUpload} /> */}
+      <ModalForAddSubject 
+        mode={'add'}
+        open={addSubjectModalOpen}
+        staffList={staffs}
+        onClose={handleAddSubjectModalClose}
+        onSubmit={handleAddSubjectModalSubmit}
+      />
+      {editSubjectModalOpen && 
+      <ModalForAddSubject
+        mode={'edit'}
+        open={editSubjectModalOpen}
+        staffList={staffs}
+        onClose={handleEditSubjectModalClose}
+        onSubmit={handleEditSubjectModalSubmit}
+        data={rowData}
+      />}
+      <ReCheckModal
+        open={deleteSubjectModalOpen}
+        title={'ลบรายวิชา'}
+        detail={'คุณยืนยันที่จะลบวิชานี้ใช่หรือไม่'}
+        onClose={handleDeleteSubjectModalClose}
+        onSubmit={handleDeleteSubjectModalSubmit}
+      />
       <Button
         component="label"
         variant="contained"
@@ -438,110 +296,5 @@ const Example = () => {
   );
 };
 
-//CREATE hook (post new user to api)
-function useCreateUser() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (user) => {
-      // ทำการส่งข้อมูลผู้ใช้ไปยัง API
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // เสียงการเรียก API เทียบเท่ากับ 1 วินาที (สำหรับการจำลอง)
-      return Promise.resolve();
-    },
-    //client side optimistic update
-    onMutate: (newUserInfo) => {
-      // ดึงข้อมูลผู้ใช้ล่าสุด
-      let prevUsers = queryClient.getQueryData(['users']); // ดึงข้อมูลผู้ใช้ที่อาจจะเป็น null หรือ undefined ออกมา
-      console.log(prevUsers)
-      if (!prevUsers) { // ตรวจสอบว่า prevUsers เป็น null หรือ undefined หรือไม่
-        prevUsers = []; // ถ้าเป็นให้กำหนดให้เป็นอาร์เรย์เปล่า
-      }
-      // เพิ่มข้อมูลผู้ใช้ใหม่เข้าไปในอาร์เรย์
-      let temp = {
-        ...newUserInfo, 
-        id: (Math.random() + 1).toString(36).substring(7),
-      }
-      // const updatedUsers = prevUsers.concat({
-      //   ...newUserInfo,
-      //   id: (Math.random() + 1).toString(36).substring(7),
-      // });
-      const updatedUsers = prevUsers+temp;
-      // อัปเดตข้อมูลผู้ใช้ในแคช
-      queryClient.setQueryData(['users'], updatedUsers);
-    },
-        // onSettled: () => queryClient.invalidateQueries({ queryKey: ['users'] }), // รีเฟรชข้อมูลผู้ใช้หลังจาก mutation, ยกเว้นสำหรับเพื่อสาธารณะ
-  });
-}
+export default Example;
 
-//READ hook (get users from api)
-function useGetUsers() {
-  return useQuery({
-    queryKey: ['users'],
-    queryFn: async () => {
-      //send api request here
-      await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
-      return Promise.resolve(XLSX);
-    },
-    refetchOnWindowFocus: false,
-  });
-}
-
-//UPDATE hook (put user in api)
-  function useUpdateUsers() {
-    const queryClient = useQueryClient();
-    return useMutation({
-      mutationFn: async (users) => {
-        //send api update request here
-        await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
-        return Promise.resolve();
-      },
-      //client side optimistic update
-      onMutate: (newUsers) => {
-        queryClient.setQueryData(['users'], (prevUsers) =>
-          prevUsers?.map((user) => {
-            const newUser = newUsers.find((u) => u.id === user.id);
-            return newUser ? newUser : user;
-          }),
-        );
-      },
-      // onSettled: () => queryClient.invalidateQueries({ queryKey: ['users'] }), //refetch users after mutation, disabled for demo
-    });
-  }
-
-
-//DELETE hook (delete user in api)
-function useDeleteUser() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (userId) => {
-      //send api update request here
-      await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
-      return Promise.resolve();
-    },
-    //client side optimistic update
-    onMutate: (userId) => {
-      queryClient.setQueryData(['users'], (prevUsers) =>
-        prevUsers?.filter((user) => user.id !== userId),
-      );
-    },
-    // onSettled: () => queryClient.invalidateQueries({ queryKey: ['users'] }), //refetch users after mutation, disabled for demo
-  });
-}
-
-const queryClient = new QueryClient();
-const ExampleWithProviders = () => (
-  //Put this with your other react-query providers near root of your app
-  <QueryClientProvider client={queryClient}>
-    <Example />
-  </QueryClientProvider>
-);
-
-export default ExampleWithProviders;
-
-const validateRequired = (value) => !!value.length;
-
-function validateUser(user) {
-  return {
-    ID: !validateRequired(user.ID) ? "Subject ID is Required" : "",
-    Name: !validateRequired(user.Name) ? "Subject name is Required" : "",
-  };
-}

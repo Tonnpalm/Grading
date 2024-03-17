@@ -13,9 +13,17 @@ import { PinkPallette } from '../../../assets/pallettes';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { useNavigate } from 'react-router';
 import Grid from '@mui/material/Grid';
+import * as XLSX from "xlsx";
+import { useCookies } from 'react-cookie';
+
 
 export default function SelectSubject2Grading() {
     const navigate = useNavigate();
+    const [cookies, setCookie] = useCookies([]);
+    const [CR58, setCR58] = React.useState('');
+    const [course, setCourse] = React.useState('');
+    const [excelData, setExcelData] = useState([]);
+    const [moduleDetail, setModuleDetail] = useState([]);
 
     const VisuallyHiddenInput = styled('input')({
         clip: 'rect(0 0 0 0)',
@@ -51,6 +59,22 @@ export default function SelectSubject2Grading() {
         //     textAlign: 'center',
         //     color: theme.palette.text.secondary,
         //   }));
+        const handleFileUpload = (event) => {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+        
+            reader.onload = (e) => {
+              const data = new Uint8Array(e.target.result);
+              const workbook = XLSX.read(data, { type: "array" });
+              const firstSheetName = workbook.SheetNames[0];
+              const worksheet = workbook.Sheets[firstSheetName];
+              const excelData = XLSX.utils.sheet_to_json(worksheet, { header: 2 });
+              console.log(excelData);
+              setExcelData(excelData);
+            };
+        
+            reader.readAsArrayBuffer(file);
+          };
   return (
     <div>
         <ResponsiveAppBar/>
@@ -77,7 +101,15 @@ export default function SelectSubject2Grading() {
                             {/* <input type="file" accept=".xlsx, .xls" style={{ backgroundColor: PinkPallette.main }}/> */}
                             <Button component="label" variant="contained" className="import-style" sx={{ backgroundColor: PinkPallette.main }} startIcon={<CloudUploadIcon />}>
                                 Upload file
-                                <VisuallyHiddenInput type="file" className="form-control custom-form-control" onChange={handleFileChange} />
+                                <VisuallyHiddenInput 
+                                    type="file" 
+                                    className="form-control custom-form-control" 
+                                    onChange={ (event) => {
+                                        handleFileChange(event)
+                                        handleFileUpload(event)
+                                        setCR58(event.target.file)
+                                    }} 
+                                />
                             </Button>
                             <TextField 
                                 id="outlined-basic" 
@@ -119,7 +151,16 @@ export default function SelectSubject2Grading() {
                             <Typography sx= {{ marginTop: '30px', marginBottom: '30px' }}>ส่วน</Typography>
                         </div>                        
                         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                            <Button variant='contained' onClick={() => {navigate('/gradeAdjustment')}} sx={{ backgroundColor: '#BCBCBC',marginTop: '22.5px', marginBottom: '60px'}}>ต่อไป</Button>
+                            <Button 
+                                variant='contained' 
+                                sx={{ backgroundColor: '#BCBCBC',marginTop: '22.5px', marginBottom: '60px'}}
+                                onClick={ () => {
+                                    setCookie("CR58", CR58)
+                                    navigate('/gradeAdjustment')
+                                }} 
+                            >
+                                ต่อไป
+                            </Button>
                         </div>
                     </div>
                 </div>

@@ -10,9 +10,9 @@ import AddMoreSubject from "./components/AddSubject/AddMoreSubject/AddMoreSubjec
 import TestTable from "./components/Scoring/TestTable"
 import SelectSubject2Grading from "./components/Grading/SubjectSelection/SelectSubject2Grading";
 import GradeAdjustment from "./components/Grading/Histogram/GradeAdjustment";
-import TTT from './components/EverythingTest/testAddOfficer'
+// import TTT from './components/EverythingTest/testAddOfficer'
 import ScoringTable from "./components/Scoring/ScoringTable";
-import TestAutocomplete from "./components/EverythingTest/TestAutocomplete"
+import Tags from "./components/AddSubject/SelectSubject/TestAutocomplete";
 import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
 import { ThemeProvider, createTheme } from "@mui/material";
 import "./App.css";
@@ -28,7 +28,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Homepage />} />
         <Route path="testAPI" element={<TestAPI />} />
-        <Route path="testAutocomplete" element={<TestAutocomplete />} />
+        <Route path="testAutocomplete" element={<Tags />} />
         <Route path="histogram" element={<Histogram />} />
         <Route path="addSubject" element={<AddSubject />} />
         <Route path="selectSubject" element={<SelectSubject />} />
@@ -38,7 +38,7 @@ function App() {
         <Route path="testTable" element={<TestTable />} />
         <Route path="selectSubject2grading" element={<SelectSubject2Grading />} />
         <Route path="gradeAdjustment" element={<GradeAdjustment />} />
-        <Route path="ttt" element={<TTT />} />
+        {/* <Route path="ttt" element={<TTT />} /> */}
         <Route path="scoringTable" element={<ScoringTable />} />
       </Routes>
     </ThemeProvider>
