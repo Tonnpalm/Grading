@@ -58,7 +58,7 @@ const Example = () => {
         },
       },
       {
-        accessorKey: 'year_semester',
+        accessorKey: 'yearAndSemester',
         header: 'ปีการศึกษา/ภาค',
         // muiTableHeadCellProps: {
         //   align: 'center'
@@ -78,7 +78,7 @@ const Example = () => {
         }
       },
       {
-        accessorKey: 'hours',
+        accessorKey: 'selectedDate',
         header: 'จำนวนชั่วโมงเรียน',
         // muiTableHeadCellProps: {
         //   align: 'center'

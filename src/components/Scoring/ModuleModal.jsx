@@ -4,11 +4,9 @@ import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { DateRangePicker } from '@mui/x-date-pickers-pro/DateRangePicker';
-import { SingleInputDateRangeField } from '@mui/x-date-pickers-pro/SingleInputDateRangeField';
-import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { TextField } from '@mui/material';
 
 
@@ -16,7 +14,8 @@ export default function ModuleModal({open, onClose, onSubmit, data, mode}) {
     const [name, setName] = React.useState(data?.moduleName ? data?.moduleName : '')
     const [yearAndSemester, setYearAndSemester] = React.useState(data?.yearAndSemester ? data?.yearAndSemester : '')
     const [duration, setDuration] = React.useState(data?.duration ? data?.duration : '')
-    const [hours, setHours] = React.useState(data?.hours ? data?.hours : [])
+    const [startDate, setStartDate] = React.useState('');
+    const [endDate, setEndDate] = React.useState('');
     
     let title = ''
     switch (mode){
@@ -38,18 +37,18 @@ export default function ModuleModal({open, onClose, onSubmit, data, mode}) {
             moduleName: name,
             yearAndSemester: yearAndSemester,
             duration: duration,
-            hours: hours,
-        }
-        onSubmit(rowAdded)
-        handleClose()
+            selectedDate: startDate.format('DD/MM/YYYY') + ' - ' + endDate.format('DD/MM/YYYY')        }
+        onSubmit(rowAdded);
+        handleClose();
     }
 
     const handleClose = () => {
-        setName('')
-        setYearAndSemester('')
-        setDuration('')
-        setHours([])
-        onClose()
+        setName('');
+        setYearAndSemester('');
+        setDuration('');
+        setStartDate(null); // เคลียร์ค่า selectedDateString เมื่อปิด Modal
+        setEndDate(null);
+        onClose();
     }
 
   return (
@@ -62,9 +61,9 @@ export default function ModuleModal({open, onClose, onSubmit, data, mode}) {
         <DialogTitle id="alert-dialog-title">
             {title}
         </DialogTitle>
-        <DialogContent>
+        <DialogContent style={{ display: 'flex', flexDirection: 'column' }}>
             <TextField 
-                variant='outlined'
+                variant="standard"
                 label='ชื่อมอดูล'
                 value={name}
                 onChange={(event) => {
@@ -72,7 +71,7 @@ export default function ModuleModal({open, onClose, onSubmit, data, mode}) {
                 }}
             />
             <TextField 
-                variant='outlined'
+                variant="standard"
                 label='ปี/ภาคการศึกษา'
                 value={yearAndSemester}
                 onChange={(event) => {
@@ -80,21 +79,33 @@ export default function ModuleModal({open, onClose, onSubmit, data, mode}) {
                 }}
             />
             <TextField 
-                variant='outlined'
+                variant="standard"
                 label='ระยะเวลาที่สอน'
                 value={duration}
                 onChange={(event) => {
                     setDuration(event.target.value)
                 }}
             />
-<LocalizationProvider dateAdapter={AdapterDayjs}>
-      <DemoContainer components={['SingleInputDateRangeField']}>
-        <DateRangePicker
-          slots={{ field: SingleInputDateRangeField }}
-          name="allowedRange"
-        />
-      </DemoContainer>
-    </LocalizationProvider>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <DatePicker 
+                    label="วันที่เริ่มต้น"
+                    slotProps={{ textField: { variant: 'standard' } }}
+                    value={startDate}
+                    onChange={(newValue) => {
+                        setStartDate(newValue);
+                    }}
+                />
+            </LocalizationProvider>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DatePicker 
+                        label="วันที่สิ้นสุด"
+                        slotProps={{ textField: { variant: 'standard' } }}
+                        value={endDate}
+                        onChange={(newValue) => {
+                            setEndDate(newValue);
+                        }}
+                    />
+                </LocalizationProvider>
         </DialogContent>
         <DialogActions>
             <Button onClick={handleClose}>ยกเลิก</Button>

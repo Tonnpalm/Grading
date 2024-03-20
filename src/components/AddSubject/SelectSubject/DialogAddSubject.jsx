@@ -10,8 +10,8 @@ import { TextField, Autocomplete } from '@mui/material';
 export default function ModalForAddSubject({open, onClose, onSubmit, staffList, data, mode}) {
     const [id, setId] = React.useState(data?.ID ? data?.ID : '')
     const [subjectName, setSubjectName] = React.useState(data?.subjectName ? data?.subjectName : '')
-    const [section, setSection] = React.useState(data?.Section ? data?.Section : '')
-    const [officers, setOfficer] = React.useState(data?.officer ? data?.officer : [])
+    const [section, setSection] = React.useState(data?.section ? data?.section : '')
+    const [coordinators, setCoordinators] = React.useState(data?.coordinators ? data?.coordinators : [])
     
     let title = ''
     switch (mode){
@@ -26,18 +26,18 @@ export default function ModalForAddSubject({open, onClose, onSubmit, staffList, 
     }
     
     React.useEffect(() => {
-      console.log('ID', id)
+      console.log('id', id)
       console.log('subjectName', subjectName);
       console.log('sectioin', section);
-      console.log('officers', officers);
+      console.log('coordinator', coordinators);
     },[])
 
     const handleSubmit = () => {
         const rowAdded = {
-            ID: id,
+            id: id,
             subjectName: subjectName,
-            Section: section,
-            officer: officers,
+            section: section,
+            coordinators: coordinators,
         }
         onSubmit(rowAdded)
         handleClose()
@@ -47,7 +47,7 @@ export default function ModalForAddSubject({open, onClose, onSubmit, staffList, 
         setId('')
         setSubjectName('')
         setSection('')
-        setOfficer([])
+        setCoordinators([])
         onClose()
     }
 
@@ -61,9 +61,9 @@ export default function ModalForAddSubject({open, onClose, onSubmit, staffList, 
         <DialogTitle id="alert-dialog-title">
           {title}
         </DialogTitle>
-        <DialogContent>
+        <DialogContent style={{ display: 'flex', flexDirection: 'column' }}>
           <TextField 
-            variant='outlined'
+            variant="standard"
             label='รหัสวิชา'
             value={id}
             onChange={(event) => {
@@ -71,7 +71,7 @@ export default function ModalForAddSubject({open, onClose, onSubmit, staffList, 
             }}
           />
           <TextField 
-            variant='outlined'
+            variant="standard"
             label='ชื่อวิชา'
             value={subjectName}
             onChange={(event) => {
@@ -79,7 +79,7 @@ export default function ModalForAddSubject({open, onClose, onSubmit, staffList, 
             }}
           />
           <TextField 
-            variant='outlined'
+            variant="standard"
             label='ตอนเรียน'
             value={section}
             onChange={(event) => {
@@ -89,7 +89,7 @@ export default function ModalForAddSubject({open, onClose, onSubmit, staffList, 
           <Autocomplete
             multiple
             id="staff"
-            value={officers}
+            value={coordinators}
             options={staffList}
             // getOptionLabel={(option) => option.title}
             renderInput={(params) => (
@@ -100,7 +100,7 @@ export default function ModalForAddSubject({open, onClose, onSubmit, staffList, 
                 />
             )}
             onChange={ (event, newValue, index) => {
-              setOfficer(newValue)
+              setCoordinators(newValue)
               console.log('index',index)
             }}
           />

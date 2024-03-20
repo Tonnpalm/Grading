@@ -51,6 +51,18 @@ const Example = () => {
     getStaffs()
   }, [])
 
+  const sendDataToServer = () => {
+    axios.post(`http://localhost:8000/api/staffs/`, excelData)
+      .then((response) => {
+        console.log('Data successfully sent to server:', response);
+        // เพิ่มโค้ดเพื่อปรับปรุงสถานะหรือแสดงข้อความผลลัพธ์ให้ผู้ใช้
+      })
+      .catch((error) => {
+        console.error('Error sending data to server:', error);
+        // เพิ่มโค้ดเพื่อปรับปรุงสถานะหรือแสดงข้อความผลลัพธ์ให้ผู้ใช้
+      });
+  };  
+
   const handleAddSubjectModalClose = () => {
     setAddSubjectModalOpen(false)
   }
@@ -138,7 +150,7 @@ const Example = () => {
   const columns = useMemo(
     () => [
       {
-        accessorKey: "ID",
+        accessorKey: "id",
         header: "รหัสวิชา",
         size: 40,
         enableEditing: true
@@ -150,7 +162,7 @@ const Example = () => {
         enableEditing: true
       },
       {
-        accessorKey: "Section",
+        accessorKey: "section",
         header: "ตอนเรียน",
         size: 20,
         muiTableBodyCellProps: {
@@ -161,7 +173,7 @@ const Example = () => {
         enableEditing: true
       },
       {
-        accessorKey: "officer",
+        accessorKey: "coordinators",
         header: "ผู้ประสานงานรายวิชา",
       },
     ],
@@ -223,10 +235,11 @@ const Example = () => {
         <Button
           color="success"
           variant="contained"
-          onClick={() => {
+          // onClick={() => {
 
-            navigate("/")
-          }}
+          //   navigate("/")
+          // }}
+          onClick={sendDataToServer}
         >
           บันทึก
         </Button>
