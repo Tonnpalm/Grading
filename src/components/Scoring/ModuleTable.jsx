@@ -68,7 +68,7 @@ const Example = () => {
         },
       },
       {
-        accessorKey: 'duration',
+        accessorKey: 'selectedDate',
         header: 'ระยะเวลาที่สอน',
         // muiTableHeadCellProps: {
         //   align: 'center'
@@ -78,7 +78,7 @@ const Example = () => {
         }
       },
       {
-        accessorKey: 'selectedDate',
+        accessorKey: 'duration',
         header: 'จำนวนชั่วโมงเรียน',
         // muiTableHeadCellProps: {
         //   align: 'center'
@@ -99,6 +99,13 @@ const Example = () => {
     enableRowActions: true,
     positionActionsColumn: 'last',
     getRowId: (row) => row.id,
+    displayColumnDefOptions: {
+      "mrt-row-actions": {
+        header: "", //change header text
+        paddingLeft: "1rem",
+        grow: false,
+      },
+    },
     renderRowActionMenuItems: ({ row }) => (
       <Box sx={{ display: 'flex', flexDirection: 'column' }}>
         <MenuItem 

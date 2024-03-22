@@ -7,8 +7,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { TextField } from '@mui/material';
-
+import { TextField, Box, InputLabel, MenuItem, FormControl, Select } from '@mui/material';
 
 export default function ModuleModal({open, onClose, onSubmit, data, mode}) {
     const [name, setName] = React.useState(data?.moduleName ? data?.moduleName : '')

@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from "react";
-import { useNavigate } from 'react-router';
+import { useNavigate } from "react-router";
 import {
   MaterialReactTable,
   useMaterialReactTable,
@@ -7,19 +7,14 @@ import {
 import * as XLSX from "xlsx";
 import "./AddOfficer.css";
 import { styled } from "@mui/material/styles";
-import EditIcon from '@mui/icons-material/Edit';
+import EditIcon from "@mui/icons-material/Edit";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { Delete as DeleteIcon } from "@mui/icons-material";
 import { PinkPallette } from "../../../assets/pallettes";
 // import { mockStaffName } from "./makeData";
-import {
-  Box,
-  Button,
-  IconButton,
-  Tooltip,
-} from "@mui/material";
-// import { useCookies } from "react-cookie";
-import axios from 'axios';
+import { Box, Button, IconButton, Tooltip } from "@mui/material";
+import { useCookies } from "react-cookie";
+import axios from "axios";
 import ModalForAddSubject from "./DialogAddSubject";
 import ReCheckModal from "../../utility/Recheck";
 
@@ -29,88 +24,105 @@ const Example = () => {
   const [addSubjectModalOpen, setAddSubjectModalOpen] = useState(false);
   const [deleteSubjectModalOpen, setDeleteSubjectModalOpen] = useState(false);
   const [editSubjectModalOpen, setEditSubjectModalOpen] = useState(false);
-  const [rowData, setRowData] = useState({})
-  const navigate = useNavigate();
-  // const [cookies, setCookie] = useCookies([]);
+  const [rowData, setRowData] = useState({});
+  const [checkStaff, setCheckStaff] = useState();
+  // const navigate = useNavigate();
+  const [cookies, setCookie] = useCookies([]);
+  const year = cookies["year"];
+  const semester = cookies["semester"];
 
   function getStaffs() {
-    axios.get(`http://localhost:8000/api/staffs/?staffName=&page=1&perPage=5`)
-        .then((response) => {
-            const staffNameList = []
-            response.data.staffs.map((item) => {
-              staffNameList.push(item.staffName)
-            })
-            setStaffs(staffNameList)
-        }) 
-        .catch((error) => {
-            console.log(error)
-        })
-  }
-  console.log(staffs)
-  useEffect(() => {
-    getStaffs()
-  }, [])
-
-  const sendDataToServer = () => {
-    axios.post(`http://localhost:8000/api/staffs/`, excelData)
+    axios
+      .get(`http://localhost:8000/api/staffs/?name=&page=1&perPage=10`)
       .then((response) => {
-        console.log('Data successfully sent to server:', response);
-        // เพิ่มโค้ดเพื่อปรับปรุงสถานะหรือแสดงข้อความผลลัพธ์ให้ผู้ใช้
+        const staffID = response.data.staffs;
+
+        console.log("checkStaffID", staffID);
+
+        const combinedStaffs = response.data.staffs.map(
+          (item) => item.staffName + " " + item.staffSurname
+        );
+        setStaffs(combinedStaffs);
       })
       .catch((error) => {
-        console.error('Error sending data to server:', error);
-        // เพิ่มโค้ดเพื่อปรับปรุงสถานะหรือแสดงข้อความผลลัพธ์ให้ผู้ใช้
+        console.log(error);
       });
-  };  
+  }
+
+  useEffect(() => {
+    getStaffs();
+  }, []);
+
+  const handleSaveButtonClick = (data) => {
+    // const postData = data.map(item => ({
+    //   crsID: item.crsID,
+    //   crsName: item.crsName,
+    //   crsSec: item.crsSec,
+    //   crsCre: item.crsCre,
+    //   coordinators: item.coordinators
+    // }));
+    // ส่งข้อมูลทีละแถวไปยังเซิร์ฟเวอร์
+    axios
+      .post(
+        `http://localhost:8000/api/courses/`,
+        // postData
+        {
+          crsID: data.crsID,
+          crsName: data.crsName,
+          crsSec: data.crsSec,
+          crsCre: data.crsCre,
+          staffs: data.coordinators,
+        }
+      )
+      .then((res) => {
+        console.log(res);
+      });
+  };
 
   const handleAddSubjectModalClose = () => {
-    setAddSubjectModalOpen(false)
-  }
+    setAddSubjectModalOpen(false);
+  };
 
   const handleAddSubjectModalOpen = () => {
-    setAddSubjectModalOpen(true)
-  }
+    setAddSubjectModalOpen(true);
+  };
 
   const handleAddSubjectModalSubmit = (data) => {
-    console.log(data)
+    // console.log(data)
     setExcelData((prevState) => {
-      const newDataSet = [
-        ...prevState, 
-        data, 
-      ]
-      return newDataSet
-    })
-  }
+      const newDataSet = [...prevState, data];
+      return newDataSet;
+    });
+  };
 
   const handleDeleteSubjectModalOpen = () => {
-    setDeleteSubjectModalOpen(true)
-  }
+    setDeleteSubjectModalOpen(true);
+  };
 
   const handleDeleteSubjectModalClose = () => {
-    setDeleteSubjectModalOpen(false)
-  }
+    setDeleteSubjectModalOpen(false);
+  };
 
   const handleDeleteSubjectModalSubmit = (row) => {
     excelData.splice(row.index, 1); //assuming simple data table
     setExcelData([...excelData]);
     handleDeleteSubjectModalClose();
-  }
+  };
 
   const handleEditSubjectModalOpen = () => {
-    setEditSubjectModalOpen(true)
-
-  }
+    setEditSubjectModalOpen(true);
+  };
 
   const handleEditSubjectModalClose = () => {
-    setEditSubjectModalOpen(false)
-  }
-  
+    setEditSubjectModalOpen(false);
+  };
+
   const handleEditSubjectModalSubmit = (data) => {
     setExcelData((prevState) => {
       // คัดลอกข้อมูลเก่าทั้งหมด
       const newDataSet = [...prevState];
       // ค้นหา index ของแถวที่ต้องการแก้ไข
-      const rowIndex = newDataSet.findIndex(row => row.ID === data.ID);
+      const rowIndex = newDataSet.findIndex((row) => row.ID === data.ID);
       // หากพบแถวที่ต้องการแก้ไข
       if (rowIndex !== -1) {
         // ลบแถวเก่าออกจากข้อมูล
@@ -124,11 +136,10 @@ const Example = () => {
     // ปิด Modal หลังจากทำการแก้ไขข้อมูลเสร็จสิ้น
     setEditSubjectModalOpen(false);
   };
-  
 
   const handleCheckRowData = () => {
-    if (rowData) handleEditSubjectModalOpen()
-  }
+    if (rowData) handleEditSubjectModalOpen();
+  };
 
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
@@ -150,34 +161,45 @@ const Example = () => {
   const columns = useMemo(
     () => [
       {
-        accessorKey: "id",
+        accessorKey: "crsID",
         header: "รหัสวิชา",
         size: 40,
-        enableEditing: true
+        enableEditing: true,
       },
       {
-        accessorKey: "subjectName",
+        accessorKey: "crsName",
         header: "ชื่อวิชา",
         size: 200,
-        enableEditing: true
+        enableEditing: true,
       },
       {
-        accessorKey: "section",
+        accessorKey: "crsSec",
         header: "ตอนเรียน",
         size: 20,
         muiTableBodyCellProps: {
           sx: {
-            alignItems: 'center'
-          }
+            alignItems: "center",
+          },
         },
-        enableEditing: true
+        enableEditing: true,
+      },
+      {
+        accessorKey: "crsCre",
+        header: "หน่วยกิต",
+        size: 20,
+        muiTableBodyCellProps: {
+          sx: {
+            alignItems: "center",
+          },
+        },
+        enableEditing: true,
       },
       {
         accessorKey: "coordinators",
         header: "ผู้ประสานงานรายวิชา",
       },
     ],
-    [],
+    []
   );
 
   const table = useMaterialReactTable({
@@ -192,7 +214,7 @@ const Example = () => {
     getRowId: (row) => row.id,
     displayColumnDefOptions: {
       "mrt-row-actions": {
-        header: "ลบ", //change header text
+        header: "", //change header text
         paddingLeft: "1rem",
         grow: false,
       },
@@ -200,34 +222,31 @@ const Example = () => {
     renderRowActions: ({ row }) => (
       <Box sx={{ display: "flex", gap: "1rem" }}>
         <Tooltip title="Edit">
-          <IconButton 
+          <IconButton
             onClick={() => {
-              setRowData(row.original)
-              console.log('rowData', typeof rowData)
-              handleCheckRowData()
+              setRowData(row.original);
+              console.log("rowData", rowData);
+              handleCheckRowData();
               // handleEditSubjectModalOpen()
             }}
           >
-            <EditIcon/>
+            <EditIcon />
           </IconButton>
         </Tooltip>
         <Tooltip title="Delete">
-          <IconButton 
-            color="error" 
-            onClick={handleDeleteSubjectModalOpen}
-          >
+          <IconButton color="error" onClick={handleDeleteSubjectModalOpen}>
             <DeleteIcon />
           </IconButton>
         </Tooltip>
       </Box>
     ),
-    renderBottomToolbarCustomActions: () => (
+    renderBottomToolbarCustomActions: ({ table }) => (
       <Box sx={{ display: "flex", gap: "1rem", alignItems: "center" }}>
         <Button
           variant="text"
           style={{ textDecoration: "underline", color: PinkPallette.main }}
           onClick={() => {
-            handleAddSubjectModalOpen()
+            handleAddSubjectModalOpen();
           }}
         >
           เพิ่มรายวิชา
@@ -239,7 +258,11 @@ const Example = () => {
 
           //   navigate("/")
           // }}
-          onClick={sendDataToServer}
+          onClick={() => {
+            // const data =  table.options.data
+            console.log(table.options.data);
+            handleSaveButtonClick(table.options.data[0]);
+          }}
         >
           บันทึก
         </Button>
@@ -259,32 +282,29 @@ const Example = () => {
     width: 1,
   });
 
-  // useEffect(() => {
-  //   handleEditSubjectModalOpen()
-  // },[rowData])
-
   return (
     <div className="import-space">
-      <ModalForAddSubject 
-        mode={'add'}
+      <ModalForAddSubject
+        mode={"add"}
         open={addSubjectModalOpen}
         staffList={staffs}
         onClose={handleAddSubjectModalClose}
         onSubmit={handleAddSubjectModalSubmit}
       />
-      {editSubjectModalOpen && 
-      <ModalForAddSubject
-        mode={'edit'}
-        open={editSubjectModalOpen}
-        staffList={staffs}
-        onClose={handleEditSubjectModalClose}
-        onSubmit={handleEditSubjectModalSubmit}
-        data={rowData}
-      />}
+      {editSubjectModalOpen && (
+        <ModalForAddSubject
+          mode={"edit"}
+          open={editSubjectModalOpen}
+          staffList={staffs}
+          onClose={handleEditSubjectModalClose}
+          onSubmit={handleEditSubjectModalSubmit}
+          data={rowData}
+        />
+      )}
       <ReCheckModal
         open={deleteSubjectModalOpen}
-        title={'ลบรายวิชา'}
-        detail={'คุณยืนยันที่จะลบวิชานี้ใช่หรือไม่'}
+        title={"ลบรายวิชา"}
+        detail={"คุณยืนยันที่จะลบวิชานี้ใช่หรือไม่"}
         onClose={handleDeleteSubjectModalClose}
         onSubmit={handleDeleteSubjectModalSubmit}
       />
@@ -310,4 +330,3 @@ const Example = () => {
 };
 
 export default Example;
-

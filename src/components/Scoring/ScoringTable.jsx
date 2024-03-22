@@ -24,7 +24,7 @@ import { PinkPallette } from '../../assets/pallettes';
 
 const ScoringTable = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [scorePartCount, setScorePartCount] = useState(4);
+    const [scorePartCount, setScorePartCount] = useState(1);
     const [newColumnName, setNewColumnName] = useState({ name: '', score: '' }); // เพิ่ม state สำหรับเก็บชื่อ column ใหม่
     const [scoreType, setScoreType] = React.useState('');
 
@@ -59,6 +59,50 @@ const ScoringTable = () => {
         }));
     };
 
+    const handleFileFilteredUpload = (event) => {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+    
+        reader.onload = (e) => {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: "array" });
+            const firstSheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[firstSheetName];
+            
+            // เลือกเฉพาะคอลัมน์ที่ต้องการนำเข้า
+            const columnsToImport = [handleAddColumn.newAccessorKey];
+    
+            // แปลงข้อมูลในไฟล์ Excel เป็น JSON
+            const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+    
+            // หาคอลัมน์ที่ต้องการนำเข้า
+            const headerRow = jsonData[0];
+            const columnIndexMap = {};
+    
+            headerRow.forEach((header, index) => {
+                if (columnsToImport.includes(header)) {
+                    columnIndexMap[header] = index;
+                }
+            });
+    
+            // เก็บข้อมูลที่ต้องการนำเข้า
+            const importedData = jsonData.map(row => {
+                const importedRow = {};
+                columnsToImport.forEach(columnName => {
+                    const columnIndex = columnIndexMap[columnName];
+                    importedRow[columnName] = row[columnIndex];
+                });
+                return importedRow;
+            });
+    
+            // ตั้งค่าข้อมูลในตาราง
+            setExcelData(importedData);
+        };
+    
+        reader.readAsArrayBuffer(file);
+    };
+    
+
     const [columns, setColumns] = useState([
         {
             accessorKey: 'number',
@@ -81,33 +125,33 @@ const ScoringTable = () => {
             size: 140
         },
         {
-            accessorKey: 'Name',
+            accessorKey: 'ชื่อ-นามสกุล',
             header: 'ชื่อ-นามสกุล',
             enableEditing: false,
             enableColumnActions: false,
             size: 200
         },
-        {
-            accessorKey: 'Score_1',
-            header: 'คะแนน 1',
-            enableEditing: true,
-            enableColumnActions: false,
-            size: 70
-        },
-        {
-            accessorKey: 'Score_2',
-            header: 'คะแนน 2',
-            enableEditing: true,
-            enableColumnActions: false,
-            size: 70
-        },
-        {
-            accessorKey: 'Score_3',
-            header: 'คะแนน 3',
-            enableEditing: true,
-            enableColumnActions: false,
-            size: 70
-        },
+        // {
+        //     accessorKey: 'Score_1',
+        //     header: 'คะแนน 1',
+        //     enableEditing: true,
+        //     enableColumnActions: false,
+        //     size: 70
+        // },
+        // {
+        //     accessorKey: 'Score_2',
+        //     header: 'คะแนน 2',
+        //     enableEditing: true,
+        //     enableColumnActions: false,
+        //     size: 70
+        // },
+        // {
+        //     accessorKey: 'Score_3',
+        //     header: 'คะแนน 3',
+        //     enableEditing: true,
+        //     enableColumnActions: false,
+        //     size: 70
+        // },
         {
             accessorKey: 'totalScore',
             header: 'คะแนนรวม',
@@ -132,7 +176,7 @@ const ScoringTable = () => {
     const handleAddColumn = () => {
         if (!newColumnName.name.trim() || !newColumnName.score.trim()) return;
     
-        const newAccessorKey = `Score_${scorePartCount}`;
+        const newAccessorKey = `${newColumnName.name}`;
 
         const newColumn = {
             accessorKey: newAccessorKey, // ใช้ชื่อ Name เป็นส่วนหลักของ accessorKey
@@ -217,6 +261,22 @@ const ScoringTable = () => {
                         onChange={handleFileUpload}
                     />
                 </Button>
+                <Button
+                    component="label"
+                    variant="contained"
+                    className="import-style"
+                    sx={{ backgroundColor: PinkPallette.main }}
+                    startIcon={<CloudUploadIcon />}
+                >
+                    Upload column
+                    <input
+                        type="file"
+                        className="form-control custom-form-control"
+                        style={{ position: 'absolute', top: 0, left: 0, opacity: 0 }}
+                        onChange={handleFileFilteredUpload}
+                    />
+                </Button>
+
             </div>
             <Button
                 variant="contained"

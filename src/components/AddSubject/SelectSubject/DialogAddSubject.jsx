@@ -8,9 +8,10 @@ import { TextField, Autocomplete } from '@mui/material';
 
 
 export default function ModalForAddSubject({open, onClose, onSubmit, staffList, data, mode}) {
-    const [id, setId] = React.useState(data?.ID ? data?.ID : '')
-    const [subjectName, setSubjectName] = React.useState(data?.subjectName ? data?.subjectName : '')
-    const [section, setSection] = React.useState(data?.section ? data?.section : '')
+    const [id, setId] = React.useState(data?.crsID ? data?.crsID : '')
+    const [subjectName, setSubjectName] = React.useState(data?.crsName ? data?.crsName : '')
+    const [section, setSection] = React.useState(data?.crsSec ? data?.crsSec : '')
+    const [credit, setCredit] = React.useState(data?.crsCre ? data?.crsCre : '')
     const [coordinators, setCoordinators] = React.useState(data?.coordinators ? data?.coordinators : [])
     
     let title = ''
@@ -28,15 +29,16 @@ export default function ModalForAddSubject({open, onClose, onSubmit, staffList, 
     React.useEffect(() => {
       console.log('id', id)
       console.log('subjectName', subjectName);
-      console.log('sectioin', section);
+      console.log('section', section);
       console.log('coordinator', coordinators);
     },[])
 
     const handleSubmit = () => {
         const rowAdded = {
-            id: id,
-            subjectName: subjectName,
-            section: section,
+            crsID: id,
+            crsName: subjectName,
+            crsSec: section,
+            crsCre: credit,
             coordinators: coordinators,
         }
         onSubmit(rowAdded)
@@ -47,6 +49,7 @@ export default function ModalForAddSubject({open, onClose, onSubmit, staffList, 
         setId('')
         setSubjectName('')
         setSection('')
+        setCredit('')
         setCoordinators([])
         onClose()
     }
@@ -84,6 +87,14 @@ export default function ModalForAddSubject({open, onClose, onSubmit, staffList, 
             value={section}
             onChange={(event) => {
                 setSection(event.target.value)
+            }}
+          />
+          <TextField 
+            variant="standard"
+            label='หน่วยกิต'
+            value={credit}
+            onChange={(event) => {
+                setCredit(event.target.value)
             }}
           />
           <Autocomplete
