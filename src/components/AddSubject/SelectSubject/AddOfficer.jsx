@@ -25,7 +25,6 @@ const Example = () => {
   const [deleteSubjectModalOpen, setDeleteSubjectModalOpen] = useState(false);
   const [editSubjectModalOpen, setEditSubjectModalOpen] = useState(false);
   const [rowData, setRowData] = useState({});
-  const [checkStaff, setCheckStaff] = useState();
   // const navigate = useNavigate();
   const [cookies, setCookie] = useCookies([]);
   const year = cookies["year"];
@@ -35,14 +34,21 @@ const Example = () => {
     axios
       .get(`http://localhost:8000/api/staffs/?name=&page=1&perPage=10`)
       .then((response) => {
-        const staffID = response.data.staffs;
+        console.log("response data", response.data);
+        let staffObject = [];
 
-        console.log("checkStaffID", staffID);
-
-        const combinedStaffs = response.data.staffs.map(
-          (item) => item.staffName + " " + item.staffSurname
-        );
-        setStaffs(combinedStaffs);
+        response.data.staffs.map((item) => {
+          let id = item.staffID;
+          let fullname = item.staffName + " " + item.staffSurname;
+          staffObject.push({
+            staffID: id,
+            staffFullname: fullname,
+            //เผื่อใช้
+            // firstName: item.staffName,
+            // surname: item.staffSurname,
+          });
+        });
+        setStaffs(staffObject);
       })
       .catch((error) => {
         console.log(error);
@@ -54,25 +60,69 @@ const Example = () => {
   }, []);
 
   const handleSaveButtonClick = (data) => {
-    // const postData = data.map(item => ({
-    //   crsID: item.crsID,
-    //   crsName: item.crsName,
-    //   crsSec: item.crsSec,
-    //   crsCre: item.crsCre,
-    //   coordinators: item.coordinators
-    // }));
-    // ส่งข้อมูลทีละแถวไปยังเซิร์ฟเวอร์
+    console.log("excelData", excelData);
+    console.log("staffs", staffs);
+
+    // แปลง coordinators จากสตริงเป็น list
+    const formattedCoordinators = excelData.map((details) => {
+      const coordinatorsList = details.coordinators.split(" / ");
+      return coordinatorsList;
+    });
+    // const selectedStaffIdList = excelData.map((details) => {
+    //   const staffIDs = details.coordinators.map((name) => {
+    //     console.log("name", name);
+    //     const staff = staffs.find((names) => names.staffFullname === name);
+    //     console.log("fullname", staff);
+    //     return staff ? staff.staffID : "ไม่มี";
+    //   });
+    //   console.log("details", details);
+    //   console.log("staffIDs", staffIDs);
+    //   return staffIDs;
+    // });
+    console.log("formattedCoordinators", formattedCoordinators);
+
+    const selectedStaffIdList = formattedCoordinators.map((coordinators) => {
+      const staffIDs = coordinators.map((name) => {
+        console.log("name", name);
+        const staff = staffs.find((staff) => staff.staffFullname === name);
+        console.log("fullname", staff);
+        return staff ? staff.staffID : "ไม่มี";
+      });
+      console.log("staffIDs", staffIDs);
+      return staffIDs;
+    });
+
+    let semesterValue = "";
+    switch (semester) {
+      case "ภาคต้น":
+        semesterValue = "1";
+        break;
+      case "ภาคปลาย":
+        semesterValue = "2";
+        break;
+      case "ภาคฤดูร้อน":
+        semesterValue = "3";
+        break;
+      default:
+        semesterValue = "0";
+    }
+
+    console.log("selectedStaffIdList", selectedStaffIdList);
+    const courseDetail = {
+      crsID: data.crsID,
+      crsName: data.crsName,
+      crsSec: data.crsSec,
+      crsCre: data.crsCre,
+      year: year.toString(),
+      semester: semesterValue,
+      coordinators: { staffID: selectedStaffIdList[0] },
+    };
+    console.log("courseDetail", courseDetail);
     axios
       .post(
         `http://localhost:8000/api/courses/`,
         // postData
-        {
-          crsID: data.crsID,
-          crsName: data.crsName,
-          crsSec: data.crsSec,
-          crsCre: data.crsCre,
-          staffs: data.coordinators,
-        }
+        courseDetail
       )
       .then((res) => {
         console.log(res);
@@ -87,10 +137,23 @@ const Example = () => {
     setAddSubjectModalOpen(true);
   };
 
+  // const handleAddSubjectModalSubmit = (data) => {
+  //   // const dataSendToAPI = data;
+  //   // const formattedCoordinators = data.coordinators.join(" / ");
+  //   // data.coordinators = formattedCoordinators;
+  //   // console.log(data)
+  //   setExcelData((prevState) => {
+  //     const newDataSet = [...prevState, data];
+  //     return newDataSet;
+  //   });
+  //   console.log(excelData);
+  // };
+
   const handleAddSubjectModalSubmit = (data) => {
-    // console.log(data)
+    const formattedCoordinators = data.coordinators.join(" / ");
+    const newData = { ...data, coordinators: formattedCoordinators };
     setExcelData((prevState) => {
-      const newDataSet = [...prevState, data];
+      const newDataSet = [...prevState, newData];
       return newDataSet;
     });
   };
@@ -118,6 +181,8 @@ const Example = () => {
   };
 
   const handleEditSubjectModalSubmit = (data) => {
+    const formattedCoordinators = data.coordinators.join(" / ");
+    data.coordinators = formattedCoordinators;
     setExcelData((prevState) => {
       // คัดลอกข้อมูลเก่าทั้งหมด
       const newDataSet = [...prevState];
@@ -197,6 +262,7 @@ const Example = () => {
       {
         accessorKey: "coordinators",
         header: "ผู้ประสานงานรายวิชา",
+        render: (value) => value.replace(/\//g, " / "), // เพิ่มการแทนที่ '/' ด้วย ' / '
       },
     ],
     []
@@ -287,7 +353,7 @@ const Example = () => {
       <ModalForAddSubject
         mode={"add"}
         open={addSubjectModalOpen}
-        staffList={staffs}
+        staffList={staffs.map((staff) => staff.staffFullname)}
         onClose={handleAddSubjectModalClose}
         onSubmit={handleAddSubjectModalSubmit}
       />
@@ -295,7 +361,7 @@ const Example = () => {
         <ModalForAddSubject
           mode={"edit"}
           open={editSubjectModalOpen}
-          staffList={staffs}
+          staffList={staffs.map((staff) => staff.staffFullname)}
           onClose={handleEditSubjectModalClose}
           onSubmit={handleEditSubjectModalSubmit}
           data={rowData}
@@ -315,7 +381,7 @@ const Example = () => {
         sx={{ backgroundColor: PinkPallette.main }}
         startIcon={<CloudUploadIcon />}
       >
-        Upload file
+        อัพโหลดไฟล์
         <VisuallyHiddenInput
           type="file"
           className="form-control custom-form-control"
