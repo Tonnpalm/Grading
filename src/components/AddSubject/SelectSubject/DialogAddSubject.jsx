@@ -23,7 +23,7 @@ export default function ModalForAddSubject({
   );
   const [credit, setCredit] = React.useState(data?.crsCre ? data?.crsCre : "");
   const [coordinators, setCoordinators] = React.useState(
-    data?.coordinators ? data?.coordinators : []
+    data?.coordinators ? [data?.coordinators] : []
   );
 
   let title = "";
@@ -113,7 +113,6 @@ export default function ModalForAddSubject({
           id="staff"
           value={coordinators}
           options={staffList}
-          // getOptionLabel={(option) => option.title}
           renderInput={(params) => (
             <TextField {...params} variant="standard" label="ผู้ประสานงาน" />
           )}

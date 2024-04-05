@@ -25,7 +25,7 @@ const Example = () => {
   const [deleteSubjectModalOpen, setDeleteSubjectModalOpen] = useState(false);
   const [editSubjectModalOpen, setEditSubjectModalOpen] = useState(false);
   const [rowData, setRowData] = useState({});
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
   const [cookies, setCookie] = useCookies([]);
   const year = cookies["year"];
   const semester = cookies["semester"];
@@ -60,37 +60,17 @@ const Example = () => {
   }, []);
 
   const handleSaveButtonClick = (data) => {
-    console.log("excelData", excelData);
-    console.log("staffs", staffs);
+    console.log("data in handleSaveButtonClick", data);
+    // console.log("staffs", staffs);
+    // console.log("data with coordinators", data.coordinators);
 
-    // แปลง coordinators จากสตริงเป็น list
-    const formattedCoordinators = excelData.map((details) => {
-      const coordinatorsList = details.coordinators.split(" / ");
-      return coordinatorsList;
+    const staffIDs = data.coordinators.map((name) => {
+      // console.log("name", name);
+      const staff = staffs.find((staff) => staff.staffFullname === name);
+      // console.log("fullname", staff);
+      return staff ? staff.staffID : "ไม่มี";
     });
-    // const selectedStaffIdList = excelData.map((details) => {
-    //   const staffIDs = details.coordinators.map((name) => {
-    //     console.log("name", name);
-    //     const staff = staffs.find((names) => names.staffFullname === name);
-    //     console.log("fullname", staff);
-    //     return staff ? staff.staffID : "ไม่มี";
-    //   });
-    //   console.log("details", details);
-    //   console.log("staffIDs", staffIDs);
-    //   return staffIDs;
-    // });
-    console.log("formattedCoordinators", formattedCoordinators);
-
-    const selectedStaffIdList = formattedCoordinators.map((coordinators) => {
-      const staffIDs = coordinators.map((name) => {
-        console.log("name", name);
-        const staff = staffs.find((staff) => staff.staffFullname === name);
-        console.log("fullname", staff);
-        return staff ? staff.staffID : "ไม่มี";
-      });
-      console.log("staffIDs", staffIDs);
-      return staffIDs;
-    });
+    // console.log("staffIDs", staffIDs);
 
     let semesterValue = "";
     switch (semester) {
@@ -107,23 +87,27 @@ const Example = () => {
         semesterValue = "0";
     }
 
-    console.log("selectedStaffIdList", selectedStaffIdList);
+    // console.log("selectedStaffIdList", selectedStaffIdList);
+    // สร้างข้อมูลสำหรับส่ง API request
+    // const lastRowData = excelData[excelData.length - 1];
+    // console.log("lastRowData", lastRowData);
     const courseDetail = {
-      crsID: data.crsID,
-      crsName: data.crsName,
-      crsSec: data.crsSec,
-      crsCre: data.crsCre,
-      year: year.toString(),
-      semester: semesterValue,
-      coordinators: { staffID: selectedStaffIdList[0] },
+      coursesData: [
+        {
+          crsID: data.crsID,
+          crsName: data.crsName,
+          crsSec: data.crsSec,
+          crsCre: data.crsCre,
+          year: year.toString(),
+          semester: semesterValue,
+          coordinators: { staffID: staffIDs },
+        },
+      ],
     };
     console.log("courseDetail", courseDetail);
+
     axios
-      .post(
-        `http://localhost:8000/api/courses/`,
-        // postData
-        courseDetail
-      )
+      .post(`http://localhost:8000/api/courses/many`, courseDetail)
       .then((res) => {
         console.log(res);
       });
@@ -137,25 +121,15 @@ const Example = () => {
     setAddSubjectModalOpen(true);
   };
 
-  // const handleAddSubjectModalSubmit = (data) => {
-  //   // const dataSendToAPI = data;
-  //   // const formattedCoordinators = data.coordinators.join(" / ");
-  //   // data.coordinators = formattedCoordinators;
-  //   // console.log(data)
-  //   setExcelData((prevState) => {
-  //     const newDataSet = [...prevState, data];
-  //     return newDataSet;
-  //   });
-  //   console.log(excelData);
-  // };
-
   const handleAddSubjectModalSubmit = (data) => {
     const formattedCoordinators = data.coordinators.join(" / ");
-    const newData = { ...data, coordinators: formattedCoordinators };
+    data = { ...data, joinedCoordinators: formattedCoordinators };
+    console.log("data in add new subject", data);
     setExcelData((prevState) => {
-      const newDataSet = [...prevState, newData];
+      const newDataSet = [...prevState, data];
       return newDataSet;
     });
+    handleSaveButtonClick(data);
   };
 
   const handleDeleteSubjectModalOpen = () => {
@@ -182,24 +156,27 @@ const Example = () => {
 
   const handleEditSubjectModalSubmit = (data) => {
     const formattedCoordinators = data.coordinators.join(" / ");
-    data.coordinators = formattedCoordinators;
+    const newData = { ...data, joinedCoordinators: formattedCoordinators };
+    data = newData;
     setExcelData((prevState) => {
       // คัดลอกข้อมูลเก่าทั้งหมด
       const newDataSet = [...prevState];
       // ค้นหา index ของแถวที่ต้องการแก้ไข
-      const rowIndex = newDataSet.findIndex((row) => row.ID === data.ID);
+      const rowIndex = newDataSet.findIndex((row) => row.crsID === data.crsID);
       // หากพบแถวที่ต้องการแก้ไข
       if (rowIndex !== -1) {
         // ลบแถวเก่าออกจากข้อมูล
         newDataSet.splice(rowIndex, 1);
+        // เพิ่มแถวใหม่เข้าไปในข้อมูล
+        newDataSet.push(data);
       }
-      // เพิ่มแถวใหม่เข้าไปในข้อมูล
-      newDataSet.push(data);
       // ส่งข้อมูลใหม่กลับ
       return newDataSet;
     });
     // ปิด Modal หลังจากทำการแก้ไขข้อมูลเสร็จสิ้น
     setEditSubjectModalOpen(false);
+    if (rowData) handleSaveButtonClick(data);
+    else return;
   };
 
   const handleCheckRowData = () => {
@@ -216,7 +193,7 @@ const Example = () => {
       const firstSheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[firstSheetName];
       const excelData = XLSX.utils.sheet_to_json(worksheet, { header: 2 });
-      console.log(excelData);
+      console.log("excelData", excelData);
       setExcelData(excelData);
     };
 
@@ -260,9 +237,8 @@ const Example = () => {
         enableEditing: true,
       },
       {
-        accessorKey: "coordinators",
+        accessorKey: "joinedCoordinators",
         header: "ผู้ประสานงานรายวิชา",
-        render: (value) => value.replace(/\//g, " / "), // เพิ่มการแทนที่ '/' ด้วย ' / '
       },
     ],
     []
@@ -291,9 +267,9 @@ const Example = () => {
           <IconButton
             onClick={() => {
               setRowData(row.original);
-              console.log("rowData", rowData);
+              console.log("rowData", row.original);
               handleCheckRowData();
-              // handleEditSubjectModalOpen()
+              handleEditSubjectModalOpen();
             }}
           >
             <EditIcon />
@@ -325,12 +301,10 @@ const Example = () => {
           //   navigate("/")
           // }}
           onClick={() => {
-            // const data =  table.options.data
-            console.log(table.options.data);
-            handleSaveButtonClick(table.options.data[0]);
+            navigate("/confirmAddSubject");
           }}
         >
-          บันทึก
+          ต่อไป
         </Button>
       </Box>
     ),

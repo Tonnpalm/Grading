@@ -1,43 +1,76 @@
-// eslint-disable-next-line no-unused-vars
-import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import * as React from "react";
+import { styled } from "@mui/material/styles";
 
-// const amount = [
-//   {name: 'A', point: 64},
-//   {name: 'B', point: 66},
-//   {name: 'C', point: 56},
-//   {name: 'D', point: 77},
-//   {name: 'E', point: 66},
-//   {name: 'F', point: 96},
-//   {name: 'G', point: 85},
-//   {name: 'H', point: 87},
-//   {name: 'I', point: 68},
-//   {name: 'J', point: 86},
-// ];
+import {
+  ResponsiveChartContainer,
+  LinePlot,
+  useDrawingArea,
+  useYScale,
+  useXScale,
+} from "@mui/x-charts";
 
+const x = Array.from({ length: 21 }, (_, index) => -1 + 0.2 * index);
+const linear = x.map(() => 0);
 
-const data = [];
+const StyledPath = styled("path")(({ theme, color }) => ({
+  fill: "none",
+  stroke: theme.palette.text[color],
+  shapeRendering: "crispEdges",
+  strokeWidth: 1,
+  pointerEvents: "none",
+}));
 
-for (let i = 1; i <= 100; i++) {
-  data.push({ x: i, จำนวนนักเรียน: Math.random() * 100});
-}
+function CartesianAxis() {
+  // Get the drawing area bounding box
+  const { left, top, width, height } = useDrawingArea();
 
-function TestChart() {
+  // Get the two scale
+  const yAxisScale = useYScale();
+  const xAxisScale = useXScale();
+
+  const yOrigin = yAxisScale(0);
+  const xOrigin = xAxisScale(0);
+
+  const xTicks = [-2, -1, 1, 2, 3];
+  const yTicks = [-2, -1, 1, 2, 3, 4, 5];
+
   return (
-    <div className="App">
-    <h1>Example chart</h1>
-    <ResponsiveContainer width="100%" height={400}>
-      <BarChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="x" label={{ value: 'คะแนน 1-100', position: 'insideBottom', offset: -10 }} />
-        <YAxis label={{ value: 'จำนวนนักเรียน', angle: -90, position: 'insideLeft' }} />
-        <Tooltip />
-        <Legend />
-        <Bar dataKey="จำนวนนักเรียน" fill="#8884d8" />
-      </BarChart>
-    </ResponsiveContainer>
-    </div>
+    <React.Fragment>
+      {yTicks.map((value) => (
+        <StyledPath
+          key={value}
+          d={`M ${left} ${yAxisScale(value)} l ${width} 0`}
+          color="secondary"
+        />
+      ))}
+      {xTicks.map((value) => (
+        <StyledPath
+          key={value}
+          d={`M ${xAxisScale(value)} ${top} l 0 ${height}`}
+          color="secondary"
+        />
+      ))}
+      <StyledPath d={`M ${left} ${yOrigin} l ${width} 0`} color="primary" />
+      <StyledPath d={`M ${xOrigin} ${top} l 0 ${height}`} color="primary" />
+    </React.Fragment>
   );
 }
-
-export default TestChart;
+export default function OriginDemo() {
+  return (
+    <ResponsiveChartContainer
+      margin={{ top: 5, left: 5, right: 5, bottom: 5 }}
+      height={300}
+      series={[
+        {
+          type: "line",
+          data: linear,
+        },
+      ]}
+      xAxis={[{ data: x, scaleType: "linear", min: -1, max: 3 }]}
+      yAxis={[{ min: -2, max: 5 }]}
+    >
+      <CartesianAxis />
+      <LinePlot />
+    </ResponsiveChartContainer>
+  );
+}
