@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState } from "react";
+import { useState, useContext } from "react";
 import {
   MaterialReactTable,
   useMaterialReactTable,
@@ -14,6 +14,7 @@ import ResponsiveAppBar from "../AppBar/ButtonAppBar";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { PinkPallette } from "../../assets/pallettes";
 import { useCookies } from "react-cookie";
+import axios from "axios";
 
 const ScoringTable = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -55,6 +56,18 @@ const ScoringTable = () => {
     }));
   };
 
+  function getOldScore() {
+    axios
+      .get(`http://localhost:8000/api/scores/:moduleObjectID`)
+      .then((response) => {
+        console.log(response.data);
+      });
+  }
+
+  React.useEffect(() => {
+    getOldScore();
+  }, []);
+
   const handleFileFilteredUpload = (event) => {
     const file = event.target.files[0];
     const reader = new FileReader();
@@ -69,7 +82,7 @@ const ScoringTable = () => {
       const columnsToImport = [handleAddColumn.newAccessorKey];
 
       // แปลงข้อมูลในไฟล์ Excel เป็น JSON
-      const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+      const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 2 });
 
       // หาคอลัมน์ที่ต้องการนำเข้า
       const headerRow = jsonData[0];
@@ -202,21 +215,6 @@ const ScoringTable = () => {
               onChange={handleFileUpload}
             />
           </Button>
-          {/* <Button
-            component="label"
-            variant="contained"
-            className="import-style"
-            sx={{ backgroundColor: PinkPallette.main }}
-            startIcon={<CloudUploadIcon />}
-          >
-            Upload column
-            <input
-              type="file"
-              className="form-control custom-form-control"
-              style={{ position: "absolute", top: 0, left: 0, opacity: 0 }}
-              onChange={handleFileFilteredUpload}
-            />
-          </Button> */}
         </div>
         <Button
           variant="contained"

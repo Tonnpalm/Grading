@@ -22,10 +22,12 @@ export default function ModalForAddSubject({
     data?.crsSec ? data?.crsSec : ""
   );
   const [credit, setCredit] = React.useState(data?.crsCre ? data?.crsCre : "");
+  // const [coordinators, setCoordinators] = React.useState(
+  //   data?.coordinators ? data?.coordinators : []
+  // );
   const [coordinators, setCoordinators] = React.useState(
-    data?.coordinators ? [data?.coordinators] : []
+    data?.joinedCoordinators ? data?.joinedCoordinators.split(" / ") : []
   );
-
   let title = "";
   switch (mode) {
     case "edit":

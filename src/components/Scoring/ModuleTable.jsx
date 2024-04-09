@@ -42,13 +42,49 @@ const Example = () => {
     setAddModuleModalOpen(false);
   };
 
-  const handleAddModuleModalSubmit = (data) => {
-    setModuleDetail((prevState) => {
+  const handleAddModuleModalSubmit = async (data) => {
+    await setModuleDetail((prevState) => {
       const newDataSet = [...prevState, data];
       return newDataSet;
     });
+    handleAddSubmitSendingToServer(data);
+  };
 
-    console.log(moduleDetail);
+  // const formatDataFromAddModule = (data) => {
+  //   const year = data.yearAndSemester.split("/")[0];
+  //   const semester = data.yearAndSemester.split("/")[1];
+  //   const startDate = data.selectedDate.split("/")[0];
+  //   const endDate = data.selectedDate.split("/")[1];
+  //   const hours = data.duration
+  //   const
+  // };
+  const handleAddSubmitSendingToServer = async (data) => {
+    console.log("data in handleSaveButtonClick", data);
+    const formattedDataFromAddModule = {
+      moduleName: data.moduleName,
+      startPeriod: data.selectedDate.split(" - ")[0],
+      endPeriod: data.selectedDate.split(" - ")[1],
+      hours: data.duration,
+      year: data.yearAndSemester.split("/")[0],
+      semester: data.yearAndSemester.split("/")[1],
+      crsID: "6601138a5a0240478a1e078d",
+      instructorID: "65f90efa4ef7a70f80525050",
+    };
+    console.log("formattedDataFromAddModule", formattedDataFromAddModule);
+    // const res = axios
+    //   .post(`http://localhost:8000/api/modules/`, formattedDataFromAddModule)
+    //   .then((res) => {
+    //     console.log("error", res);
+    //   });
+    const res = axios
+      .post(`http://localhost:8000/api/modules/`, formattedDataFromAddModule, {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      })
+      .then((res) => {
+        console.log("error", res);
+      });
   };
 
   const handleCheckRowData = () => {
@@ -65,7 +101,15 @@ const Example = () => {
 
   const handleEditModuleModalSubmit = (data) => {
     setModuleDetail((prevState) => {
-      const newDataSet = [...prevState, data];
+      const newDataSet = [...prevState];
+      // ค้นหา index ของแถวที่ต้องการแก้ไข
+      const rowIndex = newDataSet.findIndex((row) => row.crsID === data.crsID);
+      // หากพบแถวที่ต้องการแก้ไข
+      if (rowIndex !== -1) {
+        // ลบแถวเก่าออกจากข้อมูล
+        newDataSet[rowIndex] = data;
+      }
+      // ส่งข้อมูลใหม่กลับ
       return newDataSet;
     });
 
@@ -101,8 +145,21 @@ const Example = () => {
     setModuleDetail((prevState) => [...prevState, newRow]); // เพิ่มแถวใหม่เข้าไปใน state
     handleDuplicateModuleModalClose();
 
-    const sendToServer = {};
-    axios.post(`http://localhost:8000/api/modules/`);
+    // axios.get();
+    // const sendToServer = {
+    //   moduleName: name,
+    //   startPeriod: startDate.format("DD/MM/YYYY"),
+    //   endPeriod: endDate.format("DD/MM/YYYY"),
+    //   hours: duration,
+    //   year: year,
+    //   semester: semester.toString(),
+    //   crsID: "null",
+    //   instructorID: "null",
+    // };
+    // axios.put(
+    //   `http://localhost:8000/api/modules/6607cc77c87865aed0171adb`,
+    //   sendToServer
+    // );
   };
 
   const handleCheckRowDataToDuplicate = (row) => {
@@ -155,6 +212,8 @@ const Example = () => {
           key="edit"
           onClick={() => {
             setRowData(row.original);
+            console.log("rowData", row.original);
+            console.log("checkRowData", rowData);
             handleCheckRowData();
           }}
           sx={{ display: "flex", flexDirection: "row", gap: "1rem" }}
@@ -218,13 +277,15 @@ const Example = () => {
         onSubmit={handleAddModuleModalSubmit}
         mode={"add"}
       />
-      <ModuleModal
-        open={editModuleModalOpen}
-        onClose={handleEditModuleModalClose}
-        onSubmit={handleEditModuleModalSubmit}
-        data={rowData}
-        mode={"edit"}
-      />
+      {editModuleModalOpen && (
+        <ModuleModal
+          open={editModuleModalOpen}
+          onClose={handleEditModuleModalClose}
+          onSubmit={handleEditModuleModalSubmit}
+          data={rowData}
+          mode={"edit"}
+        />
+      )}
       <ReCheckModal
         open={deleteModuleModalOpen}
         title={"ลบรายวิชา"}

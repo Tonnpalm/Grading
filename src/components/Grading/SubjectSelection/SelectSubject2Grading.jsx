@@ -1,5 +1,5 @@
 // eslint-disable-next-line no-unused-vars
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import "./SelectSubject2Grading.css";
 import ResponsiveAppBar from "../../AppBar/ButtonAppBar";
 import { Button, Divider, Typography } from "@mui/material";
@@ -9,23 +9,27 @@ import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import { styled } from "@mui/material/styles";
 import SubjectIcon from "@mui/icons-material/Subject";
 import VibrationIcon from "@mui/icons-material/Vibration";
-import ComboBox from "./ComboBox";
 import { PinkPallette } from "../../../assets/pallettes";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { useNavigate } from "react-router";
 import Grid from "@mui/material/Grid";
 import * as XLSX from "xlsx";
-import { useCookies } from "react-cookie";
 import axios from "axios";
-
+// import { DataAcrossPages } from "./asset/";
 export default function SelectSubject2Grading() {
   const navigate = useNavigate();
-  const [cookies, setCookie] = useCookies([]);
   const [CR58, setCR58] = React.useState("");
   const [course, setCourse] = React.useState("");
   const [excelData, setExcelData] = useState([]);
   const [moduleDetail, setModuleDetail] = useState([]);
   const [courseName, setCourseName] = useState([]);
+
+  // const { setData } = useContext(DataAcrossPages);
+
+  const handleClick = () => {
+    // setData("Some data");
+    navigate("/gradeAdjustment");
+  };
 
   const VisuallyHiddenInput = styled("input")({
     clip: "rect(0 0 0 0)",
@@ -72,7 +76,6 @@ export default function SelectSubject2Grading() {
         console.log(nameOfCourse);
       });
       setCourseName(nameOfCourse);
-      console.log(courseName);
     });
   }
 
@@ -132,7 +135,7 @@ export default function SelectSubject2Grading() {
                 >
                   เลือกวิชาที่ต้องการตัดเกรด
                 </Typography>
-                <ComboBox sx={{ marginTop: "15px" }} />
+                {/* <ComboBox sx={{ marginTop: "15px" }} /> */}
                 <Autocomplete
                   disablePortal
                   id="combo-box-demo"
@@ -248,8 +251,8 @@ export default function SelectSubject2Grading() {
                     marginBottom: "60px",
                   }}
                   onClick={() => {
-                    setCookie("CR58", CR58);
-                    navigate("/gradeAdjustment");
+                    // setCookie("CR58", CR58);
+                    handleClick();
                   }}
                 >
                   ต่อไป
@@ -265,10 +268,40 @@ export default function SelectSubject2Grading() {
 
 // eslint-disable-next-line react/prop-types
 function AddMoreModule({ index }) {
+  const [moduleName, setModuleName] = useState([]);
+  function getModules() {
+    axios
+      .get(
+        `http://localhost:8000/api/modules/?year=2566&semester=2&page=1&perPage=10`
+      )
+      .then((response) => {
+        console.log("data in module", response.data.modules);
+        let nameOfModule = [];
+        response.data.modules.map((item) => {
+          let name = item.moduleName;
+          nameOfModule.push(name);
+          console.log(nameOfModule);
+        });
+        setModuleName(nameOfModule);
+        console.log(moduleName);
+      });
+  }
+  useEffect(() => {
+    getModules();
+  }, []);
+
   return (
     <div style={{ display: "flex", flexDirection: "row", marginTop: "10px" }}>
       <Typography sx={{ marginRight: "20px" }}>มอดูลที่ {index}</Typography>
-      <ComboBox sx={{ padding: 0 }} />
+      <Autocomplete
+        disablePortal
+        id="combo-box-demo"
+        options={moduleName}
+        sx={{ width: 300 }}
+        renderInput={(params) => (
+          <TextField {...params} placeholder="ชื่อมอดูล" />
+        )}
+      />
       <Typography sx={{ marginLeft: "20px" }}>คิดเป็น</Typography>
       <TextField
         placeholder="00.00"

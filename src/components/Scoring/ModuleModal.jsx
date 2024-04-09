@@ -7,35 +7,59 @@ import DialogTitle from "@mui/material/DialogTitle";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import dayjs from "dayjs";
 import {
   TextField,
-  Box,
   InputLabel,
   MenuItem,
   FormControl,
   Select,
 } from "@mui/material";
-import axios from "axios";
-import { useCookies } from "react-cookie";
+import dayjs from "dayjs";
 
 export default function ModuleModal({ open, onClose, onSubmit, data, mode }) {
   const [name, setName] = React.useState(
     data?.moduleName ? data?.moduleName : ""
   );
-  const [year, setYear] = React.useState(
-    data?.yearAndSemester ? data?.yearAndSemester : ""
-  );
   const [semester, setSemester] = React.useState(
-    data?.semester ? data?.semester : ""
+    data?.yearAndSemester ? data?.yearAndSemester.split("/")[1] : ""
   );
+  const [year, setYear] = React.useState(
+    data?.yearAndSemester ? data?.yearAndSemester.split("/")[0] : ""
+  );
+  // const [selectedDate, setSelectedDate] = React.useState(
+  //   data?.selectedDate ? data?.selectedDate : ""
+  // );
   const [duration, setDuration] = React.useState(
     data?.duration ? data?.duration : ""
   );
-  const [startDate, setStartDate] = React.useState(null);
-  const [endDate, setEndDate] = React.useState(null);
+  // const [year, setYear] = React.useState("");
+  // const [semester, setSemester] = React.useState("");
+  // const [beforeFormatStartDate, setBeforeFormatStartDate] = React.useState(
+  //   data?.selectedDate ? data?.selectedDate.split("-")[0] : ""
+  // );
+  // const [beforeFormatEndDate, setBeforeFormatEndDate] = React.useState(
+  //   data?.selectedDate ? data?.selectedDate.split("-")[1] : ""
+  // );
+  // const formattedStartDate = dayjs(
+  //   beforeFormatStartDate,
+  //   "DD/MM/YYYY"
+  // ).format();
+  // const formattedEndDate = dayjs(beforeFormatEndDate, "DD/MM/YYYY").format();
+
+  const [beforeFormatStartDate, setBeforeFormatStartDate] = React.useState(
+    data?.selectedDate ? data?.selectedDate.split("-")[0] : ""
+  );
+  const [beforeFormatEndDate, setBeforeFormatEndDate] = React.useState(
+    data?.selectedDate ? data?.selectedDate.split("-")[1] : ""
+  );
+  const formattedStartDate = beforeFormatStartDate
+    ? dayjs(beforeFormatStartDate, "DD/MM/YYYY")
+    : null;
+  const formattedEndDate = beforeFormatEndDate
+    ? dayjs(beforeFormatEndDate, "DD/MM/YYYY")
+    : null;
+
   const [invalidDateError, setInvalidDateError] = React.useState(false);
-  const [cookies, setCookie] = useCookies([]);
 
   let title = "";
   switch (mode) {
@@ -54,35 +78,42 @@ export default function ModuleModal({ open, onClose, onSubmit, data, mode }) {
 
   const handleSubmit = () => {
     // ตรวจสอบว่าวันที่สิ้นสุดมากกว่าหรือเท่ากับวันที่เริ่มต้น
-    if (endDate >= startDate) {
+    if (
+      beforeFormatEndDate &&
+      beforeFormatStartDate &&
+      beforeFormatEndDate.isAfter(beforeFormatStartDate)
+    ) {
       const rowAdded = {
         moduleName: name,
         yearAndSemester: year + "/" + semester,
         duration: duration,
         selectedDate:
-          startDate.format("DD/MM/YYYY") + " - " + endDate.format("DD/MM/YYYY"),
+          beforeFormatStartDate.format("DD/MM/YYYY") +
+          " - " +
+          beforeFormatEndDate.format("DD/MM/YYYY"),
       };
-      setCookie("name", name);
-      setCookie("yaer", year);
-      setCookie("semester", semester);
       onSubmit(rowAdded);
       handleClose();
     } else {
       setInvalidDateError(true);
     }
 
-    const sendModuleDatatoServer = {
-      moduleName: name,
-      startPeriod: startDate.format("DD/MM/YYYY"),
-      endPeriod: endDate.format("DD/MM/YYYY"),
-      hours: duration,
-      year: year,
-      semester: semester.toString(),
-      crsID: "null",
-      instructorID: "null",
-    };
-    axios.post(`http://localhost:8000/api/modules/`, sendModuleDatatoServer);
-    console.log("sendModule2Server", sendModuleDatatoServer);
+    // const sendModuleDatatoServer = {
+    //   moduleName: name,
+    //   startPeriod: beforeFormatStartDate.format("DD/MM/YYYY"),
+    //   endPeriod: beforeFormatEndDate.format("DD/MM/YYYY"),
+    //   hours: duration,
+    //   year: year,
+    //   semester: semester.toString(),
+    //   crsID: "null",
+    //   instructorID: "null",
+    // };
+    // axios
+    //   .post(`http://localhost:8000/api/modules/`, sendModuleDatatoServer)
+    //   .then((res) => {
+    //     console.log(res);
+    //   });
+    // console.log("sendModule2Server", sendModuleDatatoServer);
   };
 
   const handleClose = () => {
@@ -90,8 +121,8 @@ export default function ModuleModal({ open, onClose, onSubmit, data, mode }) {
     setYear("");
     setSemester("");
     setDuration("");
-    setStartDate(null); // เคลียร์ค่า selectedDateString เมื่อปิด Modal
-    setEndDate(null);
+    setBeforeFormatStartDate(null); // เคลียร์ค่า selectedDateString เมื่อปิด Modal
+    setBeforeFormatEndDate(null);
     onClose();
   };
 
@@ -151,14 +182,12 @@ export default function ModuleModal({ open, onClose, onSubmit, data, mode }) {
               slotProps={{
                 textField: {
                   variant: "standard",
-                  // error: !startDate,
-                  // helperText: !startDate ? "โปรดเลือกวันที่เริ่มต้น" : "",
                 },
               }}
-              value={startDate}
+              value={formattedStartDate}
               onChange={(newValue) => {
                 // const formattedDate = dayjs(newValue).format("DD/MM/YYYY");
-                setStartDate(newValue);
+                setBeforeFormatStartDate(newValue);
               }}
             />
           </LocalizationProvider>
@@ -169,14 +198,12 @@ export default function ModuleModal({ open, onClose, onSubmit, data, mode }) {
               slotProps={{
                 textField: {
                   variant: "standard",
-                  // error: !endDate,
-                  // helperText: !endDate ? "โปรดเลือกวันที่สิ้นสุด" : "",
                 },
               }}
-              value={endDate}
+              value={formattedEndDate}
               onChange={(newValue) => {
                 // const formattedDate = dayjs(newValue).format("DD/MM/YYYY");
-                setEndDate(newValue);
+                setBeforeFormatEndDate(newValue);
               }}
             />
           </LocalizationProvider>

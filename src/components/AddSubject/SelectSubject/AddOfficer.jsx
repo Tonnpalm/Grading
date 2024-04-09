@@ -24,7 +24,10 @@ const Example = () => {
   const [addSubjectModalOpen, setAddSubjectModalOpen] = useState(false);
   const [deleteSubjectModalOpen, setDeleteSubjectModalOpen] = useState(false);
   const [editSubjectModalOpen, setEditSubjectModalOpen] = useState(false);
+  const [idForDelete, setIdForDelete] = useState();
+  const [idForEdit, setIdForEdit] = useState();
   const [rowData, setRowData] = useState({});
+
   const navigate = useNavigate();
   const [cookies, setCookie] = useCookies([]);
   const year = cookies["year"];
@@ -55,11 +58,27 @@ const Example = () => {
       });
   }
 
+  function getCourses() {
+    axios.get(`http://localhost:8000/api/courses/`).then((response) => {
+      console.log("data in getCourses", response.data.courses);
+      const updatedCoordinators = response.data.courses.map((course) => {
+        const fullname = course.coordinators.map((item) => {
+          const staffFullName = item.staffName + " " + item.staffSurname;
+          return staffFullName;
+        });
+        return { ...course, joinedCoordinators: fullname.join(" / ") };
+      });
+      setExcelData(updatedCoordinators); // ใช้ updatedCoordinators แทน response.data.courses
+      console.log(updatedCoordinators); // ใช้ updatedCoordinators แทน excelData      console.log(excelData);
+    });
+  }
+
   useEffect(() => {
     getStaffs();
+    getCourses();
   }, []);
 
-  const handleSaveButtonClick = (data) => {
+  const handleSaveButtonClick = (data, state) => {
     console.log("data in handleSaveButtonClick", data);
     // console.log("staffs", staffs);
     // console.log("data with coordinators", data.coordinators);
@@ -70,7 +89,7 @@ const Example = () => {
       // console.log("fullname", staff);
       return staff ? staff.staffID : "ไม่มี";
     });
-    // console.log("staffIDs", staffIDs);
+    console.log("staffIDs", staffIDs);
 
     let semesterValue = "";
     switch (semester) {
@@ -104,13 +123,38 @@ const Example = () => {
         },
       ],
     };
+
+    const coursesData = {
+      crsID: data.crsID,
+      crsName: data.crsName,
+      crsSec: data.crsSec,
+      crsCre: data.crsCre,
+      year: year.toString(),
+      semester: semesterValue,
+      coordinators: { staffID: staffIDs },
+    };
+
     console.log("courseDetail", courseDetail);
 
-    axios
-      .post(`http://localhost:8000/api/courses/many`, courseDetail)
-      .then((res) => {
-        console.log(res);
-      });
+    if (state === "add") {
+      axios
+        .post(`http://localhost:8000/api/courses/many`, courseDetail)
+        .then((res) => {
+          console.log(res);
+        });
+    }
+    if (state === "edit") {
+      axios
+        .put(`http://localhost:8000/api/courses/${idForEdit}`, coursesData)
+        .then((res) => {
+          getCourses();
+          getStaffs();
+          console.log(res);
+        })
+        .catch((error) => {
+          console.log("error kaa", error);
+        });
+    }
   };
 
   const handleAddSubjectModalClose = () => {
@@ -129,21 +173,37 @@ const Example = () => {
       const newDataSet = [...prevState, data];
       return newDataSet;
     });
-    handleSaveButtonClick(data);
+    handleSaveButtonClick(data, "add");
   };
 
   const handleDeleteSubjectModalOpen = () => {
     setDeleteSubjectModalOpen(true);
+    console.log("testDelete");
   };
 
   const handleDeleteSubjectModalClose = () => {
     setDeleteSubjectModalOpen(false);
   };
 
-  const handleDeleteSubjectModalSubmit = (row) => {
-    excelData.splice(row.index, 1); //assuming simple data table
-    setExcelData([...excelData]);
-    handleDeleteSubjectModalClose();
+  const handleDeleteSubjectModalSubmit = () => {
+    axios
+      .delete(`http://localhost:8000/api/courses/${idForDelete}`)
+      .then((response) => {
+        getStaffs();
+        getCourses();
+        handleDeleteSubjectModalClose();
+      })
+      .catch((error) => {
+        console.log("error");
+      });
+    // const updatedData = excelData.filter((rowData) => rowData !== row.original);
+    // setExcelData(updatedData);
+  };
+
+  const handleCheckRowDataForDelete = (row) => {
+    // console.log("row.original._id", row.original._id);
+    setIdForDelete(row.original._id);
+    handleDeleteSubjectModalOpen();
   };
 
   const handleEditSubjectModalOpen = () => {
@@ -165,21 +225,24 @@ const Example = () => {
       const rowIndex = newDataSet.findIndex((row) => row.crsID === data.crsID);
       // หากพบแถวที่ต้องการแก้ไข
       if (rowIndex !== -1) {
-        // ลบแถวเก่าออกจากข้อมูล
-        newDataSet.splice(rowIndex, 1);
-        // เพิ่มแถวใหม่เข้าไปในข้อมูล
-        newDataSet.push(data);
+        // // ลบแถวเก่าออกจากข้อมูล
+        // newDataSet.splice(rowIndex, 1);
+        // // เพิ่มแถวใหม่เข้าไปในข้อมูล
+        // newDataSet.push(data);
+        newDataSet[rowIndex] = newData;
       }
       // ส่งข้อมูลใหม่กลับ
       return newDataSet;
     });
+    console.log("data in edit modal", data);
     // ปิด Modal หลังจากทำการแก้ไขข้อมูลเสร็จสิ้น
     setEditSubjectModalOpen(false);
-    if (rowData) handleSaveButtonClick(data);
+    if (rowData) handleSaveButtonClick(data, "edit");
     else return;
   };
 
-  const handleCheckRowData = () => {
+  const handleCheckRowData = (row) => {
+    setIdForEdit(row.original._id);
     if (rowData) handleEditSubjectModalOpen();
   };
 
@@ -268,7 +331,7 @@ const Example = () => {
             onClick={() => {
               setRowData(row.original);
               console.log("rowData", row.original);
-              handleCheckRowData();
+              handleCheckRowData(row);
               handleEditSubjectModalOpen();
             }}
           >
@@ -276,7 +339,12 @@ const Example = () => {
           </IconButton>
         </Tooltip>
         <Tooltip title="Delete">
-          <IconButton color="error" onClick={handleDeleteSubjectModalOpen}>
+          <IconButton
+            color="error"
+            onClick={() => {
+              handleCheckRowDataForDelete(row);
+            }}
+          >
             <DeleteIcon />
           </IconButton>
         </Tooltip>
@@ -341,13 +409,15 @@ const Example = () => {
           data={rowData}
         />
       )}
-      <ReCheckModal
-        open={deleteSubjectModalOpen}
-        title={"ลบรายวิชา"}
-        detail={"คุณยืนยันที่จะลบวิชานี้ใช่หรือไม่"}
-        onClose={handleDeleteSubjectModalClose}
-        onSubmit={handleDeleteSubjectModalSubmit}
-      />
+      {deleteSubjectModalOpen && (
+        <ReCheckModal
+          open={deleteSubjectModalOpen}
+          title={"ลบรายวิชา"}
+          detail={"คุณยืนยันที่จะลบวิชานี้ใช่หรือไม่"}
+          onClose={handleDeleteSubjectModalClose}
+          onSubmit={handleDeleteSubjectModalSubmit}
+        />
+      )}
       <Button
         component="label"
         variant="contained"
