@@ -85,7 +85,7 @@ function ConfirmAddSubject() {
   return (
     <div>
       <ResponsiveAppBar />
-      <div>
+      <div style={{ paddingBottom: 80 }}>
         <div
           style={{
             display: "flex",
@@ -163,6 +163,9 @@ function ConfirmAddSubject() {
               marginTop: 10,
               color: "white",
               backgroundColor: PinkPallette.main,
+              "&:hover": {
+                backgroundColor: PinkPallette.light,
+              },
               borderRadius: 20,
               width: 200,
             }}

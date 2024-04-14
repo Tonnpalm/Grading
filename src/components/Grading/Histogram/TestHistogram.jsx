@@ -1,6 +1,6 @@
 import * as React from "react";
 import { BarChart } from "@mui/x-charts/BarChart";
-import { Grid, Paper, TextField, Typography } from "@mui/material";
+import { Grid, Paper, TextField, Typography, Button } from "@mui/material";
 import { styled } from "@mui/material/styles";
 // import { DataAcrossPages } from "/Users/pongpipatsrimuang/Desktop/GradingFront/src/App.jsx";
 import {
@@ -10,10 +10,11 @@ import {
   useYScale,
   useXScale,
 } from "@mui/x-charts";
+import { PinkPallette } from "../../../assets/pallettes";
 
 const uData = [
-  74, 65, 78, 80, 81, 82, 82, 82, 84, 52, 98, 98, 73, 90, 78, 48, 78, 83, 2, 55,
-  66, 2, 2, 2, 2, 2, 2,
+  74, 65, 78, 80, 81, 82, 82, 82, 84, 52, 98, 98, 73, 90, 78, 48, 78, 83, 72,
+  55, 66, 92, 87, 87, 93, 66, 62,
 ];
 const lineData = [
   { x: 0, y: 0 },
@@ -88,14 +89,14 @@ function CartesianAxis({ cutoff }) {
   return (
     <React.Fragment>
       {/* {/* <StyledPath d={`M ${left} ${yOrigin} l ${width} 0`} color="primary" /> */}
-      <StyledPath d={`M ${xOrigin} ${top} l 0 ${height}`} color="primary" /> */}
+      {/* <StyledPath d={`M ${xOrigin} ${top} l 0 ${height}`} color="primary" /> */}
       {/* cut off Grade A */}
       <line
         x1={xOrigin + cutOffGradeA * 10}
         y1={top + 40}
         x2={xOrigin + cutOffGradeA * 10}
         y2={top + height}
-        stroke="red"
+        stroke={PinkPallette.main}
       />
       {/* cut off Grade B+ */}
       <line
@@ -103,7 +104,7 @@ function CartesianAxis({ cutoff }) {
         y1={top + 40}
         x2={xOrigin + cutOffGradeBPlus * 10}
         y2={top + height}
-        stroke="red"
+        stroke="blue"
       />
       {/* cut off Grade B */}
       <line
@@ -111,7 +112,7 @@ function CartesianAxis({ cutoff }) {
         y1={top + 40}
         x2={xOrigin + cutOffGradeB * 10}
         y2={top + height}
-        stroke="red"
+        stroke="navy"
       />
       {/* cut off Grade C+ */}
       <line
@@ -119,7 +120,7 @@ function CartesianAxis({ cutoff }) {
         y1={top + 40}
         x2={xOrigin + cutOffGradeCPlus * 10}
         y2={top + height}
-        stroke="red"
+        stroke="green"
       />
       {/* cut off Grade C */}
       <line
@@ -127,7 +128,7 @@ function CartesianAxis({ cutoff }) {
         y1={top + 40}
         x2={xOrigin + cutOffGradeC * 10}
         y2={top + height}
-        stroke="red"
+        stroke="yellow"
       />
       {/* cut off Grade D+ */}
       <line
@@ -135,7 +136,7 @@ function CartesianAxis({ cutoff }) {
         y1={top + 40}
         x2={xOrigin + cutOffGradeDPlus * 10}
         y2={top + height}
-        stroke="red"
+        stroke="orange"
       />
       {/* cut off Grade D */}
       <line
@@ -262,10 +263,10 @@ export default function SimpleBarChart() {
                 />
               </Grid>
               <Grid item xs={3}>
-                <Typography sx={{ paddingTop: "10px" }}>DATA</Typography>
+                <Typography sx={{ paddingTop: "10px" }}>13</Typography>
               </Grid>
               <Grid item xs={3}>
-                <Typography sx={{ paddingTop: "10px" }}>DATA</Typography>
+                <Typography sx={{ paddingTop: "10px" }}>48.15</Typography>
               </Grid>
             </Grid>
 
@@ -287,10 +288,10 @@ export default function SimpleBarChart() {
                 />
               </Grid>
               <Grid item xs={3}>
-                <Typography sx={{ paddingTop: "10px" }}>DATA</Typography>
+                <Typography sx={{ paddingTop: "10px" }}>4</Typography>
               </Grid>
               <Grid item xs={3}>
-                <Typography sx={{ paddingTop: "10px" }}>DATA</Typography>
+                <Typography sx={{ paddingTop: "10px" }}>14.81</Typography>
               </Grid>
             </Grid>
 
@@ -310,10 +311,10 @@ export default function SimpleBarChart() {
                 />
               </Grid>
               <Grid item xs={3}>
-                <Typography sx={{ paddingTop: "10px" }}>DATA</Typography>
+                <Typography sx={{ paddingTop: "10px" }}>3</Typography>
               </Grid>
               <Grid item xs={3}>
-                <Typography sx={{ paddingTop: "10px" }}>DATA</Typography>
+                <Typography sx={{ paddingTop: "10px" }}>11.11</Typography>
               </Grid>
             </Grid>
 
@@ -335,10 +336,10 @@ export default function SimpleBarChart() {
                 />
               </Grid>
               <Grid item xs={3}>
-                <Typography sx={{ paddingTop: "10px" }}>DATA</Typography>
+                <Typography sx={{ paddingTop: "10px" }}>2</Typography>
               </Grid>
               <Grid item xs={3}>
-                <Typography sx={{ paddingTop: "10px" }}>DATA</Typography>
+                <Typography sx={{ paddingTop: "10px" }}>7.41</Typography>
               </Grid>
             </Grid>
 
@@ -358,10 +359,10 @@ export default function SimpleBarChart() {
                 />
               </Grid>
               <Grid item xs={3}>
-                <Typography sx={{ paddingTop: "10px" }}>DATA</Typography>
+                <Typography sx={{ paddingTop: "10px" }}>2</Typography>
               </Grid>
               <Grid item xs={3}>
-                <Typography sx={{ paddingTop: "10px" }}>DATA</Typography>
+                <Typography sx={{ paddingTop: "10px" }}>7.41</Typography>
               </Grid>
             </Grid>
 
@@ -383,10 +384,10 @@ export default function SimpleBarChart() {
                 />
               </Grid>
               <Grid item xs={3}>
-                <Typography sx={{ paddingTop: "10px" }}>DATA</Typography>
+                <Typography sx={{ paddingTop: "10px" }}>0</Typography>
               </Grid>
               <Grid item xs={3}>
-                <Typography sx={{ paddingTop: "10px" }}>DATA</Typography>
+                <Typography sx={{ paddingTop: "10px" }}>0</Typography>
               </Grid>
             </Grid>
 
@@ -406,10 +407,10 @@ export default function SimpleBarChart() {
                 />
               </Grid>
               <Grid item xs={3}>
-                <Typography sx={{ paddingTop: "10px" }}>DATA</Typography>
+                <Typography sx={{ paddingTop: "10px" }}>2</Typography>
               </Grid>
               <Grid item xs={3}>
-                <Typography sx={{ paddingTop: "10px" }}>DATA</Typography>
+                <Typography sx={{ paddingTop: "10px" }}>7.41</Typography>
               </Grid>
             </Grid>
 
@@ -421,10 +422,10 @@ export default function SimpleBarChart() {
                 <Typography sx={{ paddingTop: "10px" }}>00.00</Typography>
               </Grid>
               <Grid item xs={3}>
-                <Typography sx={{ paddingTop: "10px" }}>DATA</Typography>
+                <Typography sx={{ paddingTop: "10px" }}>1</Typography>
               </Grid>
               <Grid item xs={3}>
-                <Typography sx={{ paddingTop: "10px" }}>DATA</Typography>
+                <Typography sx={{ paddingTop: "10px" }}>3.70</Typography>
               </Grid>
             </Grid>
           </Item>
@@ -453,10 +454,10 @@ export default function SimpleBarChart() {
                 <Typography sx={{ paddingTop: "10px" }}>I</Typography>
               </Grid>
               <Grid item xs={4}>
-                <Typography sx={{ paddingTop: "10px" }}>DATA</Typography>
+                <Typography sx={{ paddingTop: "10px" }}>00.00</Typography>
               </Grid>
               <Grid item xs={4}>
-                <Typography sx={{ paddingTop: "10px" }}>DATA</Typography>
+                <Typography sx={{ paddingTop: "10px" }}>00.00</Typography>
               </Grid>
             </Grid>
             <Grid container spacing={2} paddingTop={2}>
@@ -464,10 +465,10 @@ export default function SimpleBarChart() {
                 <Typography sx={{ paddingTop: "10px" }}>M</Typography>
               </Grid>
               <Grid item xs={4}>
-                <Typography sx={{ paddingTop: "10px" }}>DATA</Typography>
+                <Typography sx={{ paddingTop: "10px" }}>00.00</Typography>
               </Grid>
               <Grid item xs={4}>
-                <Typography sx={{ paddingTop: "10px" }}>DATA</Typography>
+                <Typography sx={{ paddingTop: "10px" }}>00.00</Typography>
               </Grid>
             </Grid>
             <Grid container spacing={2} paddingTop={2}>
@@ -475,10 +476,10 @@ export default function SimpleBarChart() {
                 <Typography sx={{ paddingTop: "10px" }}>W</Typography>
               </Grid>
               <Grid item xs={4}>
-                <Typography sx={{ paddingTop: "10px" }}>DATA</Typography>
+                <Typography sx={{ paddingTop: "10px" }}>00.00</Typography>
               </Grid>
               <Grid item xs={4}>
-                <Typography sx={{ paddingTop: "10px" }}>DATA</Typography>
+                <Typography sx={{ paddingTop: "10px" }}>00.00</Typography>
               </Grid>
             </Grid>
             <Grid container spacing={2} paddingTop={2}>
@@ -486,10 +487,10 @@ export default function SimpleBarChart() {
                 <Typography sx={{ paddingTop: "10px" }}>S</Typography>
               </Grid>
               <Grid item xs={4}>
-                <Typography sx={{ paddingTop: "10px" }}>DATA</Typography>
+                <Typography sx={{ paddingTop: "10px" }}>00.00</Typography>
               </Grid>
               <Grid item xs={4}>
-                <Typography sx={{ paddingTop: "10px" }}>DATA</Typography>
+                <Typography sx={{ paddingTop: "10px" }}>00.00</Typography>
               </Grid>
             </Grid>
             <Grid container spacing={2} paddingTop={2}>
@@ -497,10 +498,10 @@ export default function SimpleBarChart() {
                 <Typography sx={{ paddingTop: "10px" }}>U</Typography>
               </Grid>
               <Grid item xs={4}>
-                <Typography sx={{ paddingTop: "10px" }}>DATA</Typography>
+                <Typography sx={{ paddingTop: "10px" }}>00.00</Typography>
               </Grid>
               <Grid item xs={4}>
-                <Typography sx={{ paddingTop: "10px" }}>DATA</Typography>
+                <Typography sx={{ paddingTop: "10px" }}>00.00</Typography>
               </Grid>
             </Grid>
             <Grid container spacing={2} paddingTop={2}>
@@ -508,10 +509,10 @@ export default function SimpleBarChart() {
                 <Typography sx={{ paddingTop: "10px" }}>V</Typography>
               </Grid>
               <Grid item xs={4}>
-                <Typography sx={{ paddingTop: "10px" }}>DATA</Typography>
+                <Typography sx={{ paddingTop: "10px" }}>00.00</Typography>
               </Grid>
               <Grid item xs={4}>
-                <Typography sx={{ paddingTop: "10px" }}>DATA</Typography>
+                <Typography sx={{ paddingTop: "10px" }}>00.00</Typography>
               </Grid>
             </Grid>
             <Grid container spacing={2} paddingTop={2}>
@@ -519,10 +520,10 @@ export default function SimpleBarChart() {
                 <Typography sx={{ paddingTop: "10px" }}>รวม</Typography>
               </Grid>
               <Grid item xs={4}>
-                <Typography sx={{ paddingTop: "10px" }}>DATA</Typography>
+                <Typography sx={{ paddingTop: "10px" }}>27</Typography>
               </Grid>
               <Grid item xs={4}>
-                <Typography sx={{ paddingTop: "10px" }}>DATA</Typography>
+                <Typography sx={{ paddingTop: "10px" }}>100</Typography>
               </Grid>
             </Grid>
             <Grid container spacing={2} paddingTop={2} paddingBottom={1}>
@@ -530,7 +531,7 @@ export default function SimpleBarChart() {
                 <Typography sx={{ paddingTop: "10px" }}>เกรดเฉลี่ย</Typography>
               </Grid>
               <Grid item xs={4}>
-                <Typography sx={{ paddingTop: "10px" }}>DATA</Typography>
+                <Typography sx={{ paddingTop: "10px" }}>3.48</Typography>
               </Grid>
             </Grid>
           </Item>
@@ -542,6 +543,16 @@ export default function SimpleBarChart() {
           <Item>
             <Typography>เวอร์ชัน 2</Typography>
           </Item>
+          <Button
+            variant="contained"
+            color="success"
+            sx={{
+              marginTop: 40,
+              marginLeft: 7,
+            }}
+          >
+            บันทึก
+          </Button>
         </Grid>
       </Grid>
     </div>

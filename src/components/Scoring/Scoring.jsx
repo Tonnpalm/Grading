@@ -4,14 +4,12 @@ import SearchAppBar from "../AppBar/ButtonAppBar";
 import "./Scoring.css";
 import { Button } from "@mui/material";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
-import { useNavigate } from 'react-router-dom';
-// import BasicModal from './Modal'
-import Example from './ModuleTable'
-
+import { useNavigate } from "react-router-dom";
+import { GreenPallette } from "../../assets/pallettes";
+import Example from "./ModuleTable";
 
 function Scoring() {
   const navigate = useNavigate();
-
 
   return (
     <div>
@@ -23,14 +21,16 @@ function Scoring() {
             variant="contained"
             sx={{ backgroundColor: "white", color: "black" }}
             startIcon={<ArrowBackIosIcon />}
-            onClick = { () => {navigate('/')}}
+            onClick={() => {
+              navigate("/");
+            }}
           >
             กลับ
           </Button>
           {/* <BasicModal></BasicModal> */}
         </div>
         <div className="scoring-table-container">
-          <Example/>
+          <Example />
         </div>
       </div>
     </div>

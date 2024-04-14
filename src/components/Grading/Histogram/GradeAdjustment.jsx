@@ -4,13 +4,16 @@ import ResponsiveAppBar from "../../AppBar/ButtonAppBar";
 import SimpleBarChart from "./TestHistogram";
 import ScoreTable from "./ScoreTable";
 import { useContext } from "react";
-import { Typography } from "@mui/material";
-import { useCookies } from "react-cookie";
+import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
+import { Typography, Button } from "@mui/material";
+import { PinkPallette } from "../../../assets/pallettes";
+// import { useCookies } from "react-cookie";
 // import { DataAcrossPages } from "/Users/pongpipatsrimuang/Desktop/GradingFront/src/App.jsx";
 
 export default function GradeAdjustment() {
-  const [cookies, setCookie] = useCookies([]);
-  const course = cookies["course"];
+  // const [cookies, setCookie] = useCookies([]);
+  // const course = cookies["course"];
 
   //   const { data } = useContext(DataAcrossPages);
 
@@ -21,7 +24,6 @@ export default function GradeAdjustment() {
         style={{
           display: "flex",
           flexDirection: "column",
-          alignItems: "center",
         }}
       >
         <div
@@ -46,13 +48,44 @@ export default function GradeAdjustment() {
         </div>
         <div
           style={{
-            width: "80%",
+            paddingLeft: "10%",
+            paddingRight: "10%",
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
           }}
         >
           <ScoreTable />
+        </div>
+        <div
+          style={{
+            paddingLeft: "10%",
+            paddingRight: "10%",
+            marginTop: "30px",
+            display: "flex",
+            justifyContent: "space-between",
+            marginBottom: 40,
+          }}
+        >
+          <Button
+            variant="contained"
+            startIcon={<ArrowBackIosIcon />}
+            sx={{
+              backgroundColor: PinkPallette.main,
+              "&:hover": {
+                backgroundColor: PinkPallette.light,
+              },
+            }}
+          >
+            ย้อนกลับ
+          </Button>
+          <Button
+            variant="contained"
+            color="success"
+            endIcon={<ArrowForwardIosIcon />}
+          >
+            ต่อไป
+          </Button>
         </div>
       </div>
     </div>

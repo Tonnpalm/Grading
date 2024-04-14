@@ -13,14 +13,22 @@ import Select from "@mui/material/Select";
 import ResponsiveAppBar from "../AppBar/ButtonAppBar";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { PinkPallette } from "../../assets/pallettes";
+import ReCheckModal from "../utility/Recheck";
 import { useCookies } from "react-cookie";
 import axios from "axios";
+import { useNavigate } from "react-router";
 
 const ScoringTable = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newColumnName, setNewColumnName] = useState({ name: "", score: "" }); // เพิ่ม state สำหรับเก็บชื่อ column ใหม่
+  const [columnNameToCalulateScore, setColumnNameToCalculateScore] = useState(
+    []
+  );
   const [scoreType, setScoreType] = React.useState("");
   const [excelData, setExcelData] = useState([]);
+  const [deleteColumnModalOpen, setDeleteModuleModalOpen] = useState(false);
+  const [check, setCheck] = useState();
+  const navigate = useNavigate();
   //   const year = cookies["year"];
   //   const semester = cookies["semester"];
   //   const name = cookies["name"];
@@ -39,6 +47,8 @@ const ScoringTable = () => {
       const excelData = XLSX.utils.sheet_to_json(worksheet, { header: 2 });
       console.log(excelData);
       setExcelData(excelData);
+
+      console.log("check", columnNameToCalulateScore);
     };
 
     reader.readAsArrayBuffer(file);
@@ -56,6 +66,10 @@ const ScoringTable = () => {
     }));
   };
 
+  const handleSaveButtonClick = () => {
+    navigate("/");
+  };
+
   function getOldScore() {
     axios
       .get(`http://localhost:8000/api/scores/:moduleObjectID`)
@@ -68,47 +82,54 @@ const ScoringTable = () => {
     getOldScore();
   }, []);
 
-  const handleFileFilteredUpload = (event) => {
-    const file = event.target.files[0];
-    const reader = new FileReader();
+  const handleAddColumn = () => {
+    if (!newColumnName.name.trim() || !newColumnName.score.trim()) return;
 
-    reader.onload = (e) => {
-      const data = new Uint8Array(e.target.result);
-      const workbook = XLSX.read(data, { type: "array" });
-      const firstSheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[firstSheetName];
+    const newAccessorKey = `${newColumnName.name}`;
 
-      // เลือกเฉพาะคอลัมน์ที่ต้องการนำเข้า
-      const columnsToImport = [handleAddColumn.newAccessorKey];
-
-      // แปลงข้อมูลในไฟล์ Excel เป็น JSON
-      const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 2 });
-
-      // หาคอลัมน์ที่ต้องการนำเข้า
-      const headerRow = jsonData[0];
-      const columnIndexMap = {};
-
-      headerRow.forEach((header, index) => {
-        if (columnsToImport.includes(header)) {
-          columnIndexMap[header] = index;
-        }
-      });
-
-      // เก็บข้อมูลที่ต้องการนำเข้า
-      const importedData = jsonData.map((row) => {
-        const importedRow = {};
-        columnsToImport.forEach((columnName) => {
-          const columnIndex = columnIndexMap[columnName];
-          importedRow[columnName] = row[columnIndex];
-        });
-        return importedRow;
-      });
-
-      // ตั้งค่าข้อมูลในตาราง
-      setExcelData(importedData);
+    const newColumn = {
+      accessorKey: newAccessorKey,
+      header: `${newColumnName.name} (${newColumnName.score})`,
+      size: 70,
+      renderColumnActionsMenuItems: ({ closeMenu }) => [
+        <MenuItem
+          key={1}
+          onClick={() => beforeDelete(closeMenu, newAccessorKey)}
+        >
+          ลบส่วนคะแนน
+        </MenuItem>,
+        <MenuItem
+          key={2}
+          onClick={() => {
+            console.log("Item 2 clicked");
+            closeMenu();
+          }}
+        >
+          แก้ไข
+        </MenuItem>,
+      ],
     };
+    setColumns((prevColumns) => [...prevColumns, newColumn]);
+    const newData = excelData.map((row) => ({
+      ...row,
+      [newAccessorKey]: "", // สร้างคอลัมน์ใหม่ในแต่ละแถว
+    }));
 
-    reader.readAsArrayBuffer(file);
+    console.log(columnNameToCalulateScore);
+
+    doingData(newAccessorKey);
+    setExcelData(newData);
+    setIsModalOpen(false);
+    setNewColumnName({ name: "", score: "" });
+    setScoreType("");
+    // collectedDataFromAddColumn(newColumnName, scoreType);
+  };
+
+  const doingData = (newAccessorKey) => {
+    setColumnNameToCalculateScore((prevState) => {
+      console.log("new column name:", newAccessorKey);
+      return [...prevState, newAccessorKey]; // เพิ่มชื่อคอลัมน์ใหม่ลงในรายการ columnNameToCalculateScore
+    });
   };
 
   const [columns, setColumns] = useState([
@@ -141,44 +162,62 @@ const ScoringTable = () => {
       header: "คะแนนรวม",
       enableColumnActions: false,
       size: 70,
-      Cell: ({ row }) => {
-        let fullScore = 0;
-        columns.forEach((column) => {
-          // เช็คว่า accessorKey ของคอลัมน์นั้นๆ เริ่มต้นด้วยชื่อที่เพิ่มเข้ามาใหม่หรือไม่
-          if (column.accessorKey.startsWith(newColumnName.name)) {
-            fullScore += parseFloat(row[column.accessorKey] || 0);
-          }
-        });
-        return fullScore;
-      },
       enableEditing: false,
     },
   ]);
 
   //   console.log(columns.map((item) => item.accessorKey));
 
-  const handleAddColumn = () => {
-    if (!newColumnName.name.trim() || !newColumnName.score.trim()) return;
+  // const collectedDataFromAddColumn = (nameScore, scoreType) => {
+  //   console.log("newData", nameScore, scoreType);
+  //   const scoreData = {
+  //     moduleID: "65d2fbb9a1a6c3f234868427",
+  //     assignments: [
+  //       {
+  //         accessorKey: nameScore.name,
+  //         headerName: nameScore.name,
+  //         nType: scoreType,
+  //         fullScore: nameScore.score,
+  //       },
+  //     ],
+  //     student: [
+  //       {
+  //         sID: "6334458523",
+  //         sName: "ลภัสรดา สิริโชคสวัสดิ์",
+  //         scores: {
+  //           12344: 16,
+  //         },
+  //       },
+  //     ],
+  //   };
+  //   axios.post(`http://localhost:8000/api/scores/`, scoreData).then((res) => {
+  //     console.log("res", res);
+  //   });
+  // };
 
-    const newAccessorKey = `${newColumnName.name}`;
+  const handleDeleteColumnModalOpen = () => {
+    setDeleteModuleModalOpen(true);
+  };
 
-    const newColumn = {
-      accessorKey: newAccessorKey, // ใช้ชื่อ Name เป็นส่วนหลักของ accessorKey
-      header: `${newColumnName.name} (${newColumnName.score})`,
-      size: 70,
-    };
+  const handleDeleteColumnModalClose = () => {
+    setDeleteModuleModalOpen(false);
+  };
 
-    setColumns((prevColumns) => [...prevColumns, newColumn]);
+  const handleDeleteColumnModalSubmit = () => {
+    console.log("ยังไงเนี่ยย", check);
+    setColumns((prevColumns) =>
+      prevColumns.filter((column) => column.accessorKey !== check)
+    );
+    handleDeleteColumnModalClose();
+  };
 
-    const newData = excelData.map((row) => ({
-      ...row,
-      [newAccessorKey]: "", // สร้างคอลัมน์ใหม่ในแต่ละแถว
-    }));
-
-    setExcelData(newData);
-    setIsModalOpen(false);
-    setNewColumnName({ name: "", score: "" }); // ล้างข้อมูลที่กรอกเข้ามาหลังจากเพิ่มเสร็จ
-    setScoreType(""); // ล้างข้อมูลประเภทคะแนนหลังจากเพิ่มเสร็จแล้ว
+  const beforeDelete = (closeMenu, accessorKey) => {
+    console.log("check", accessorKey);
+    // เปิด Modal สำหรับการยืนยันการลบคอลัมน์
+    setCheck(accessorKey);
+    handleDeleteColumnModalOpen();
+    // ปิดเมนู
+    closeMenu();
   };
 
   const table = useMaterialReactTable({
@@ -204,10 +243,15 @@ const ScoringTable = () => {
             component="label"
             variant="contained"
             className="import-style"
-            sx={{ backgroundColor: PinkPallette.main }}
+            sx={{
+              backgroundColor: PinkPallette.main,
+              "&:hover": {
+                backgroundColor: PinkPallette.light,
+              },
+            }}
             startIcon={<CloudUploadIcon />}
           >
-            อัพโหลดไฟล์
+            อัปโหลดไฟล์
             <input
               type="file"
               className="form-control custom-form-control"
@@ -219,7 +263,13 @@ const ScoringTable = () => {
         <Button
           variant="contained"
           onClick={() => setIsModalOpen(true)}
-          sx={{ ml: "auto" }} // ใช้ margin-left: auto เพื่อให้ปุ่มอยู่ทางขวา
+          sx={{
+            ml: "auto",
+            backgroundColor: PinkPallette.main,
+            "&:hover": {
+              backgroundColor: PinkPallette.light,
+            },
+          }}
         >
           เพิ่มคอลัมน์
         </Button>
@@ -227,9 +277,40 @@ const ScoringTable = () => {
     ),
   });
 
+  React.useEffect(() => {
+    setColumns((prevColumns) => {
+      const updatedColumns = [...prevColumns];
+      const totalScoreColumnIndex = updatedColumns.findIndex(
+        (column) => column.accessorKey === "totalScore"
+      );
+      if (totalScoreColumnIndex !== -1) {
+        updatedColumns[totalScoreColumnIndex] = {
+          ...updatedColumns[totalScoreColumnIndex],
+          Cell: ({ row }) => {
+            let fullScore = 0;
+            columnNameToCalulateScore.forEach((columnName) => {
+              fullScore += parseFloat(row.original[columnName] || 0);
+            });
+            return fullScore.toString();
+          },
+        };
+      }
+      return updatedColumns;
+    });
+  }, [columnNameToCalulateScore]);
+
   return (
     <div>
       <ResponsiveAppBar></ResponsiveAppBar>
+      <ReCheckModal
+        open={deleteColumnModalOpen}
+        title={"ลบส่วนคะแนน"}
+        detail={"คุณยืนยันที่จะลบส่วนคะแนนนี้ใช่หรือไม่"}
+        onClose={handleDeleteColumnModalClose}
+        onSubmit={() => {
+          handleDeleteColumnModalSubmit();
+        }}
+      />
       <div
         style={{
           display: "flex",
@@ -242,16 +323,18 @@ const ScoringTable = () => {
             นำเข้าคะแนน
           </Typography>
         </div>
-        <div>
+        <div
+          style={{ paddingLeft: "10%", paddingRight: "10%", marginTop: "30px" }}
+        >
           <Typography>
-            {/* {name} ภาค{semester} ปีการศึกษา {year} */}
+            รายวิชา Chem Porous Mat ภาคปลาย ปีการศึกษา 2566
           </Typography>
         </div>
         <div
           style={{
             display: "flex",
             justifyContent: "center",
-            paddingTop: "50px",
+            paddingTop: "20px",
           }}
         >
           <Modal
@@ -272,28 +355,41 @@ const ScoringTable = () => {
                 p: 4,
               }}
             >
-              <Typography fontSize={20}>เพิ่มส่วนการให้คะแนน</Typography>
+              {/* <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyItems: "center",
+                }}
+              > */}
+              <Typography
+                fontSize={20}
+                sx={{ display: "flex", justifyContent: "center" }}
+              >
+                เพิ่มส่วนการให้คะแนน
+              </Typography>
+              {/* </Box> */}
               <TextField
                 id="name"
                 name="name"
-                label="Name"
+                label="ชื่อส่วนคะแนน"
                 variant="outlined"
                 value={newColumnName.name}
                 onChange={handleModalInputChange}
                 fullWidth
-                mb={2}
+                sx={{ marginTop: 1 }}
               />
               <TextField
                 id="score"
                 name="score"
-                label="Score"
+                label="คะแนนเต็ม"
                 variant="outlined"
                 value={newColumnName.score}
                 onChange={handleModalInputChange}
                 fullWidth
-                mb={2}
+                sx={{ marginTop: 2 }}
               />
-              <FormControl fullWidth>
+              <FormControl fullWidth sx={{ marginTop: 2 }}>
                 <InputLabel id="demo-simple-select-label">ประเภท</InputLabel>
                 <Select
                   labelId="demo-simple-select-label"
@@ -313,15 +409,73 @@ const ScoringTable = () => {
                   <MenuItem value={"skill"}>skill</MenuItem>
                 </Select>
               </FormControl>
-              <Button variant="contained" onClick={handleAddColumn}>
-                บันทึก
-              </Button>
+              <Box sx={{ display: "flex", justifyContent: "center" }}>
+                <Button
+                  variant="contained"
+                  onClick={() => {
+                    setIsModalOpen(false);
+                  }}
+                  sx={{
+                    marginTop: 2,
+                    marginRight: 1,
+                    backgroundColor: PinkPallette.main,
+                    "&:hover": {
+                      backgroundColor: PinkPallette.light,
+                    },
+                  }}
+                >
+                  ยกเลิก
+                </Button>
+                <Button
+                  variant="contained"
+                  onClick={handleAddColumn}
+                  sx={{
+                    marginTop: 2,
+                    marginLeft: 1,
+                    backgroundColor: PinkPallette.main,
+                    "&:hover": {
+                      backgroundColor: PinkPallette.light,
+                    },
+                  }}
+                >
+                  บันทึก
+                </Button>
+              </Box>
             </Box>
           </Modal>
         </div>
         <div style={{ paddingLeft: "10%", paddingRight: "10%" }}>
           <MaterialReactTable table={table} />
         </div>
+      </div>
+      <div
+        style={{
+          paddingRight: "10%",
+          paddingLeft: "10%",
+          marginTop: "30px",
+          display: "flex",
+          justifyContent: "space-between",
+          paddingBottom: 80,
+        }}
+      >
+        <Button
+          variant="contained"
+          color="inherit"
+          onClick={() => {
+            navigate("/scoring");
+          }}
+        >
+          กลับ
+        </Button>
+        <Button
+          variant="contained"
+          color="success"
+          onClick={() => {
+            handleSaveButtonClick();
+          }}
+        >
+          บันทึก
+        </Button>
       </div>
     </div>
   );

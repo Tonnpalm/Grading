@@ -47,17 +47,19 @@ export default function ModuleModal({ open, onClose, onSubmit, data, mode }) {
   // const formattedEndDate = dayjs(beforeFormatEndDate, "DD/MM/YYYY").format();
 
   const [beforeFormatStartDate, setBeforeFormatStartDate] = React.useState(
-    data?.selectedDate ? data?.selectedDate.split("-")[0] : ""
+    data?.selectedDate ? data?.selectedDate.split(" - ")[0] : ""
   );
   const [beforeFormatEndDate, setBeforeFormatEndDate] = React.useState(
-    data?.selectedDate ? data?.selectedDate.split("-")[1] : ""
+    data?.selectedDate ? data?.selectedDate.split(" - ")[1] : ""
   );
+  // console.log("date picker", beforeFormatEndDate);
   const formattedStartDate = beforeFormatStartDate
     ? dayjs(beforeFormatStartDate, "DD/MM/YYYY")
     : null;
   const formattedEndDate = beforeFormatEndDate
     ? dayjs(beforeFormatEndDate, "DD/MM/YYYY")
     : null;
+  // console.log("date picker", formattedEndDate);
 
   const [invalidDateError, setInvalidDateError] = React.useState(false);
 
@@ -67,7 +69,7 @@ export default function ModuleModal({ open, onClose, onSubmit, data, mode }) {
       title = "แก้ไขรายวิชา";
       break;
     case "add":
-      title = "เพิ่มรายวิชา";
+      title = "เพิ่มมอดูล";
       break;
     case "duplicate":
       title = "คัดลอกมอดูล";
@@ -79,41 +81,24 @@ export default function ModuleModal({ open, onClose, onSubmit, data, mode }) {
   const handleSubmit = () => {
     // ตรวจสอบว่าวันที่สิ้นสุดมากกว่าหรือเท่ากับวันที่เริ่มต้น
     if (
-      beforeFormatEndDate &&
-      beforeFormatStartDate &&
-      beforeFormatEndDate.isAfter(beforeFormatStartDate)
+      formattedEndDate &&
+      formattedStartDate &&
+      formattedEndDate.isAfter(formattedStartDate)
     ) {
       const rowAdded = {
         moduleName: name,
         yearAndSemester: year + "/" + semester,
         duration: duration,
         selectedDate:
-          beforeFormatStartDate.format("DD/MM/YYYY") +
+          formattedStartDate.format("DD/MM/YYYY") +
           " - " +
-          beforeFormatEndDate.format("DD/MM/YYYY"),
+          formattedEndDate.format("DD/MM/YYYY"),
       };
       onSubmit(rowAdded);
       handleClose();
     } else {
       setInvalidDateError(true);
     }
-
-    // const sendModuleDatatoServer = {
-    //   moduleName: name,
-    //   startPeriod: beforeFormatStartDate.format("DD/MM/YYYY"),
-    //   endPeriod: beforeFormatEndDate.format("DD/MM/YYYY"),
-    //   hours: duration,
-    //   year: year,
-    //   semester: semester.toString(),
-    //   crsID: "null",
-    //   instructorID: "null",
-    // };
-    // axios
-    //   .post(`http://localhost:8000/api/modules/`, sendModuleDatatoServer)
-    //   .then((res) => {
-    //     console.log(res);
-    //   });
-    // console.log("sendModule2Server", sendModuleDatatoServer);
   };
 
   const handleClose = () => {
@@ -186,7 +171,6 @@ export default function ModuleModal({ open, onClose, onSubmit, data, mode }) {
               }}
               value={formattedStartDate}
               onChange={(newValue) => {
-                // const formattedDate = dayjs(newValue).format("DD/MM/YYYY");
                 setBeforeFormatStartDate(newValue);
               }}
             />
@@ -202,7 +186,6 @@ export default function ModuleModal({ open, onClose, onSubmit, data, mode }) {
               }}
               value={formattedEndDate}
               onChange={(newValue) => {
-                // const formattedDate = dayjs(newValue).format("DD/MM/YYYY");
                 setBeforeFormatEndDate(newValue);
               }}
             />

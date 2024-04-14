@@ -74,9 +74,15 @@ export default function AddSubjectCard() {
                   onChange={handleChange}
                   autoWidth
                 >
-                  <MenuItem value={1}>ภาคต้น</MenuItem>
-                  <MenuItem value={2}>ภาคปลาย</MenuItem>
-                  <MenuItem value={3}>ภาคฤดูร้อน</MenuItem>
+                  <MenuItem value={1} sx={{ width: 249.1 }}>
+                    ภาคต้น
+                  </MenuItem>
+                  <MenuItem value={2} sx={{ width: 249.1 }}>
+                    ภาคปลาย
+                  </MenuItem>
+                  <MenuItem value={3} sx={{ width: 249.1 }}>
+                    ภาคฤดูร้อน
+                  </MenuItem>
                 </Select>
               </FormControl>
             </Grid>
@@ -94,7 +100,14 @@ export default function AddSubjectCard() {
             <Button
               variant="outlined"
               size="large"
-              sx={{ color: "black", borderColor: "black" }}
+              sx={{
+                color: "black",
+                borderColor: "black",
+                "&:hover": {
+                  backgroundColor: "E5E5E5",
+                  borderColor: "black",
+                },
+              }}
               onClick={() => {
                 navigate("/");
               }}
@@ -107,8 +120,10 @@ export default function AddSubjectCard() {
               size="large"
               // color="error"
               sx={{
-                color: "white",
                 backgroundColor: PinkPallette.main,
+                "&:hover": {
+                  backgroundColor: PinkPallette.light,
+                },
               }}
               onClick={() => {
                 setCookie("year", year);

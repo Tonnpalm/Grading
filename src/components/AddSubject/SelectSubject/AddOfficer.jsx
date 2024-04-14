@@ -9,9 +9,9 @@ import "./AddOfficer.css";
 import { styled } from "@mui/material/styles";
 import EditIcon from "@mui/icons-material/Edit";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { Delete as DeleteIcon } from "@mui/icons-material";
 import { PinkPallette } from "../../../assets/pallettes";
-// import { mockStaffName } from "./makeData";
 import { Box, Button, IconButton, Tooltip } from "@mui/material";
 import { useCookies } from "react-cookie";
 import axios from "axios";
@@ -29,7 +29,7 @@ const Example = () => {
   const [rowData, setRowData] = useState({});
 
   const navigate = useNavigate();
-  const [cookies, setCookie] = useCookies([]);
+  const [cookies] = useCookies([]);
   const year = cookies["year"];
   const semester = cookies["semester"];
 
@@ -350,11 +350,17 @@ const Example = () => {
         </Tooltip>
       </Box>
     ),
-    renderBottomToolbarCustomActions: ({ table }) => (
+    renderBottomToolbarCustomActions: () => (
       <Box sx={{ display: "flex", gap: "1rem", alignItems: "center" }}>
         <Button
           variant="text"
-          style={{ textDecoration: "underline", color: PinkPallette.main }}
+          style={{
+            textDecoration: "underline",
+            color: PinkPallette.main,
+            "&:hover": {
+              backgroundColor: PinkPallette.light,
+            },
+          }}
           onClick={() => {
             handleAddSubjectModalOpen();
           }}
@@ -364,10 +370,7 @@ const Example = () => {
         <Button
           color="success"
           variant="contained"
-          // onClick={() => {
-
-          //   navigate("/")
-          // }}
+          endIcon={<ArrowForwardIosIcon />}
           onClick={() => {
             navigate("/confirmAddSubject");
           }}
@@ -422,10 +425,15 @@ const Example = () => {
         component="label"
         variant="contained"
         className="import-style"
-        sx={{ backgroundColor: PinkPallette.main }}
+        sx={{
+          backgroundColor: PinkPallette.main,
+          "&:hover": {
+            backgroundColor: PinkPallette.light,
+          },
+        }}
         startIcon={<CloudUploadIcon />}
       >
-        อัพโหลดไฟล์
+        อัปโหลดไฟล์
         <VisuallyHiddenInput
           type="file"
           className="form-control custom-form-control"

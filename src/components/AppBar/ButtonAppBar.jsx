@@ -9,6 +9,7 @@ import Container from "@mui/material/Container";
 import Avatar from "@mui/material/Avatar";
 import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
+import { PinkPallette } from "../../assets/pallettes";
 // import { useNavigate } from 'react-router-dom';
 
 // import AdbIcon from '@mui/icons-material/Adb';
@@ -44,6 +45,9 @@ function ResponsiveAppBar() {
               letterSpacing: ".3rem",
               color: "inherit",
               textDecoration: "none",
+              "&:hover": {
+                color: PinkPallette.light,
+              },
             }}
           >
             Grading

@@ -2,17 +2,26 @@
 import React, { useState, useEffect, useContext } from "react";
 import "./SelectSubject2Grading.css";
 import ResponsiveAppBar from "../../AppBar/ButtonAppBar";
-import { Button, Divider, Typography } from "@mui/material";
-import TextField from "@mui/material/TextField";
-import Autocomplete from "@mui/material/Autocomplete";
+import {
+  Button,
+  IconButton,
+  Tooltip,
+  Divider,
+  Typography,
+  Paper,
+  TextField,
+  Autocomplete,
+  Grid,
+} from "@mui/material";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { styled } from "@mui/material/styles";
 import SubjectIcon from "@mui/icons-material/Subject";
+import Delete from "@mui/icons-material/Delete";
 import VibrationIcon from "@mui/icons-material/Vibration";
 import { PinkPallette } from "../../../assets/pallettes";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { useNavigate } from "react-router";
-import Grid from "@mui/material/Grid";
 import * as XLSX from "xlsx";
 import axios from "axios";
 // import { DataAcrossPages } from "./asset/";
@@ -22,6 +31,7 @@ export default function SelectSubject2Grading() {
   const [course, setCourse] = React.useState("");
   const [excelData, setExcelData] = useState([]);
   const [moduleDetail, setModuleDetail] = useState([]);
+  const [moduleList, setModuleList] = useState([{}]);
   const [courseName, setCourseName] = useState([]);
 
   // const { setData } = useContext(DataAcrossPages);
@@ -29,6 +39,12 @@ export default function SelectSubject2Grading() {
   const handleClick = () => {
     // setData("Some data");
     navigate("/gradeAdjustment");
+  };
+  const handleDeleteModule = (indexToDelete) => {
+    setModuleList(
+      moduleList?.filter((item, index) => index != indexToDelete - 1)
+    );
+    // console.log("moduleList", indexToDelete);
   };
 
   const VisuallyHiddenInput = styled("input")({
@@ -55,25 +71,20 @@ export default function SelectSubject2Grading() {
   const [count, setCount] = useState(1); // เก็บจำนวน Component
 
   const handleAddComponent = () => {
+    setModuleList((prevState) => {
+      return [...prevState, {}];
+    });
     setCount(count + 1); // เพิ่มจำนวน Component ที่ต้องการแสดง
   };
 
-  // const Item = styled(Paper)(({ theme }) => ({
-  //     backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
-  //     ...theme.typography.body2,
-  //     padding: theme.spacing(1),
-  //     textAlign: 'center',
-  //     color: theme.palette.text.secondary,
-  //   }));
-
   function getCourse() {
     axios.get(`http://localhost:8000/api/courses/`).then((response) => {
-      console.log(response.data);
+      // console.log(response.data);
       let nameOfCourse = [];
       response.data.courses.map((item) => {
         let name = item.crsName;
         nameOfCourse.push(name);
-        console.log(nameOfCourse);
+        // console.log(nameOfCourse);
       });
       setCourseName(nameOfCourse);
     });
@@ -159,10 +170,15 @@ export default function SelectSubject2Grading() {
                   component="label"
                   variant="contained"
                   className="import-style"
-                  sx={{ backgroundColor: PinkPallette.main }}
+                  sx={{
+                    backgroundColor: PinkPallette.main,
+                    "&:hover": {
+                      backgroundColor: PinkPallette.light,
+                    },
+                  }}
                   startIcon={<CloudUploadIcon />}
                 >
-                  Upload file
+                  อัปโหลดไฟล์
                   <VisuallyHiddenInput
                     type="file"
                     className="form-control custom-form-control"
@@ -178,7 +194,7 @@ export default function SelectSubject2Grading() {
                   placeholder="ชื่อไฟล์"
                   variant="outlined"
                   value={fileName}
-                  sx={{ width: "346px", marginLeft: "20px" }}
+                  sx={{ width: "360px", marginLeft: "20px" }}
                 />
                 <Divider
                   sx={{
@@ -204,15 +220,30 @@ export default function SelectSubject2Grading() {
             >
               กำหนดสัดส่วนน้ำหนักมอดูล
             </Typography>
-            {Array.from({ length: count }, (_, index) => (
-              <AddMoreModule key={index} index={index + 1} /> // กำหนด key เพื่อให้ React รู้จักแต่ละ Component และส่งตัวเลขกำกับไปให้ Component
+            {/* {Array.from({ length: count }, (_, index) => (
+              <AddMoreModule
+                key={index}
+                index={index + 1}
+                onDelete={() => handleDeleteModule(index - 1)}
+              /> // กำหนด key เพื่อให้ React รู้จักแต่ละ Component และส่งตัวเลขกำกับไปให้ Component
+            ))} */}
+
+            {moduleList.map((item, index) => (
+              <>
+                <AddMoreModule
+                  key={index}
+                  index={index + 1}
+                  onDelete={handleDeleteModule}
+                />
+              </>
             ))}
             <Button
               onClick={handleAddComponent}
               sx={{
+                fontSize: 16,
                 color: PinkPallette.main,
                 padding: "0px",
-                marginTop: "10px",
+                marginTop: "20px",
               }}
             >
               เพิ่มมอดูล
@@ -245,8 +276,10 @@ export default function SelectSubject2Grading() {
               <div style={{ display: "flex", justifyContent: "flex-end" }}>
                 <Button
                   variant="contained"
+                  color="success"
+                  endIcon={<ArrowForwardIosIcon />}
                   sx={{
-                    backgroundColor: "#BCBCBC",
+                    // backgroundColor: "#BCBCBC",
                     marginTop: "22.5px",
                     marginBottom: "60px",
                   }}
@@ -267,52 +300,121 @@ export default function SelectSubject2Grading() {
 }
 
 // eslint-disable-next-line react/prop-types
-function AddMoreModule({ index }) {
+function AddMoreModule({ index, onDelete }) {
   const [moduleName, setModuleName] = useState([]);
+  const [selectedMouleName, setSelectedModuleName] = useState("");
+  const [portion, setPortion] = useState("");
+
   function getModules() {
     axios
       .get(
         `http://localhost:8000/api/modules/?year=2566&semester=2&page=1&perPage=10`
       )
       .then((response) => {
-        console.log("data in module", response.data.modules);
+        // console.log("data in module", response.data.modules);
         let nameOfModule = [];
         response.data.modules.map((item) => {
           let name = item.moduleName;
           nameOfModule.push(name);
-          console.log(nameOfModule);
+          // console.log(nameOfModule);
         });
         setModuleName(nameOfModule);
-        console.log(moduleName);
+        // console.log(moduleName);
       });
   }
+
   useEffect(() => {
     getModules();
   }, []);
 
+  const Item = styled(Paper)(({ theme }) => ({
+    padding: theme.spacing(1),
+    paddingLeft: theme.spacing(2),
+    width: 1024,
+  }));
+
+  const handleDeleteButtonClick = () => {
+    onDelete(index); // เรียกใช้ฟังก์ชัน handleDeleteModule ที่ถูกส่งมาจาก SelectSubject2Grading
+  };
+
   return (
     <div style={{ display: "flex", flexDirection: "row", marginTop: "10px" }}>
-      <Typography sx={{ marginRight: "20px" }}>มอดูลที่ {index}</Typography>
-      <Autocomplete
-        disablePortal
-        id="combo-box-demo"
-        options={moduleName}
-        sx={{ width: 300 }}
-        renderInput={(params) => (
-          <TextField {...params} placeholder="ชื่อมอดูล" />
-        )}
-      />
-      <Typography sx={{ marginLeft: "20px" }}>คิดเป็น</Typography>
-      <TextField
-        placeholder="00.00"
-        sx={{
-          marginLeft: "20px",
-          width: "85px",
-          display: "flex",
-          justifyContent: "center",
-        }}
-      />
-      <Typography sx={{ marginLeft: "20px" }}>ส่วน</Typography>
+      <Grid container spacing={1}>
+        <Item
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            textAlign: "center",
+            alignContent: "center",
+            marginTop: "10px",
+            flexGrow: 1,
+            maxWidth: 1024,
+          }}
+        >
+          <Grid
+            item
+            lg={8}
+            xs={12}
+            sx={{ display: "flex", flexDirection: "row" }}
+          >
+            <Typography sx={{ width: 90, alignContent: "center" }}>
+              มอดูลที่ {index}
+            </Typography>
+            <Autocomplete
+              disablePortal
+              id="moduleName"
+              value={selectedMouleName}
+              options={moduleName}
+              sx={{ width: 600 }}
+              renderInput={(params) => (
+                <TextField {...params} placeholder="ชื่อมอดูล" />
+              )}
+              onChange={(event, newValue) => {
+                setSelectedModuleName(newValue);
+              }}
+            />
+          </Grid>
+
+          <Grid item sx={{ display: "flex", flexDirection: "row" }}>
+            <Grid
+              item
+              md
+              container
+              direction="row"
+              sx={{ alignContent: "center" }}
+            >
+              <Typography sx={{ width: 90, alignContent: "center" }}>
+                คิดเป็น
+              </Typography>
+              <TextField
+                placeholder="00.00"
+                value={portion}
+                onChange={(event) => {
+                  setPortion(event.target.value);
+                }}
+                sx={{
+                  width: "85px",
+                  display: "flex",
+                  justifyContent: "center",
+                }}
+              />
+              <Typography sx={{ width: 70, alignContent: "center" }}>
+                ส่วน
+              </Typography>
+              <Tooltip title="delete">
+                <IconButton
+                  color="error"
+                  onClick={() => {
+                    handleDeleteButtonClick();
+                  }}
+                >
+                  <Delete />
+                </IconButton>
+              </Tooltip>
+            </Grid>
+          </Grid>
+        </Item>
+      </Grid>
     </div>
   );
 }
