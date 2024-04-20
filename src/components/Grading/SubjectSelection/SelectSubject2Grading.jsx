@@ -1,5 +1,5 @@
-// eslint-disable-next-line no-unused-vars
-import React, { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
+import { DataAcrossPages } from "../../../assets/DataAcrossPages";
 import "./SelectSubject2Grading.css";
 import ResponsiveAppBar from "../../AppBar/ButtonAppBar";
 import {
@@ -24,27 +24,32 @@ import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { useNavigate } from "react-router";
 import * as XLSX from "xlsx";
 import axios from "axios";
-// import { DataAcrossPages } from "./asset/";
+import { useCookies } from "react-cookie";
+
 export default function SelectSubject2Grading() {
   const navigate = useNavigate();
-  const [CR58, setCR58] = React.useState("");
-  const [course, setCourse] = React.useState("");
   const [excelData, setExcelData] = useState([]);
-  const [moduleDetail, setModuleDetail] = useState([]);
   const [moduleList, setModuleList] = useState([{}]);
-  const [courseName, setCourseName] = useState([]);
+  const [courseNameAndID, setCourseNameAndID] = useState([]);
+  const [minimumPortion, setMinimumPortion] = useState("");
+  const [idFromSelectedSubject, setIdFromSelectedSubject] = useState("");
+  const [packedDataList, setPackedDataList] = useState([]);
+  const [cookies] = useCookies([]);
+  const year = cookies["year"];
+  const semester = cookies["semester"];
+  const { setData } = useContext(DataAcrossPages);
 
-  // const { setData } = useContext(DataAcrossPages);
-
-  const handleClick = () => {
-    // setData("Some data");
+  const handleClick = (excelData) => {
+    console.log("data in packed", packedDataList);
+    const mergedPackedData = [...packedDataList, excelData, minimumPortion];
+    setData(mergedPackedData);
+    console.log("moduleList", mergedPackedData);
     navigate("/gradeAdjustment");
   };
   const handleDeleteModule = (indexToDelete) => {
     setModuleList(
       moduleList?.filter((item, index) => index != indexToDelete - 1)
     );
-    // console.log("moduleList", indexToDelete);
   };
 
   const VisuallyHiddenInput = styled("input")({
@@ -68,25 +73,35 @@ export default function SelectSubject2Grading() {
     }
   };
 
-  const [count, setCount] = useState(1); // เก็บจำนวน Component
+  const [count, setCount] = useState(0); // เก็บจำนวน Component
 
   const handleAddComponent = () => {
     setModuleList((prevState) => {
       return [...prevState, {}];
     });
     setCount(count + 1); // เพิ่มจำนวน Component ที่ต้องการแสดง
+    // เพิ่มข้อมูลเปล่าๆ เพื่อรอการกรอกจากผู้ใช้
+    setPackedDataList((prevState) => [...prevState, ["", "", "", ""]]);
+  };
+
+  const handlePackedDataChange = (index, newData) => {
+    setPackedDataList((prevState) => {
+      const updatedDataList = [...prevState];
+      updatedDataList[index] = newData;
+      return updatedDataList;
+    });
   };
 
   function getCourse() {
     axios.get(`http://localhost:8000/api/courses/`).then((response) => {
-      // console.log(response.data);
-      let nameOfCourse = [];
-      response.data.courses.map((item) => {
-        let name = item.crsName;
-        nameOfCourse.push(name);
-        // console.log(nameOfCourse);
+      let courseNameAndID = [];
+      response.data.courses.map((names) => {
+        let name = names.crsName;
+        let ID = names._id;
+        courseNameAndID.push({ crsName: name, crsID: ID });
       });
-      setCourseName(nameOfCourse);
+      console.log(courseNameAndID);
+      setCourseNameAndID(courseNameAndID);
     });
   }
 
@@ -125,7 +140,7 @@ export default function SelectSubject2Grading() {
           กลับ
         </Button>
         <Typography sx={{ marginTop: "20px" }}>
-          การประเมิมผลการศึกษาภาคปลาย ปีการศึกษา 2566
+          การประเมิมผลการศึกษา{semester} ปีการศึกษา {year}
         </Typography>
         <div
           style={{ display: "flex", flexDirection: "row", marginTop: "50px" }}
@@ -150,11 +165,22 @@ export default function SelectSubject2Grading() {
                 <Autocomplete
                   disablePortal
                   id="combo-box-demo"
-                  options={courseName}
+                  options={courseNameAndID.map((names) => {
+                    return names.crsName;
+                  })}
                   sx={{ width: 510 }}
                   renderInput={(params) => (
                     <TextField {...params} placeholder="ค้นหารหัส/ชื่อวิชา" />
                   )}
+                  onChange={(event, newValue) => {
+                    const selectedCourse = courseNameAndID.find(
+                      (course) => course.crsName === newValue
+                    );
+                    const selectedCrsID = selectedCourse
+                      ? selectedCourse.crsID
+                      : "";
+                    setIdFromSelectedSubject(selectedCrsID); // ตั้งค่า crsID ให้กับ state ใน SelectSubject2Grading
+                  }}
                 />
                 <Typography
                   sx={{
@@ -183,9 +209,9 @@ export default function SelectSubject2Grading() {
                     type="file"
                     className="form-control custom-form-control"
                     onChange={(event) => {
+                      console.log("data", moduleList);
                       handleFileChange(event);
                       handleFileUpload(event);
-                      setCR58(event.target.file);
                     }}
                   />
                 </Button>
@@ -220,22 +246,18 @@ export default function SelectSubject2Grading() {
             >
               กำหนดสัดส่วนน้ำหนักมอดูล
             </Typography>
-            {/* {Array.from({ length: count }, (_, index) => (
+            {moduleList.map((item, index) => (
               <AddMoreModule
                 key={index}
                 index={index + 1}
-                onDelete={() => handleDeleteModule(index - 1)}
-              /> // กำหนด key เพื่อให้ React รู้จักแต่ละ Component และส่งตัวเลขกำกับไปให้ Component
-            ))} */}
-
-            {moduleList.map((item, index) => (
-              <>
-                <AddMoreModule
-                  key={index}
-                  index={index + 1}
-                  onDelete={handleDeleteModule}
-                />
-              </>
+                onDelete={handleDeleteModule}
+                crsID={idFromSelectedSubject} // ส่งค่า crsID ไปยัง AddMoreModule
+                year={year}
+                semester={semester}
+                onPackedDataChange={(newData) =>
+                  handlePackedDataChange(index, newData)
+                }
+              />
             ))}
             <Button
               onClick={handleAddComponent}
@@ -262,6 +284,10 @@ export default function SelectSubject2Grading() {
                 </Typography>
                 <TextField
                   placeholder="00.00"
+                  value={minimumPortion}
+                  onChange={(event) => {
+                    setMinimumPortion(event.target.value);
+                  }}
                   sx={{
                     width: "85px",
                     marginTop: "15px",
@@ -285,7 +311,7 @@ export default function SelectSubject2Grading() {
                   }}
                   onClick={() => {
                     // setCookie("CR58", CR58);
-                    handleClick();
+                    handleClick(excelData);
                   }}
                 >
                   ต่อไป
@@ -299,27 +325,47 @@ export default function SelectSubject2Grading() {
   );
 }
 
-// eslint-disable-next-line react/prop-types
-function AddMoreModule({ index, onDelete }) {
-  const [moduleName, setModuleName] = useState([]);
-  const [selectedMouleName, setSelectedModuleName] = useState("");
-  const [portion, setPortion] = useState("");
+function AddMoreModule({
+  index,
+  onDelete,
+  crsID,
+  year,
+  semester,
+  onPackedDataChange,
+}) {
+  const [moduleNameAndID, setModuleNameAndID] = useState([]);
+  const [selectedModuleName, setSelectedModuleName] = useState("");
+  const [packedData, setPackedData] = useState([]);
+  const [selectedModulePortion, setSelectedModulePortion] = useState("");
+  const [selectedModuleID, setSelectedModuleID] = useState("");
 
   function getModules() {
+    let semesterValue = "";
+    switch (semester) {
+      case "ภาคต้น":
+        semesterValue = "1";
+        break;
+      case "ภาคปลาย":
+        semesterValue = "2";
+        break;
+      case "ภาคฤดูร้อน":
+        semesterValue = "3";
+        break;
+      default:
+        semesterValue = "0";
+    }
     axios
       .get(
-        `http://localhost:8000/api/modules/?year=2566&semester=2&page=1&perPage=10`
+        `http://localhost:8000/api/modules/?year=${year}&semester=${semesterValue}`
       )
       .then((response) => {
-        // console.log("data in module", response.data.modules);
-        let nameOfModule = [];
+        let moduleNameAndID = [];
         response.data.modules.map((item) => {
           let name = item.moduleName;
-          nameOfModule.push(name);
-          // console.log(nameOfModule);
+          let id = item._id;
+          moduleNameAndID.push({ moduleName: name, moduleID: id });
         });
-        setModuleName(nameOfModule);
-        // console.log(moduleName);
+        setModuleNameAndID(moduleNameAndID);
       });
   }
 
@@ -335,6 +381,10 @@ function AddMoreModule({ index, onDelete }) {
 
   const handleDeleteButtonClick = () => {
     onDelete(index); // เรียกใช้ฟังก์ชัน handleDeleteModule ที่ถูกส่งมาจาก SelectSubject2Grading
+  };
+
+  const handlePackedDataChangeLocal = (newData) => {
+    onPackedDataChange(newData); // เรียกใช้ฟังก์ชันจาก props เพื่ออัปเดตข้อมูลใน packedDataList ใน SelectSubject2Grading
   };
 
   return (
@@ -363,14 +413,28 @@ function AddMoreModule({ index, onDelete }) {
             <Autocomplete
               disablePortal
               id="moduleName"
-              value={selectedMouleName}
-              options={moduleName}
+              value={selectedModuleName === "" ? null : selectedModuleName}
+              options={moduleNameAndID.map((name) => {
+                return name.moduleName;
+              })}
               sx={{ width: 600 }}
               renderInput={(params) => (
                 <TextField {...params} placeholder="ชื่อมอดูล" />
               )}
               onChange={(event, newValue) => {
                 setSelectedModuleName(newValue);
+                const selectedModule = moduleNameAndID.find(
+                  (module) => module.moduleName === newValue
+                );
+                setSelectedModuleID(
+                  selectedModule ? selectedModule.moduleID : ""
+                );
+                handlePackedDataChangeLocal({
+                  crsID: crsID,
+                  moduleName: newValue,
+                  moduleID: selectedModule ? selectedModule.moduleID : "",
+                  portion: selectedModulePortion,
+                });
               }}
             />
           </Grid>
@@ -388,16 +452,23 @@ function AddMoreModule({ index, onDelete }) {
               </Typography>
               <TextField
                 placeholder="00.00"
-                value={portion}
+                value={selectedModulePortion}
                 onChange={(event) => {
-                  setPortion(event.target.value);
+                  const newValue = event.target.value;
+                  setSelectedModulePortion(newValue);
+                  handlePackedDataChangeLocal({
+                    crsID: crsID,
+                    moduleName: selectedModuleName,
+                    moduleID: selectedModuleID,
+                    portion: newValue,
+                  });
                 }}
                 sx={{
                   width: "85px",
                   display: "flex",
                   justifyContent: "center",
                 }}
-              />
+              />{" "}
               <Typography sx={{ width: 70, alignContent: "center" }}>
                 ส่วน
               </Typography>

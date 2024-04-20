@@ -1,8 +1,13 @@
 import * as React from "react";
 import { BarChart } from "@mui/x-charts/BarChart";
 import { Grid, Paper, TextField, Typography, Button } from "@mui/material";
+import {
+  MaterialReactTable,
+  useMaterialReactTable,
+} from "material-react-table";
 import { styled } from "@mui/material/styles";
-// import { DataAcrossPages } from "/Users/pongpipatsrimuang/Desktop/GradingFront/src/App.jsx";
+import { MenuItem } from "@mui/material";
+import { DataAcrossPages } from "../../../assets/DataAcrossPages";
 import {
   ResponsiveChartContainer,
   LinePlot,
@@ -10,6 +15,8 @@ import {
   useYScale,
   useXScale,
 } from "@mui/x-charts";
+import Modal from "./Modal";
+import axios from "axios";
 import { PinkPallette } from "../../../assets/pallettes";
 
 const uData = [
@@ -158,7 +165,7 @@ function CartesianAxis({ cutoff }) {
   );
 }
 
-export default function SimpleBarChart() {
+export default function Grading() {
   const [cutOffGradeA, setCutOffGradeA] = React.useState(80); // ค่าเริ่มต้นของ cut-off grade A
   const [cutOffGradeBPlus, setCutOffGradeBPlus] = React.useState(75); // ค่าเริ่มต้นของ cut-off grade B+
   const [cutOffGradeB, setCutOffGradeB] = React.useState(70); // ค่าเริ่มต้นของ cut-off grade B
@@ -173,6 +180,103 @@ export default function SimpleBarChart() {
   //   setCutOffValue(event.target.value);
   //   console.log("Cut-off value:", event.target.value);
   // };
+
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const { data } = React.useContext(DataAcrossPages);
+  const [columns, setColumns] = React.useState([]);
+  const [checkCR58, setCheckCR58] = React.useState();
+
+  function getAllScores() {
+    axios.get(`http://localhost:8000/api/scores/`).then((res) => {
+      console.log("data from api", res.data);
+    });
+  }
+
+  React.useEffect(() => {
+    console.log("ข้อมูลจากหน้าเลือกความต้องการ", data[data.length - 2]);
+    getAllScores();
+    if (!data) return;
+
+    // สร้าง formattedData โดยจัดรูปแบบข้อมูลก่อนส่งเข้าในตาราง
+    const formatted = data[data.length - 2];
+    console.log("formatted", formatted);
+
+    setCheckCR58(formatted);
+    console.log("cr58", checkCR58);
+
+    // สร้าง columns ที่มีหัวตารางเป็นชื่อ moduleName
+    const uniqueModuleNames = data
+      .slice(0, data.length - 2)
+      .map((item) => item.moduleName);
+    const moduleNameColumns = uniqueModuleNames.map((moduleName, index) => ({
+      accessorKey: `moduleName_${index}`,
+      header: moduleName,
+      enableSorting: false,
+      enableColumnActions: true,
+      renderColumnActionsMenuItems: ({ closeMenu }) => (
+        <MenuItem
+          key={1}
+          onClick={() => {
+            handleHeaderClick();
+            closeMenu();
+          }}
+        >
+          ดูคะแนน
+        </MenuItem>
+      ),
+    }));
+
+    setColumns([
+      {
+        accessorKey: "rowNumbers",
+        header: "ลำดับ",
+        size: 70,
+        Cell: ({ row }) => row.index + 1,
+        enableColumnPinning: true,
+        enableSorting: false,
+        enableColumnActions: false,
+      },
+      {
+        accessorKey: "studentName",
+        header: "ชื่อ-นามสกุล",
+        enableSorting: true,
+        enableColumnActions: false,
+      },
+      {
+        accessorKey: "SID",
+        header: "รหัสนิสิต",
+        size: 120,
+        disableSortBy: true,
+        enableColumnActions: false,
+      },
+      ...moduleNameColumns, // เพิ่ม columns ที่สร้างจาก moduleName ที่ได้จาก data
+      {
+        accessorKey: "studentGrade",
+        header: "เกรด",
+        size: 120,
+        enableColumnActions: false,
+        muiTableBodyCellProps: {
+          align: "center",
+        },
+      },
+    ]);
+  }, [data]);
+
+  const handleHeaderClick = () => {
+    setIsModalOpen(true);
+  };
+
+  const table = useMaterialReactTable({
+    columns,
+    data: data[data.length - 2],
+    enableColumnPinning: true,
+    initialState: {
+      columnPinning: {
+        left: ["rowNumbers", "SID", "studentName"],
+        right: ["studentGrade"],
+      },
+    },
+  });
 
   return (
     <div>
@@ -419,7 +523,7 @@ export default function SimpleBarChart() {
                 <Typography sx={{ paddingTop: "10px" }}>F</Typography>
               </Grid>
               <Grid item xs={4}>
-                <Typography sx={{ paddingTop: "10px" }}>00.00</Typography>
+                <Typography sx={{ paddingTop: "10px" }}>{"<"}50.00</Typography>
               </Grid>
               <Grid item xs={3}>
                 <Typography sx={{ paddingTop: "10px" }}>1</Typography>
@@ -555,6 +659,10 @@ export default function SimpleBarChart() {
           </Button>
         </Grid>
       </Grid>
+      <div>
+        <MaterialReactTable table={table} />
+        {isModalOpen && <Modal onClose={() => setIsModalOpen(false)} />}
+      </div>
     </div>
   );
 }

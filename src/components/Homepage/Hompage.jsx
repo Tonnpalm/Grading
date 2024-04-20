@@ -1,5 +1,5 @@
 // eslint-disable-next-line no-unused-vars
-import React from "react";
+import React, { useContext } from "react";
 import "./HomepageC.css";
 import ResponsiveAppBar from "../AppBar/ButtonAppBar";
 import Card from "@mui/material/Card";
@@ -12,9 +12,11 @@ import BeenhereIcon from "@mui/icons-material/Beenhere";
 import AddToPhotosIcon from "@mui/icons-material/AddToPhotos";
 import { PinkPallette } from "../../assets/pallettes";
 import { useNavigate } from "react-router-dom";
+import { DataAcrossPages } from "../../assets/DataAcrossPages";
 
 function Homepage() {
   const navigate = useNavigate();
+  const { setData } = useContext(DataAcrossPages);
   return (
     <div>
       <ResponsiveAppBar />
@@ -91,6 +93,7 @@ function Homepage() {
             <CardActionArea
               sx={{ p: 3, paddingRight: 7, paddingLeft: 7 }}
               onClick={() => {
+                setData("65f90efa4ef7a70f80525050");
                 navigate("/scoring");
               }}
             >
@@ -120,7 +123,7 @@ function Homepage() {
                 "&:hover": { backgroundColor: PinkPallette.light },
               }}
               onClick={() => {
-                navigate("/selectSubject2grading");
+                navigate("/yearAndSemester");
               }}
             >
               <CardContent sx={{ color: "white", width: "155" }}>

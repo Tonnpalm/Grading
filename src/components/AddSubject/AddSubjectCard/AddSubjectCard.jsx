@@ -1,4 +1,5 @@
 import * as React from "react";
+import toast, { Toaster } from "react-hot-toast";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
@@ -20,7 +21,22 @@ export default function AddSubjectCard() {
   const navigate = useNavigate();
   const [year, setYear] = React.useState("");
   const [semester, setSemester] = React.useState("");
-
+  const numOnly = () =>
+    toast.error("กรุณากรอกตัวเลขเท่านั้น", {
+      style: {
+        borderRadius: "10px",
+        background: "red",
+        color: "#fff",
+      },
+    });
+  const yearOnly = () =>
+    toast.error("กรุณากรอกเป็นปี ค.ศ.", {
+      style: {
+        borderRadius: "10px",
+        background: "red",
+        color: "#fff",
+      },
+    });
   const [cookies, setCookie] = useCookies([]);
 
   const handleChange = (event) => {
@@ -56,6 +72,7 @@ export default function AddSubjectCard() {
             </Grid>
             <Grid item xs={8}>
               <TextField
+                placeholder="กรุณากรอกเป็น ค.ศ. เช่น 2024"
                 value={year}
                 onChange={(event) => {
                   setYear(event.target.value);
@@ -68,8 +85,7 @@ export default function AddSubjectCard() {
             <Grid item xs={8}>
               <FormControl sx={{ width: 249.1 }}>
                 <Select
-                  labelId="demo-simple-select-autowidth-label"
-                  id="demo-simple-select-autowidth"
+                  placeholder="กรุณาเลือกภาคการศึกษา"
                   value={semester}
                   onChange={handleChange}
                   autoWidth
@@ -126,27 +142,60 @@ export default function AddSubjectCard() {
                 },
               }}
               onClick={() => {
-                setCookie("year", year);
-                let semesterValue;
-                switch (semester) {
-                  case 1:
-                    semesterValue = "ภาคต้น";
-                    break;
-                  case 2:
-                    semesterValue = "ภาคปลาย";
-                    break;
-                  case 3:
-                    semesterValue = "ภาคฤดูร้อน";
-                    break;
-                  default:
-                    semesterValue = 0;
+                // ตรวจสอบว่าเป็นตัวเลขจริง ๆ
+                const isNumericYear = /^\d+$/.test(year);
+                if (!isNumericYear) {
+                  numOnly();
+                  return;
                 }
-                setCookie("semester", semesterValue);
-                navigate("/selectSubject");
+
+                // ตรวจสอบว่าไม่เกินปีปัจจุบัน
+                const currentYear = new Date().getFullYear().toString();
+                if (
+                  year.length !== 4 ||
+                  parseInt(year) > parseInt(currentYear)
+                ) {
+                  toast.error("กรุณากรอกปี ค.ศ. ปัจจุบัน", {
+                    style: {
+                      borderRadius: "10px",
+                      background: "red",
+                      color: "#fff",
+                    },
+                  });
+                  return;
+                }
+
+                if (year && semester) {
+                  setCookie("year", year);
+                  let semesterValue;
+                  switch (semester) {
+                    case 1:
+                      semesterValue = "ภาคต้น";
+                      break;
+                    case 2:
+                      semesterValue = "ภาคปลาย";
+                      break;
+                    case 3:
+                      semesterValue = "ภาคฤดูร้อน";
+                      break;
+                    default:
+                      semesterValue = "";
+                  }
+                  if (semesterValue) {
+                    setCookie("semester", semesterValue);
+                    navigate("/selectSubject");
+                  } else {
+                    toast.error("กรุณาเลือกภาคการศึกษา");
+                  }
+                } else {
+                  toast.error("กรุณากรอกข้อมูลให้ครบทุกช่อง");
+                }
               }}
+              disabled={!year || !semester}
             >
               ตกลง
             </Button>
+            <Toaster />
           </Box>
         </CardActions>
       </Card>

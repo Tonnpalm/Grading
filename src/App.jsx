@@ -11,6 +11,8 @@ import SelectSubject2Grading from "./components/Grading/SubjectSelection/SelectS
 import GradeAdjustment from "./components/Grading/Histogram/GradeAdjustment";
 import ScoringTable from "./components/Scoring/ScoringTable";
 import ConfirmAddSubject from "./components/AddSubject/ConfirmAddSubject/ConfirmAddSubject";
+import ConfirmScore from "./components/Grading/ConfirmScore/ConfirmScore";
+import YearAndSemester from "./components/Grading/SubjectSelection/YearAndSemester";
 import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
 import { ThemeProvider, createTheme } from "@mui/material";
 import "./App.css";
@@ -40,6 +42,8 @@ function App() {
           <Route path="gradeAdjustment" element={<GradeAdjustment />} />
           <Route path="scoringTable" element={<ScoringTable />} />
           <Route path="confirmAddSubject" element={<ConfirmAddSubject />} />
+          <Route path="confirmScore" element={<ConfirmScore />} />
+          <Route path="yearAndSemester" element={<YearAndSemester />} />
         </Routes>
       </ThemeProvider>
     </MyProvider>

@@ -1,16 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useContext } from "react";
 import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import {
-  Box,
-  Button,
-  // IconButton,
-  // Tooltip,
-  Typography,
-  duration,
-} from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import "./ModuleTable.css";
 import { Edit } from "@mui/icons-material";
 import { MenuItem } from "@mui/material";
@@ -23,6 +16,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import ModuleModal from "./ModuleModal";
 import ReCheckModal from "../utility/Recheck";
+import { DataAcrossPages } from "../../assets/DataAcrossPages.jsx";
 
 const Example = () => {
   const navigate = useNavigate();
@@ -36,31 +30,28 @@ const Example = () => {
   const [idForDelete, setIdForDelete] = useState();
   const [rowDataToDuplicate, setRowDataToDuplicate] = useState();
   const [rowData, setRowData] = useState({});
+  const { data } = useContext(DataAcrossPages);
+  const { setData } = useContext(DataAcrossPages);
 
-  function getModules() {
-    axios
-      .get(
-        `http://localhost:8000/api/modules/?year=2566&semester=2&page=1&perPage=10`
-      )
-      .then((res) => {
-        console.log("res.data", res.data);
-        const pushDataToModuleDetail = res.data.modules.map((item) => {
-          // console.log("item", item);
-          const date = item.startPeriod + " - " + item.endPeriod;
-          const term = item.year + "/" + item.semester;
-          return {
-            ...item,
-            selectedDate: date,
-            yearAndSemester: term,
-            duration: item.hours,
-          };
-        });
-        setModuleDetail(pushDataToModuleDetail);
+  function getModuleID() {
+    axios.get(`http://localhost:8000/api/modules/${data}`).then((res) => {
+      console.log("res.data", res.data);
+      const pushDataToModuleDetail = res.data.moduleID.map((item) => {
+        const date = item.startPeriod + " - " + item.endPeriod;
+        const term = item.year + "/" + item.semester;
+        return {
+          ...item,
+          selectedDate: date,
+          yearAndSemester: term,
+          duration: item.hours,
+        };
       });
+      setModuleDetail(pushDataToModuleDetail);
+    });
   }
 
   useEffect(() => {
-    getModules();
+    getModuleID();
   }, []);
 
   const handleAddModuleModalOpen = () => {
@@ -109,7 +100,7 @@ const Example = () => {
   };
 
   const handleCheckRowData = (row) => {
-    // console.log("row.original.", row.original);
+    console.log("row.original.", row.original);
     setIdForEdit(row.original._id);
     if (rowData) handleEditModuleModalOpen();
   };
@@ -125,12 +116,14 @@ const Example = () => {
       moduleName: data.moduleName,
       startPeriod: startDate,
       endPeriod: endDate,
-      hours: data.hours,
+      hours: data.duration,
       year: year,
       semester: semester,
-      crsID: "6601138a5a0240478a1e078d",
+      crsID: null,
       instructorID: "65f90efa4ef7a70f80525050",
     };
+
+    console.log("editDataSendToServer", editDataSendToServer);
     axios
       .put(
         `http://localhost:8000/api/modules/${idForEdit}`,
@@ -227,8 +220,8 @@ const Example = () => {
       hours: newRow.duration,
       year: year,
       semester: semester,
-      crsID: "6601138a5a0240478a1e078d",
-      instructorID: "65f90efa4ef7a70f80525050",
+      crsID: newRow.crsIDd,
+      instructorID: newRow.instructorID._id,
     };
     axios
       .post(`http://localhost:8000/api/modules/`, duplicateDataSendToServer)
@@ -241,6 +234,11 @@ const Example = () => {
     handleDuplicateModuleModalOpen(row);
     setRowDataToDuplicate(row);
     console.log("row.orginal", row);
+  };
+
+  const handleScoringClick = (row) => {
+    setData(row);
+    navigate("/scoringTable");
   };
 
   const columns = useMemo(
@@ -319,7 +317,11 @@ const Example = () => {
 
         <MenuItem
           key="scoring"
-          onClick={() => navigate("/scoringTable")}
+          // onClick={() => navigate("/scoringTable")}
+          onClick={() => {
+            console.log("row.ori", row.original);
+            handleScoringClick(row.original);
+          }}
           sx={{ display: "flex", flexDirection: "row", gap: "1rem" }}
         >
           <ChecklistIcon />

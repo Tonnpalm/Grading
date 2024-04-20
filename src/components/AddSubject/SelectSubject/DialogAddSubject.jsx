@@ -1,4 +1,5 @@
 import * as React from "react";
+import toast, { Toaster } from "react-hot-toast";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
@@ -22,12 +23,18 @@ export default function ModalForAddSubject({
     data?.crsSec ? data?.crsSec : ""
   );
   const [credit, setCredit] = React.useState(data?.crsCre ? data?.crsCre : "");
-  // const [coordinators, setCoordinators] = React.useState(
-  //   data?.coordinators ? data?.coordinators : []
-  // );
   const [coordinators, setCoordinators] = React.useState(
     data?.joinedCoordinators ? data?.joinedCoordinators.split(" / ") : []
   );
+  const fillTheBlank = () =>
+    toast.error("กรุณากรอกข้อมูล", {
+      style: {
+        borderRadius: "10px",
+        background: "red",
+        color: "#fff",
+      },
+    });
+
   let title = "";
   switch (mode) {
     case "edit":
@@ -49,6 +56,18 @@ export default function ModalForAddSubject({
   }, []);
 
   const handleSubmit = () => {
+    // ตรวจสอบว่าข้อมูลครบทุกช่องหรือไม่
+    if (
+      !id ||
+      !subjectName ||
+      !section ||
+      !credit ||
+      coordinators.length === 0
+    ) {
+      fillTheBlank();
+      return;
+    }
+
     const rowAdded = {
       crsID: id,
       crsName: subjectName,
@@ -130,6 +149,7 @@ export default function ModalForAddSubject({
           ตกลง
         </Button>
       </DialogActions>
+      <Toaster />
     </Dialog>
   );
 }

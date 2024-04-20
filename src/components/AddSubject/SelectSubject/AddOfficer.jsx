@@ -37,7 +37,6 @@ const Example = () => {
     axios
       .get(`http://localhost:8000/api/staffs/?name=&page=1&perPage=10`)
       .then((response) => {
-        console.log("response data", response.data);
         let staffObject = [];
 
         response.data.staffs.map((item) => {
@@ -69,7 +68,6 @@ const Example = () => {
         return { ...course, joinedCoordinators: fullname.join(" / ") };
       });
       setExcelData(updatedCoordinators); // ใช้ updatedCoordinators แทน response.data.courses
-      console.log(updatedCoordinators); // ใช้ updatedCoordinators แทน excelData      console.log(excelData);
     });
   }
 
@@ -79,17 +77,10 @@ const Example = () => {
   }, []);
 
   const handleSaveButtonClick = (data, state) => {
-    console.log("data in handleSaveButtonClick", data);
-    // console.log("staffs", staffs);
-    // console.log("data with coordinators", data.coordinators);
-
     const staffIDs = data.coordinators.map((name) => {
-      // console.log("name", name);
       const staff = staffs.find((staff) => staff.staffFullname === name);
-      // console.log("fullname", staff);
       return staff ? staff.staffID : "ไม่มี";
     });
-    console.log("staffIDs", staffIDs);
 
     let semesterValue = "";
     switch (semester) {
@@ -106,10 +97,6 @@ const Example = () => {
         semesterValue = "0";
     }
 
-    // console.log("selectedStaffIdList", selectedStaffIdList);
-    // สร้างข้อมูลสำหรับส่ง API request
-    // const lastRowData = excelData[excelData.length - 1];
-    // console.log("lastRowData", lastRowData);
     const courseDetail = {
       coursesData: [
         {
@@ -138,7 +125,7 @@ const Example = () => {
 
     if (state === "add") {
       axios
-        .post(`http://localhost:8000/api/courses/many`, courseDetail)
+        .post(`http://localhost:8000/api/courses/`, coursesData)
         .then((res) => {
           console.log(res);
         });
@@ -196,12 +183,9 @@ const Example = () => {
       .catch((error) => {
         console.log("error");
       });
-    // const updatedData = excelData.filter((rowData) => rowData !== row.original);
-    // setExcelData(updatedData);
   };
 
   const handleCheckRowDataForDelete = (row) => {
-    // console.log("row.original._id", row.original._id);
     setIdForDelete(row.original._id);
     handleDeleteSubjectModalOpen();
   };
@@ -219,31 +203,33 @@ const Example = () => {
     const newData = { ...data, joinedCoordinators: formattedCoordinators };
     data = newData;
     setExcelData((prevState) => {
-      // คัดลอกข้อมูลเก่าทั้งหมด
       const newDataSet = [...prevState];
-      // ค้นหา index ของแถวที่ต้องการแก้ไข
       const rowIndex = newDataSet.findIndex((row) => row.crsID === data.crsID);
-      // หากพบแถวที่ต้องการแก้ไข
       if (rowIndex !== -1) {
-        // // ลบแถวเก่าออกจากข้อมูล
-        // newDataSet.splice(rowIndex, 1);
-        // // เพิ่มแถวใหม่เข้าไปในข้อมูล
-        // newDataSet.push(data);
         newDataSet[rowIndex] = newData;
       }
-      // ส่งข้อมูลใหม่กลับ
       return newDataSet;
     });
     console.log("data in edit modal", data);
-    // ปิด Modal หลังจากทำการแก้ไขข้อมูลเสร็จสิ้น
     setEditSubjectModalOpen(false);
-    if (rowData) handleSaveButtonClick(data, "edit");
-    else return;
+    if (idForEdit) {
+      // ถ้ามี idForEdit ให้ส่ง "edit"
+      handleSaveButtonClick(data, "edit");
+    } else {
+      // ถ้าไม่มี idForEdit ให้ส่ง "add"
+      handleSaveButtonClick(data, "add");
+    }
   };
 
   const handleCheckRowData = (row) => {
-    setIdForEdit(row.original._id);
-    if (rowData) handleEditSubjectModalOpen();
+    if (row.original._id) {
+      // ถ้ามี _id ให้ setIdForEdit และเปิด modal แก้ไข
+      setIdForEdit(row.original._id);
+      handleEditSubjectModalOpen();
+    } else {
+      // ถ้าไม่มี _id ให้เปิด modal แก้ไข และส่ง "add" เมื่อกดบันทึก
+      handleEditSubjectModalOpen();
+    }
   };
 
   const handleFileUpload = (event) => {
@@ -330,7 +316,6 @@ const Example = () => {
           <IconButton
             onClick={() => {
               setRowData(row.original);
-              console.log("rowData", row.original);
               handleCheckRowData(row);
               handleEditSubjectModalOpen();
             }}
@@ -372,8 +357,16 @@ const Example = () => {
           variant="contained"
           endIcon={<ArrowForwardIosIcon />}
           onClick={() => {
+            // ตรวจสอบว่ามีข้อมูลในตารางหรือไม่
+            if (excelData.length === 0) {
+              // หากไม่มีข้อมูลในตาราง ให้แสดง alert เพื่อแจ้งให้ผู้ใช้รู้
+              alert("ไม่สามารถดำเนินการต่อไปได้เพราะไม่มีข้อมูลในตาราง");
+              return; // ไม่สามารถดำเนินการต่อไปได้
+            }
+            // หากมีข้อมูลในตารางให้ทำการ navigate ไปยังหน้าต่อไป
             navigate("/confirmAddSubject");
           }}
+          disabled={excelData.length === 0} // ปุ่มจะถูก disable หากไม่มีข้อมูลในตาราง
         >
           ต่อไป
         </Button>

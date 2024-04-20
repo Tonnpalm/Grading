@@ -1,21 +1,16 @@
 // eslint-disable-next-line no-unused-vars
 import React from "react";
 import ResponsiveAppBar from "../../AppBar/ButtonAppBar";
-import SimpleBarChart from "./TestHistogram";
-import ScoreTable from "./ScoreTable";
+import Grading from "./TestHistogram";
+// import ScoreTable from "./ScoreTable";
 import { useContext } from "react";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { Typography, Button } from "@mui/material";
 import { PinkPallette } from "../../../assets/pallettes";
-// import { useCookies } from "react-cookie";
-// import { DataAcrossPages } from "/Users/pongpipatsrimuang/Desktop/GradingFront/src/App.jsx";
-
+import { DataAcrossPages } from "../../../assets/DataAcrossPages";
 export default function GradeAdjustment() {
-  // const [cookies, setCookie] = useCookies([]);
-  // const course = cookies["course"];
-
-  //   const { data } = useContext(DataAcrossPages);
+  const { data } = useContext(DataAcrossPages);
 
   return (
     <div>
@@ -35,7 +30,7 @@ export default function GradeAdjustment() {
           }}
         >
           <Typography fontSize={30}>ตัดเกรด</Typography>
-          <Typography>2302008 Chem Tech II ภาคปลาย ปีการศึกษา 2566</Typography>
+          <Typography>2302008 Chem Tech II ภาคปลาย ปีการศึกษา 2024</Typography>
         </div>
         <div
           style={{
@@ -44,9 +39,9 @@ export default function GradeAdjustment() {
             alignItems: "center",
           }}
         >
-          <SimpleBarChart />
+          <Grading />
         </div>
-        <div
+        {/* <div
           style={{
             paddingLeft: "10%",
             paddingRight: "10%",
@@ -56,7 +51,7 @@ export default function GradeAdjustment() {
           }}
         >
           <ScoreTable />
-        </div>
+        </div> */}
         <div
           style={{
             paddingLeft: "10%",
