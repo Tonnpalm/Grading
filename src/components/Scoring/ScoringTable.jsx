@@ -29,10 +29,12 @@ const ScoringTable = () => {
   const [deleteColumnModalOpen, setDeleteModuleModalOpen] = useState(false);
   const [check, setCheck] = useState();
   const navigate = useNavigate();
+  const { setData } = useContext(DataAcrossPages);
   const { data } = useContext(DataAcrossPages);
   const [emptyArray, setEmptyArray] = useState([]);
   const [scoreDetail, setScoreDetail] = useState([]);
   const [afterUpload, setAfterUpload] = useState(0);
+  const [rowScores, setRowScores] = useState([]); // เพิ่ม state เพื่อเก็บคะแนนรวมในแต่ละแถว
 
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
@@ -47,7 +49,14 @@ const ScoringTable = () => {
       console.log(excelData);
       setExcelData(excelData);
       setAfterUpload(afterUpload + 1);
-
+      // excelData.forEach((item) => {
+      //   Object.keys(item).forEach((key) => {
+      //     if (key !== "ID" && key !== "ชื่อ-นามสกุล") {
+      //       console.log("keys", key);
+      //       doingData(key); // ส่งค่า key ไปยังฟังก์ชัน doingData
+      //     }
+      //   });
+      // });
       console.log("check", columnNameToCalulateScore);
     };
 
@@ -67,8 +76,13 @@ const ScoringTable = () => {
   };
 
   const handleSaveButtonClick = () => {
-    console.log("scoreDetail in handleSaveButtonClick", scoreDetail);
-
+    // console.log("scoreDetail in handleSaveButtonClick", scoreDetail);
+    // ตรวจสอบว่ามี totalScore ที่ไม่ได้กำหนดค่าหรือไม่
+    if (excelData.some((row) => row.totalScore === undefined)) {
+      console.log("มีค่า totalScore ที่ไม่ได้กำหนดค่าในข้อมูล");
+      // แสดงข้อความหรือแจ้งเตือนให้ผู้ใช้ทราบว่ามีข้อมูลที่ไม่สมบูรณ์
+      return;
+    }
     const dataToSend = {
       moduleObjectID: data._id,
       assignments: scoreDetail
@@ -88,6 +102,7 @@ const ScoringTable = () => {
         // แปลงข้อมูลนิสิตให้อยู่ในรูปแบบที่ API ต้องการ
         sID: row.ID,
         sName: row["ชื่อ-นามสกุล"],
+        totalScore: row.totalScore, // เก็บคะแนนรวม
         scores: Object.keys(row)
           .filter(
             (key) =>
@@ -100,9 +115,13 @@ const ScoringTable = () => {
             acc[key] = row[key]; // เก็บค่าคะแนนแต่ละส่วนในอ็อบเจ็กต์ scores
             return acc;
           }, {}),
-        totalScore: row.totalScore, // เก็บคะแนนรวม
       })),
     };
+
+    const studentsData = excelData.map((row) => {
+      console.log("totalScore in log", row.totalScore); // ล็อกค่าของ row ที่ถูกแปลง
+      return "test ระบบ";
+    });
 
     console.log("ข้อมูลที่จะส่งไป DB", dataToSend);
 
@@ -123,16 +142,18 @@ const ScoringTable = () => {
       .get(`http://localhost:8000/api/scores/${data._id}`)
       .then((response) => {
         console.log("testAPI", response.data.scores.assignments);
-
+        console.log("students", response.data.scores.students);
         // Process oldScoreData to match the structure of excelData
         const processedData = response.data.scores.students.map((student) => {
+          console.log("totalScore", student.totalScore);
           const row = {
             ID: student.sID,
             "ชื่อ-นามสกุล": student.sName,
-            totalScore: student.totalScore.toString(),
+            totalScore: student.totalScore,
           };
 
           response.data.scores.assignments.map((assignment) => {
+            console.log(row);
             row[assignment.accessorKey] =
               student.scores[assignment.accessorKey] || "";
           });
@@ -159,7 +180,7 @@ const ScoringTable = () => {
               <MenuItem
                 key={2}
                 onClick={() => {
-                  console.log("Item 2 clicked");
+                  console.log("totalScore in excelData", excelData);
                   closeMenu();
                 }}
               >
@@ -176,6 +197,7 @@ const ScoringTable = () => {
   }
 
   React.useEffect(() => {
+    console.log(data._id);
     getOldScore();
   }, []);
 
@@ -198,7 +220,7 @@ const ScoringTable = () => {
         <MenuItem
           key={2}
           onClick={() => {
-            console.log("Item 2 clicked");
+            console.log("totalScore in excelData", excelData);
             closeMenu();
           }}
         >
@@ -212,7 +234,6 @@ const ScoringTable = () => {
       ...row,
       [newAccessorKey]: "", // สร้างคอลัมน์ใหม่ในแต่ละแถว
     }));
-
     doingData(newAccessorKey);
     setExcelData(newData);
     collectedDataFromAddColumn([...emptyArray, newColumn]); // ส่งอาร์เรย์ของหัวตารางที่เพิ่มเข้ามา
@@ -261,21 +282,6 @@ const ScoringTable = () => {
       enableEditing: false,
     },
   ]);
-
-  // const collectedDataFromAddColumn = (nameScore, scoreType) => {
-  //   console.log("newData", nameScore, scoreType);
-  //   const scoreData = {
-  //     assignments: [
-  //       {
-  //         accessorKey: nameScore.name,
-  //         headerName: nameScore.name,
-  //         nType: scoreType,
-  //         fullScore: nameScore.score,
-  //       },
-  //     ],
-  //   };
-  //   setScoreDetail(scoreData);
-  // };
 
   const collectedDataFromAddColumn = (columnsToAdd) => {
     const scoreData = {
@@ -390,31 +396,79 @@ const ScoringTable = () => {
       break;
   }
 
+  // React.useEffect(() => {
+  //   if (afterUpload > 0) {
+  //     let fullScores = [];
+  //     // คำนวณ totalScore โดยใช้ columnNameToCalulateScore
+  //     setColumns((prevColumns) => {
+  //       const updatedColumns = [...prevColumns];
+  //       const totalScoreColumnIndex = updatedColumns.findIndex(
+  //         (column) => column.accessorKey === "totalScore"
+  //       );
+  //       if (totalScoreColumnIndex !== -1) {
+  //         updatedColumns[totalScoreColumnIndex] = {
+  //           ...updatedColumns[totalScoreColumnIndex],
+  //           Cell: ({ row }) => {
+  //             let fullScore = 0;
+  //             columnNameToCalulateScore.forEach((columnName) => {
+  //               fullScore += parseFloat(row.original[columnName] || 0);
+  //             });
+  //             fullScores[row.index] = fullScore.toString(); // เก็บค่า fullScore ของแถวนี้
+  //             return fullScore.toString(); // ส่งค่า totalScore กลับเพื่อแสดงในตาราง            },
+  //           },
+  //         };
+  //       }
+  //       return updatedColumns;
+  //     });
+  //     // หลังจากทำการคำนวณคะแนนในแต่ละแถวเสร็จสิ้น
+  //     console.log("fullScores", fullScores[1]);
+
+  //     console.log("exelData before set", excelData);
+  //     // ก็สามารถอัปเดตค่า totalScore ที่ excelData ได้
+  //     setExcelData((prevExcelData) =>
+  //       prevExcelData.map((rowData, index) => ({
+  //         ...rowData,
+  //         totalScore: fullScores[index], // กำหนดค่า totalScore ของแถวนี้
+  //       }))
+  //     );
+  //     console.log("excelData", excelData);
+  //   }
+  // }, [afterUpload, columnNameToCalulateScore, excelData]);
+
   React.useEffect(() => {
     if (afterUpload > 0) {
-      // คำนวณ totalScore โดยใช้ columnNameToCalulateScore
-      setColumns((prevColumns) => {
-        const updatedColumns = [...prevColumns];
-        const totalScoreColumnIndex = updatedColumns.findIndex(
-          (column) => column.accessorKey === "totalScore"
-        );
-        if (totalScoreColumnIndex !== -1) {
-          updatedColumns[totalScoreColumnIndex] = {
-            ...updatedColumns[totalScoreColumnIndex],
-            Cell: ({ row }) => {
-              let fullScore = 0;
-              columnNameToCalulateScore.forEach((columnName) => {
-                fullScore += parseFloat(row.original[columnName] || 0);
-              });
-              return fullScore.toString();
-            },
-          };
-        }
-        return updatedColumns;
+      let scores = []; // เก็บคะแนนรวมในแต่ละแถว
+      excelData.forEach((rowData) => {
+        let fullScore = 0;
+        columnNameToCalulateScore.forEach((columnName) => {
+          fullScore += parseFloat(rowData[columnName] || 0);
+        });
+        scores.push(fullScore); // เพิ่มคะแนนรวมในแต่ละแถวเข้าไปใน scores
       });
+      setRowScores(scores); // อัปเดตคะแนนรวมในแต่ละแถว
     }
-  }, [columnNameToCalulateScore, excelData]);
+  }, [afterUpload, columnNameToCalulateScore, excelData]);
 
+  React.useEffect(() => {
+    // เมื่อ columnNameToCalulateScore มีการเปลี่ยนแปลง
+    // ให้ทำการคำนวณคะแนนรวมใหม่
+    if (columnNameToCalulateScore.length > 0) {
+      setAfterUpload((prev) => prev + 1); // เรียกใช้ useEffect ที่คำนวณคะแนนรวมใหม่
+    }
+  }, [columnNameToCalulateScore]);
+
+  React.useEffect(() => {
+    if (afterUpload > 0 && rowScores.length > 0) {
+      // หลังจากทำการคำนวณคะแนนในแต่ละแถวเสร็จสิ้น
+      // ก็สามารถอัปเดตค่า totalScore ที่ excelData ได้
+      setExcelData((prevExcelData) =>
+        prevExcelData.map((rowData, index) => ({
+          ...rowData,
+          totalScore: rowScores[index], // กำหนดค่า totalScore ของแถวนี้
+        }))
+      );
+    }
+  }, [afterUpload, rowScores]);
   return (
     <div>
       <ResponsiveAppBar />
@@ -571,6 +625,7 @@ const ScoringTable = () => {
           variant="contained"
           color="inherit"
           onClick={() => {
+            setData("65f90efa4ef7a70f80525050");
             navigate("/scoring");
           }}
         >

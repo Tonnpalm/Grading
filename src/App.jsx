@@ -13,6 +13,7 @@ import ScoringTable from "./components/Scoring/ScoringTable";
 import ConfirmAddSubject from "./components/AddSubject/ConfirmAddSubject/ConfirmAddSubject";
 import ConfirmScore from "./components/Grading/ConfirmScore/ConfirmScore";
 import YearAndSemester from "./components/Grading/SubjectSelection/YearAndSemester";
+import GradingResult from "./components/Grading/ConfirmScore/GradingResult";
 import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
 import { ThemeProvider, createTheme } from "@mui/material";
 import "./App.css";
@@ -44,6 +45,7 @@ function App() {
           <Route path="confirmAddSubject" element={<ConfirmAddSubject />} />
           <Route path="confirmScore" element={<ConfirmScore />} />
           <Route path="yearAndSemester" element={<YearAndSemester />} />
+          <Route path="gradingResult" element={<GradingResult />} />
         </Routes>
       </ThemeProvider>
     </MyProvider>

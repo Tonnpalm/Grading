@@ -1,16 +1,17 @@
-// eslint-disable-next-line no-unused-vars
-import React from "react";
 import ResponsiveAppBar from "../../AppBar/ButtonAppBar";
 import Grading from "./TestHistogram";
-// import ScoreTable from "./ScoreTable";
 import { useContext } from "react";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { Typography, Button } from "@mui/material";
 import { PinkPallette } from "../../../assets/pallettes";
 import { DataAcrossPages } from "../../../assets/DataAcrossPages";
+import { useNavigate } from "react-router-dom";
+
 export default function GradeAdjustment() {
+  const navigate = useNavigate;
   const { data } = useContext(DataAcrossPages);
+  console.log(data);
 
   return (
     <div>
@@ -70,6 +71,9 @@ export default function GradeAdjustment() {
               "&:hover": {
                 backgroundColor: PinkPallette.light,
               },
+            }}
+            onClick={() => {
+              navigate("/selectSubject2grading");
             }}
           >
             ย้อนกลับ

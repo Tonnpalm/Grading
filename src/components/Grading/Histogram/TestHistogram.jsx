@@ -18,16 +18,16 @@ import {
 import Modal from "./Modal";
 import axios from "axios";
 import { PinkPallette } from "../../../assets/pallettes";
+import { useNavigate } from "react-router-dom";
 
-const uData = [
-  74, 65, 78, 80, 81, 82, 82, 82, 84, 52, 98, 98, 73, 90, 78, 48, 78, 83, 72,
-  55, 66, 92, 87, 87, 93, 66, 62,
-];
+// const uData = [
+//   74, 65, 78, 80, 81, 82, 82, 82, 84, 52, 98, 98, 73, 90, 78, 48, 78, 83, 72,
+//   55, 66, 92, 87, 87, 93, 66, 62,
+// ];
 const lineData = [
   { x: 0, y: 0 },
   { x: 0, y: 100 },
 ];
-
 // เพิ่ม CSS style สำหรับทับ ResponsiveChartContainer บน BarChart
 const OverlayContainer = styled("div")({
   position: "absolute",
@@ -42,25 +42,17 @@ const y = Array.from({ length: 21 }, (_, index) => {
   return -2 + 0.5 * index;
 });
 
-const StyledPath = styled("path")(({ theme, color }) => ({
-  fill: "none",
-  stroke: theme.palette.text[color],
-  shapeRendering: "crispEdges",
-  strokeWidth: 1,
-  pointerEvents: "none",
-}));
-
 // นับจำนวนครั้งที่ข้อมูลปรากฏซ้ำกันแต่ละค่า
-const dataMap = new Map();
-uData.forEach((value) => {
-  dataMap.set(value, (dataMap.get(value) || 0) + 1);
-});
+// const dataMap = new Map();
+// uData.forEach((value) => {
+//   dataMap.set(value, (dataMap.get(value) || 0) + 1);
+// });
 
-// สร้างแกน X ที่แสดงคะแนน 1 ถึง 100
-const xAxisData = Array.from({ length: 100 }, (_, i) => (i + 1).toString()); // สร้างเลขคะแนน 1 ถึง 100
+// // สร้างแกน X ที่แสดงคะแนน 1 ถึง 100
+// const xAxisData = Array.from({ length: 100 }, (_, i) => (i + 1).toString()); // สร้างเลขคะแนน 1 ถึง 100
 
-// แมปข้อมูลจำนวนที่ซ้ำตามคะแนนในแกน X
-const uDataMapped = xAxisData.map((score) => dataMap.get(parseInt(score)) || 0); // ใช้ Math.floor() เพื่อแปลงเป็นจำนวนนับ
+// // แมปข้อมูลจำนวนที่ซ้ำตามคะแนนในแกน X
+// const uDataMapped = xAxisData.map((score) => dataMap.get(parseInt(score)) || 0); // ใช้ Math.floor() เพื่อแปลงเป็นจำนวนนับ
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
@@ -71,10 +63,8 @@ const Item = styled(Paper)(({ theme }) => ({
 }));
 
 function CartesianAxis({ cutoff }) {
-  // Get the drawing area bounding box
   const { left, top, width, height } = useDrawingArea();
 
-  // Get the two scale
   const yAxisScale = useYScale();
   const xAxisScale = useXScale();
 
@@ -175,41 +165,133 @@ export default function Grading() {
   const [cutOffGradeD, setCutOffGradeD] = React.useState(50); // ค่าเริ่มต้นของ cut-off grade D
   const [cutOffGradeF, setCutOffGradeF] = React.useState(49.99); // ค่าเริ่มต้นของ cut-off grade F
 
-  // const { data } = useContext(DataAcrossPages);
-  // const handleCutOffChange = (event) => {
-  //   setCutOffValue(event.target.value);
-  //   console.log("Cut-off value:", event.target.value);
-  // };
-
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const { data } = React.useContext(DataAcrossPages);
   const [columns, setColumns] = React.useState([]);
-  const [checkCR58, setCheckCR58] = React.useState();
+  const [histogramScore, setHistogramScore] = React.useState([]);
+  const [scoreInTable, setScoreInTable] = React.useState([]);
+  const [moduleFullScore, setModuleFullScore] = React.useState();
+  const navigate = useNavigate();
+
+  const dataMap = new Map();
+  histogramScore.map((value) => {
+    dataMap.set(value, (dataMap.get(value) || 0) + 1);
+  });
+
+  // สร้างแกน X ที่แสดงคะแนน 1 ถึง 100
+  const xAxisData = Array.from({ length: 100 }, (_, i) => (i + 1).toString()); // สร้างเลขคะแนน 1 ถึง 100
+
+  // แมปข้อมูลจำนวนที่ซ้ำตามคะแนนในแกน X
+  const histogramData = xAxisData.map(
+    (score) => dataMap.get(parseInt(score)) || 0
+  ); // ใช้ Math.floor() เพื่อแปลงเป็นจำนวนนับ
+
+  // async function getModuleFullScore() {
+  //   try {
+  //     const res = await axios.get(`http://localhost:8000/api/scores/`);
+  //     let marks = {};
+  //     const apiData = res.data.scores;
+  //     apiData.forEach((item) => {
+  //       let fullScoresss = 0;
+  //       item.assignments.forEach((full) => {
+  //         fullScoresss += parseFloat(full.fullScore || 0);
+  //       });
+  //       marks[item.moduleObjectID] = fullScoresss.toString();
+  //     });
+  //     setModuleFullScore(marks);
+  //   } catch (error) {
+  //     console.error("Error fetching module full score:", error);
+  //   }
+  // }
+  React.useEffect(() => {
+    getAllScores();
+    calculateGrade();
+  }, [data]);
 
   function getAllScores() {
     axios.get(`http://localhost:8000/api/scores/`).then((res) => {
-      console.log("data from api", res.data);
+      const apiScores = res.data.scores;
+      console.log("ข้อมูลจาก API", apiScores);
+      // เพิ่มตัวแปร formattedData เพื่อเก็บข้อมูลที่จะนำเข้าตาราง
+      const formattedData = [];
+      let scoreUseInHistogram = [];
+      let calTotScore = 0;
+      //คะแนนเต็มของแต่ละมอดูล
+      let marks = {};
+      const apiData = res.data.scores;
+      apiData.forEach((item) => {
+        let fullScoresss = 0;
+        item.assignments.forEach((full) => {
+          fullScoresss += parseFloat(full.fullScore || 0);
+        });
+        marks[item.moduleObjectID] = fullScoresss.toString();
+      });
+
+      apiScores.forEach((apiScore) => {
+        // หา moduleID จาก API
+        const moduleID = apiScore.moduleObjectID;
+        // ค้นหาข้อมูลที่มี moduleID เหมือนกับข้อมูลใน API ใน dat
+        const relevantData = data
+          .slice(0, data.length - 2)
+          .filter((item) => item.moduleID === moduleID);
+        if (relevantData) {
+          apiScore.students.forEach((student) => {
+            const studentData = data[data.length - 2].find(
+              (item) => item.SID === student.sID
+            ); // ค้นหาข้อมูลนักเรียนที่เกี่ยวข้องกับ SID ในตัวแปร data
+            const modulePortion = data[data.length - 1];
+            if (studentData) {
+              calTotScore =
+                ((student.totalScore /
+                  parseFloat(marks[relevantData[0].moduleID])) *
+                  100 *
+                  relevantData[0].portion) /
+                parseFloat(modulePortion);
+              console.log(calTotScore);
+              const rowData = {
+                SID: studentData.SID,
+                studentName: studentData.studentName,
+                [relevantData[0].moduleName]: calTotScore.toFixed(2) || 0, // ใช้ชื่อโมดูลเป็น key ในการเก็บคะแนน
+                sumPortion: parseFloat(modulePortion),
+              };
+
+              scoreUseInHistogram.push(calTotScore);
+              // เช็คว่า formattedData มีข้อมูลของนักเรียนนี้อยู่แล้วหรือไม่
+              const existingStudentIndex = formattedData.findIndex(
+                (item) => item.SID === rowData.SID
+              );
+              if (existingStudentIndex !== -1) {
+                formattedData[existingStudentIndex][
+                  relevantData[0].moduleName
+                ] = calTotScore.toFixed(2) || 0;
+              } else {
+                formattedData.push(rowData);
+              }
+            } else {
+              console.log(
+                "No relevant data found for student SID:",
+                student.sID
+              );
+            }
+          });
+        } else {
+          console.log("No relevant data found for moduleID:", moduleID);
+        }
+      });
+      setHistogramScore(scoreUseInHistogram);
+      setScoreInTable(formattedData);
     });
+    calculateGrade();
   }
 
   React.useEffect(() => {
-    console.log("ข้อมูลจากหน้าเลือกความต้องการ", data[data.length - 2]);
-    getAllScores();
     if (!data) return;
-
-    // สร้าง formattedData โดยจัดรูปแบบข้อมูลก่อนส่งเข้าในตาราง
-    const formatted = data[data.length - 2];
-    console.log("formatted", formatted);
-
-    setCheckCR58(formatted);
-    console.log("cr58", checkCR58);
-
     // สร้าง columns ที่มีหัวตารางเป็นชื่อ moduleName
     const uniqueModuleNames = data
       .slice(0, data.length - 2)
       .map((item) => item.moduleName);
     const moduleNameColumns = uniqueModuleNames.map((moduleName, index) => ({
-      accessorKey: `moduleName_${index}`,
+      accessorKey: moduleName,
       header: moduleName,
       enableSorting: false,
       enableColumnActions: true,
@@ -251,6 +333,24 @@ export default function Grading() {
       },
       ...moduleNameColumns, // เพิ่ม columns ที่สร้างจาก moduleName ที่ได้จาก data
       {
+        accessorKey: "calculatedTotalScore",
+        header: "คะแนนรวม",
+        size: 120,
+        enableColumnActions: false,
+        muiTableBodyCellProps: {
+          align: "center",
+        },
+      },
+      {
+        accessorKey: "roundedTotalScore",
+        header: "ปรับคะแนน",
+        size: 120,
+        enableColumnActions: false,
+        muiTableBodyCellProps: {
+          align: "center",
+        },
+      },
+      {
         accessorKey: "studentGrade",
         header: "เกรด",
         size: 120,
@@ -262,18 +362,57 @@ export default function Grading() {
     ]);
   }, [data]);
 
+  // ฟังก์ชันคำนวณเกรด
+  function calculateGrade() {
+    const newData = []; // เก็บข้อมูลใหม่ที่จะเปลี่ยนแปลง
+    scoreInTable.forEach((studentData) => {
+      const newRow = { ...studentData }; // สำเนาข้อมูลนักเรียน
+
+      let percentage = 0;
+
+      // หาคะแนนรวมและคะแนนเต็มของนักเรียน
+      Object.keys(studentData).forEach((key) => {
+        if (
+          key !== "SID" &&
+          key !== "studentName" &&
+          key !== "studentGrade" &&
+          key !== "sumPortion"
+        ) {
+          percentage += parseFloat(studentData[key]);
+        }
+      });
+
+      // คำนวณเกรด
+      let grade = ""; // เกรด
+      if (percentage >= cutOffGradeA) grade = "A";
+      else if (percentage >= cutOffGradeBPlus) grade = "B+";
+      else if (percentage >= cutOffGradeB) grade = "B";
+      else if (percentage >= cutOffGradeCPlus) grade = "C+";
+      else if (percentage >= cutOffGradeC) grade = "C";
+      else if (percentage >= cutOffGradeDPlus) grade = "D+";
+      else if (percentage >= cutOffGradeD) grade = "D";
+      else grade = "F";
+
+      newRow["studentGrade"] = grade; // เซ็ตเกรดให้กับข้อมูลใหม่
+      newRow["calculatedTotalScore"] = percentage;
+      newData.push(newRow); // เพิ่มข้อมูลใหม่เข้าไปใน newData
+    });
+    setScoreInTable(newData); // เซ็ตข้อมูลใหม่ให้กับ state
+    console.log("หลังคิดเกรดแล้ว", scoreInTable);
+  }
+
   const handleHeaderClick = () => {
     setIsModalOpen(true);
   };
 
   const table = useMaterialReactTable({
     columns,
-    data: data[data.length - 2],
+    data: scoreInTable,
     enableColumnPinning: true,
     initialState: {
       columnPinning: {
         left: ["rowNumbers", "SID", "studentName"],
-        right: ["studentGrade"],
+        right: ["calculatedTotalScore", "roundedTotalScore", "studentGrade"],
       },
     },
   });
@@ -283,18 +422,8 @@ export default function Grading() {
       <BarChart
         width={1100}
         height={550}
-        series={[{ data: uDataMapped, label: "จำนวนนักเรียน", type: "bar" }]}
+        series={[{ data: histogramData, label: "จำนวนนักเรียน", type: "bar" }]}
         xAxis={[{ data: xAxisData, scaleType: "band" }]}
-        // lineProps={[
-        //   {
-        //     data: lineData,
-        //     stroke: "red",
-        //     strokeWidth: 2,
-        //   },
-        // ]}
-        // onLoad={(chart) => {
-        //   console.log("Line props:", chart.options.lineProps);
-        // }}
       />
       <OverlayContainer>
         {" "}
@@ -310,7 +439,7 @@ export default function Grading() {
               // },
             ]
           }
-          xAxis={[{ data: y, scaleTyxpe: "linear", min: -0.531, max: 3 }]} // ไม่ได้ใช้ข้อมูล X เนื่องจากต้องการเส้นตรงแนวตั้งเท่านั้น
+          xAxis={[{ data: y, scaleTyxpe: "linear", min: -0.375, max: 3 }]} // ไม่ได้ใช้ข้อมูล X เนื่องจากต้องการเส้นตรงแนวตั้งเท่านั้น
           yAxis={[{ min: -2, max: 2 }]}
         >
           <CartesianAxis
@@ -659,7 +788,14 @@ export default function Grading() {
           </Button>
         </Grid>
       </Grid>
-      <div>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          paddingLeft: "10%",
+          paddingRight: "10%",
+        }}
+      >
         <MaterialReactTable table={table} />
         {isModalOpen && <Modal onClose={() => setIsModalOpen(false)} />}
       </div>

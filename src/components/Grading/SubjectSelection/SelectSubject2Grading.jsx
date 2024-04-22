@@ -40,7 +40,6 @@ export default function SelectSubject2Grading() {
   const { setData } = useContext(DataAcrossPages);
 
   const handleClick = (excelData) => {
-    console.log("data in packed", packedDataList);
     const mergedPackedData = [...packedDataList, excelData, minimumPortion];
     setData(mergedPackedData);
     console.log("moduleList", mergedPackedData);
@@ -100,7 +99,6 @@ export default function SelectSubject2Grading() {
         let ID = names._id;
         courseNameAndID.push({ crsName: name, crsID: ID });
       });
-      console.log(courseNameAndID);
       setCourseNameAndID(courseNameAndID);
     });
   }
@@ -119,7 +117,7 @@ export default function SelectSubject2Grading() {
       const firstSheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[firstSheetName];
       const excelData = XLSX.utils.sheet_to_json(worksheet, { header: 2 });
-      console.log(excelData);
+      console.log("อัปโหลดไฟล์แล้ว : ", excelData);
       setExcelData(excelData);
     };
 
@@ -209,7 +207,6 @@ export default function SelectSubject2Grading() {
                     type="file"
                     className="form-control custom-form-control"
                     onChange={(event) => {
-                      console.log("data", moduleList);
                       handleFileChange(event);
                       handleFileUpload(event);
                     }}
@@ -338,6 +335,7 @@ function AddMoreModule({
   const [packedData, setPackedData] = useState([]);
   const [selectedModulePortion, setSelectedModulePortion] = useState("");
   const [selectedModuleID, setSelectedModuleID] = useState("");
+  const [moduleData, setModuleData] = useState({}); // เก็บข้อมูลโมดูลทั้งหมด
 
   function getModules() {
     let semesterValue = "";
@@ -373,6 +371,32 @@ function AddMoreModule({
     getModules();
   }, []);
 
+  // อัพเดทข้อมูลโมดูลทั้งหมดเมื่อมีการเปลี่ยนแปลงใน TextField
+  useEffect(() => {
+    setModuleData({
+      crsID: crsID,
+      moduleName: selectedModuleName,
+      moduleID: selectedModuleID,
+      portion: selectedModulePortion,
+    });
+  }, [crsID, selectedModuleName, selectedModuleID, selectedModulePortion]);
+
+  // ตรวจสอบว่าข้อมูลโมดูลทั้งหมดครบถ้วนหรือไม่
+  const isModuleDataComplete = () => {
+    return (
+      selectedModuleName !== "" &&
+      selectedModuleID !== "" &&
+      selectedModulePortion !== ""
+    );
+  };
+
+  // กำหนดฟังก์ชัน handlePackedDataChangeLocal เพื่อส่งข้อมูลไปยัง onPackedDataChange เมื่อข้อมูลครบถ้วน
+  const handlePackedDataChangeLocal = () => {
+    if (isModuleDataComplete()) {
+      onPackedDataChange(moduleData);
+    }
+  };
+
   const Item = styled(Paper)(({ theme }) => ({
     padding: theme.spacing(1),
     paddingLeft: theme.spacing(2),
@@ -383,10 +407,28 @@ function AddMoreModule({
     onDelete(index); // เรียกใช้ฟังก์ชัน handleDeleteModule ที่ถูกส่งมาจาก SelectSubject2Grading
   };
 
-  const handlePackedDataChangeLocal = (newData) => {
-    onPackedDataChange(newData); // เรียกใช้ฟังก์ชันจาก props เพื่ออัปเดตข้อมูลใน packedDataList ใน SelectSubject2Grading
+  // const handlePackedDataChangeLocal = (newData) => {
+  //   onPackedDataChange(newData);
+  // };
+
+  useEffect(() => {
+    if (isModuleDataComplete()) {
+      handlePackedDataChangeLocal();
+    }
+  }, [selectedModuleName, selectedModuleID, selectedModulePortion]);
+
+  // ในฟังก์ชัน handleChange
+  const handleChange = (event) => {
+    setSelectedModulePortion(event.target.value);
+    const newValue = event.target.value;
+    setModuleData((prevData) => ({
+      ...prevData,
+      portion: newValue,
+    }));
+    handlePackedDataChangeLocal(); // เรียกใช้ handlePackedDataChangeLocal เมื่อมีการเปลี่ยนแปลงในข้อมูล portion
   };
 
+  // Rest of your component code...
   return (
     <div style={{ display: "flex", flexDirection: "row", marginTop: "10px" }}>
       <Grid container spacing={1}>
@@ -429,12 +471,6 @@ function AddMoreModule({
                 setSelectedModuleID(
                   selectedModule ? selectedModule.moduleID : ""
                 );
-                handlePackedDataChangeLocal({
-                  crsID: crsID,
-                  moduleName: newValue,
-                  moduleID: selectedModule ? selectedModule.moduleID : "",
-                  portion: selectedModulePortion,
-                });
               }}
             />
           </Grid>
@@ -454,14 +490,12 @@ function AddMoreModule({
                 placeholder="00.00"
                 value={selectedModulePortion}
                 onChange={(event) => {
+                  handleChange(event);
                   const newValue = event.target.value;
-                  setSelectedModulePortion(newValue);
-                  handlePackedDataChangeLocal({
-                    crsID: crsID,
-                    moduleName: selectedModuleName,
-                    moduleID: selectedModuleID,
+                  setModuleData((prevData) => ({
+                    ...prevData,
                     portion: newValue,
-                  });
+                  }));
                 }}
                 sx={{
                   width: "85px",

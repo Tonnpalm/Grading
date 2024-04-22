@@ -71,7 +71,6 @@ const Example = () => {
   };
 
   const handleAddSubmitSendingToServer = async (data) => {
-    console.log("data in handleSaveButtonClick", data);
     const formattedDataFromAddModule = {
       moduleName: data.moduleName,
       startPeriod: data.selectedDate.split(" - ")[0],
@@ -82,12 +81,6 @@ const Example = () => {
       crsID: "6601138a5a0240478a1e078d",
       instructorID: "65f90efa4ef7a70f80525050",
     };
-    console.log("formattedDataFromAddModule", formattedDataFromAddModule);
-    // const res = axios
-    //   .post(`http://localhost:8000/api/modules/`, formattedDataFromAddModule)
-    //   .then((res) => {
-    //     console.log("error", res);
-    //   });
     const res = axios
       .post(`http://localhost:8000/api/modules/`, formattedDataFromAddModule, {
         headers: {
@@ -95,7 +88,7 @@ const Example = () => {
         },
       })
       .then((res) => {
-        console.log("error", res);
+        console.log("data", res);
       });
   };
 
@@ -162,12 +155,10 @@ const Example = () => {
     console.log(moduleDetail);
     if (rowData) handleSaveButtonClick(data);
     else return;
-
-    // axios.put(`http://localhost:8000/api/modules/${idForEdit}`);
   };
 
   const handleCheckRowDataForDelete = (row) => {
-    // console.log("row.original._id", row.original._id);
+    console.log("row.original._id", row.original._id);
     setIdForDelete(row.original._id);
     handleDeleteModuleModalOpen();
   };
@@ -184,7 +175,7 @@ const Example = () => {
     axios
       .delete(`http://localhost:8000/api/modules/${idForDelete}`)
       .then((response) => {
-        getModules();
+        getModuleID();
       })
       .catch((error) => {
         console.log("error");

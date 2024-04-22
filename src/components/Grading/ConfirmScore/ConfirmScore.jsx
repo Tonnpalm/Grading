@@ -10,6 +10,7 @@ import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import OfflinePinIcon from "@mui/icons-material/OfflinePin";
 import { PinkPallette } from "../../../assets/pallettes";
+import { useNavigate } from "react-router-dom";
 
 const mockData = [
   {
@@ -139,6 +140,7 @@ const csvConfig = mkConfig({
 });
 
 const ConfirmScore = () => {
+  const navigate = useNavigate();
   const handleExportData = () => {
     const csv = generateCsv(csvConfig)(mockData);
     download(csvConfig)(csv);
@@ -272,6 +274,9 @@ const ConfirmScore = () => {
           <Button
             variant="contained"
             endIcon={<OfflinePinIcon />}
+            onClick={() => {
+              navigate("/gradingResult");
+            }}
             sx={{
               backgroundColor: PinkPallette.main,
               "&:hover": {

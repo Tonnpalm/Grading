@@ -222,6 +222,7 @@ const Example = () => {
   };
 
   const handleCheckRowData = (row) => {
+    console.log("_id", row.original._id);
     if (row.original._id) {
       // ถ้ามี _id ให้ setIdForEdit และเปิด modal แก้ไข
       setIdForEdit(row.original._id);
