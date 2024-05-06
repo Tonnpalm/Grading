@@ -1,11 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Prompt&display=swap');
-
-
+@import url("https://fonts.googleapis.com/css2?family=Prompt&display=swap");
 
 .my-app-bar {
   background-color: rgb(255, 0, 162);
 }
 
-
-
-
+/* CSS for Red Background */
+.red-background {
+  background-color: red;
+}

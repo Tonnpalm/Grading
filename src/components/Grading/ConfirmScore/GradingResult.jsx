@@ -5,6 +5,7 @@ import TaskAltIcon from "@mui/icons-material/TaskAlt";
 import { GreenPallette, PinkPallette } from "../../../assets/pallettes";
 import { Typography, Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { DataAcrossPages } from "../../../assets/DataAcrossPages";
 
 function ConfirmAddSubject() {
   const [confirmCrsID, setConfirmCrsID] = React.useState([]);
@@ -12,67 +13,108 @@ function ConfirmAddSubject() {
   const [confirmCrsSec, setConfirmCrsSec] = React.useState([]);
   const [confirmCrsCre, setConfirmCrsCre] = React.useState([]);
   const [confirmCoordinators, setConfirmCoordinators] = React.useState([]);
+  const [confirmCrsYearAndSemester, setConfirmCrsYearAndSemester] =
+    React.useState([]);
   const navigate = useNavigate();
 
-  //   React.useEffect(() => {
-  //     const fetchData = async () => {
-  //       try {
-  //         const response = await axios.get("http://localhost:8000/api/courses/");
-  //         console.log("data to show", response.data);
-  //         console.log("data to show with courses", response.data.courses);
+  const { data } = React.useContext(DataAcrossPages);
 
-  //         let crsID2Confirm = [];
-  //         response.data.courses.map((ID) => {
-  //           let id = ID.crsID;
-  //           crsID2Confirm.push(id);
-  //         });
-  //         setConfirmCrsID(crsID2Confirm);
+  React.useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:8000/api/grades/?year=${data[0]}&semester=${data[1]}`
+        );
+        console.log("data to show", response.data.grades);
+        console.log("year&Semester&crsID", data);
+        response.data.grades.map((item) => {
+          item.gradeAll.map((grade) => {
+            if (data[3] === grade.courses) {
+              axios
+                .get(
+                  `http://localhost:8000/api/courses/onceID?year=${data[0]}&semester=${data[1]}&_id=${data[2]}`
+                )
+                .then((res) => {
+                  let crsID2Confirm = [];
+                  res.data.courses.map((ID) => {
+                    let id = ID.crsID;
+                    crsID2Confirm.push(id);
+                  });
+                  setConfirmCrsID(crsID2Confirm);
+                  let crsName2Confirm = [];
+                  res.data.courses.map((crsName) => {
+                    let name = crsName.crsName;
+                    crsName2Confirm.push(name);
+                  });
+                  setConfirmCrsName(crsName2Confirm);
+                  let crsSec2Confirm = [];
+                  res.data.courses.map((crsSec) => {
+                    let section = crsSec.crsSec;
+                    crsSec2Confirm.push(section);
+                  });
+                  setConfirmCrsSec(crsSec2Confirm);
+                  let crsYearAndSemester = [];
+                  res.data.courses.map((item) => {
+                    let yearAndSemester = item.year + "/" + item.semester;
+                    crsYearAndSemester.push(yearAndSemester);
+                  });
+                  setConfirmCrsYearAndSemester(crsYearAndSemester);
+                });
+            }
+          });
+        });
+        // let crsID2Confirm = [];
+        // response.data.courses.map((ID) =>{
+        //   let id = ID.crsID;
+        //   crsID2Confirm.push(id);
+        // });
+        // setConfirmCrsID(crsID2Confirm);
 
-  //         let crsName2Confirm = [];
-  //         response.data.courses.map((crsName) => {
-  //           let name = crsName.crsName;
-  //           crsName2Confirm.push(name);
-  //         });
-  //         setConfirmCrsName(crsName2Confirm);
+        // let crsName2Confirm = [];
+        // response.data.courses.map((crsName) => {
+        //   let name = crsName.crsName;
+        //   crsName2Confirm.push(name);
+        // });
+        // setConfirmCrsName(crsName2Confirm);
 
-  //         let crsSec2Confirm = [];
-  //         response.data.courses.map((crsSec) => {
-  //           let section = crsSec.crsSec;
-  //           crsSec2Confirm.push(section);
-  //         });
-  //         setConfirmCrsSec(crsSec2Confirm);
+        // let crsSec2Confirm = [];
+        // response.data.courses.map((crsSec) => {
+        //   let section = crsSec.crsSec;
+        //   crsSec2Confirm.push(section);
+        // });
+        // setConfirmCrsSec(crsSec2Confirm);
 
-  //         let crsCre2Confirm = [];
-  //         response.data.courses.map((crsCre) => {
-  //           let credit = crsCre.crsCre;
-  //           crsCre2Confirm.push(credit);
-  //         });
-  //         setConfirmCrsCre(crsCre2Confirm);
+        // let crsCre2Confirm = [];
+        // response.data.courses.map((crsCre) => {
+        //   let credit = crsCre.crsCre;
+        //   crsCre2Confirm.push(credit);
+        // });
+        // setConfirmCrsCre(crsCre2Confirm);
 
-  //         let coordinators2Confirm = [];
-  //         response.data.courses.map((course) => {
-  //           let coordinators = course.coordinators;
-  //           if (Array.isArray(coordinators) && coordinators.length > 1) {
-  //             let staffFullNames = coordinators.map(
-  //               (name) => `${name.staffName} ${name.staffSurname}`
-  //             );
-  //             coordinators2Confirm.push(staffFullNames.join(", "));
-  //           } else {
-  //             coordinators.map((name) => {
-  //               console.log("something", name);
-  //               let staffFullName = name.staffName + " " + name.staffSurname;
-  //               coordinators2Confirm.push(staffFullName);
-  //             });
-  //           }
-  //         });
-  //         setConfirmCoordinators(coordinators2Confirm);
-  //       } catch (error) {
-  //         console.error("เกิดข้อผิดพลาดในการดึงข้อมูล:", error);
-  //       }
-  //     };
+        // let coordinators2Confirm = [];
+        // response.data.courses.map((course) => {
+        //   let coordinators = course.coordinators;
+        //   if (Array.isArray(coordinators) && coordinators.length > 1) {
+        //     let staffFullNames = coordinators.map(
+        //       (name) => `${name.staffName} ${name.staffSurname}`
+        //     );
+        //     coordinators2Confirm.push(staffFullNames.join(", "));
+        //   } else {
+        //     coordinators.map((name) => {
+        //       console.log("something", name);
+        //       let staffFullName = name.staffName + " " + name.staffSurname;
+        //       coordinators2Confirm.push(staffFullName);
+        //     });
+        //   }
+        // });
+        // setConfirmCoordinators(coordinators2Confirm);
+      } catch (error) {
+        console.error("เกิดข้อผิดพลาดในการดึงข้อมูล:", error);
+      }
+    };
 
-  //     fetchData();
-  //   }, []); // ใส่ [] เพื่อให้ useEffect เรียกฟังก์ชันของเราเฉพาะครั้งแรกเท่านั้น
+    fetchData();
+  }, []); // ใส่ [] เพื่อให้ useEffect เรียกฟังก์ชันของเราเฉพาะครั้งแรกเท่านั้น
   return (
     <div>
       <ResponsiveAppBar />
@@ -130,21 +172,23 @@ function ConfirmAddSubject() {
             </Typography>
             <Typography sx={{ marginLeft: 7 }}>
               ปี/ภาคการศึกษา
-              {confirmCrsCre.map((credit, index) => (
+              {confirmCrsYearAndSemester.map((term, index) => (
                 <React.Fragment key={index}>
                   <br />
-                  {credit}
+                  {term}
                 </React.Fragment>
               ))}
             </Typography>
             <Typography sx={{ marginLeft: 7 }}>
               สถานะการตัดเกรด
-              {confirmCoordinators.map((coordinators, index) => (
+              <br />
+              ตัดเกรดแล้ว
+              {/* {confirmCoordinators.map((coordinators, index) => (
                 <React.Fragment key={index}>
                   <br />
                   {coordinators}
                 </React.Fragment>
-              ))}
+              ))} */}
             </Typography>
           </div>
           <Button

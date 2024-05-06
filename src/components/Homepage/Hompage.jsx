@@ -1,5 +1,5 @@
 // eslint-disable-next-line no-unused-vars
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import "./HomepageC.css";
 import ResponsiveAppBar from "../AppBar/ButtonAppBar";
 import Card from "@mui/material/Card";
@@ -11,12 +11,71 @@ import EditIcon from "@mui/icons-material/Edit";
 import BeenhereIcon from "@mui/icons-material/Beenhere";
 import AddToPhotosIcon from "@mui/icons-material/AddToPhotos";
 import { PinkPallette } from "../../assets/pallettes";
+import { GreyPallette } from "../../assets/pallettes";
+
 import { useNavigate } from "react-router-dom";
 import { DataAcrossPages } from "../../assets/DataAcrossPages";
+
+import axios from "axios";
+import { useCookies } from "react-cookie";
 
 function Homepage() {
   const navigate = useNavigate();
   const { setData } = useContext(DataAcrossPages);
+  const [cookies, setCookie] = useCookies([]);
+  const [staffIDFromHomepage, setStaffIDFromHomepage] = React.useState("");
+  // const [semester, setSemester] = React.useState("");
+
+  const [goToImportWithStaffID, setGoToImportWithStaffID] = useState("");
+  const [registerOfficer, setRegisterOfficer] = useState(false);
+  const [goToScoringWithStaffID, setGoToScoringWithStaffID] = useState();
+
+  useEffect(() => {
+    // ตรวจสอบว่ามีรหัสหรือไม่
+    // ในกรณีที่มีรหัส ให้ตั้งค่าให้กับ stat
+    // ในกรณีที่ไม่มีรหัส ปล่อยให้ state เป็นค่าว่าง
+    const storedCode = "35117"; // รหัสที่ต้องการตรวจสอ[]
+
+    axios.get(`http://localhost:8000/api/staffs/allStaffs`).then((response) => {
+      console.log(response.data);
+      response.data.staffs.map((staff) => {
+        if (staff.isRegistraOfficer === true) {
+          console.log(staff.staffID);
+          console.log(storedCode);
+          if (staff.staffID === storedCode) {
+            setRegisterOfficer(true);
+            setGoToImportWithStaffID(staff.staffID);
+            setGoToScoringWithStaffID(staff._id);
+          }
+        } else {
+          if (staff.staffID === storedCode) {
+            // setRegisterOfficer(true);
+            console.log("staff id", staff._id);
+            setGoToImportWithStaffID(staff.staffID);
+            setGoToScoringWithStaffID(staff._id);
+          }
+        }
+      });
+    });
+  }, []);
+
+  const handleImportSubjectButton = () => {
+    setData(goToImportWithStaffID);
+    navigate("/addSubject");
+  };
+
+  const handleScoringButton = () => {
+    // setData(goToScoringWithStaffID);
+    setCookie("staffIDFromHomepage", goToScoringWithStaffID);
+    navigate("/scoring");
+  };
+  34131;
+  const handleGradingButton = () => {
+    setData(goToScoringWithStaffID);
+    // setData("65f90efa4ef7a70f80525052");
+
+    navigate("/yearAndSemester");
+  };
   return (
     <div>
       <ResponsiveAppBar />
@@ -27,7 +86,10 @@ function Homepage() {
               maxWidth: 255,
               maxHeight: 255,
               mr: 6,
-              backgroundColor: PinkPallette.main,
+              backgroundColor:
+                registerOfficer === true
+                  ? PinkPallette.main
+                  : GreyPallette.main, // ใช้ GreyPallette แทน "grey"
             }}
           >
             <CardActionArea
@@ -35,10 +97,15 @@ function Homepage() {
                 p: 3,
                 paddingRight: 7,
                 paddingLeft: 7,
-                "&:hover": { backgroundColor: PinkPallette.light },
+                "&:hover":
+                  registerOfficer === true
+                    ? { backgroundColor: PinkPallette.light }
+                    : {}, // ใช้เงื่อนไขเพื่อกำหนด hover ตามรหัส
               }}
               onClick={() => {
-                navigate("/addSubject");
+                if (registerOfficer === true) {
+                  handleImportSubjectButton(); // ให้ทำงานเมื่อมีรหัสเข้ามา
+                }
               }}
             >
               <CardContent
@@ -86,15 +153,14 @@ function Homepage() {
               maxWidth: 255,
               mr: 6,
               ml: 6,
-              backgroundColor: PinkPallette.main,
-              "&:hover": { backgroundColor: PinkPallette.light },
+              backgroundColor: PinkPallette.main, // ใช้ GreyPallette แทน "grey"
+              "&:hover": { backgroundColor: PinkPallette.light }, // ใช้เงื่อนไขเพื่อกำหนด hover ตามรหัส
             }}
           >
             <CardActionArea
               sx={{ p: 3, paddingRight: 7, paddingLeft: 7 }}
               onClick={() => {
-                setData("65f90efa4ef7a70f80525050");
-                navigate("/scoring");
+                handleScoringButton();
               }}
             >
               <CardContent sx={{ color: "white", width: "155" }}>
@@ -113,17 +179,24 @@ function Homepage() {
           </Card>
 
           <Card
-            sx={{ maxWidth: 255, ml: 6, backgroundColor: PinkPallette.main }}
+            sx={{
+              maxWidth: 255,
+              ml: 6,
+              backgroundColor: PinkPallette.main,
+            }}
           >
             <CardActionArea
               sx={{
                 p: 3,
                 paddingRight: 7,
                 paddingLeft: 7,
-                "&:hover": { backgroundColor: PinkPallette.light },
+                "&:hover": { backgroundColor: PinkPallette.light }, // ใช้เงื่อนไขเพื่อกำหนด hover ตามรหัส
               }}
               onClick={() => {
-                navigate("/yearAndSemester");
+                // if (registerOfficer === "ผู้ประสานงาน") {
+                //   handleGradingButton();
+                // }
+                handleGradingButton();
               }}
             >
               <CardContent sx={{ color: "white", width: "155" }}>

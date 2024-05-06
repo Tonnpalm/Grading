@@ -47,13 +47,13 @@ export default function ModalForAddSubject({
       break;
   }
 
-  React.useEffect(() => {
-    console.log("id", id);
-    console.log("subjectName", subjectName);
-    console.log("section", section);
-    console.log("credit", credit);
-    console.log("coordinator", coordinators);
-  }, []);
+  // React.useEffect(() => {
+  //   console.log("id", id);
+  //   console.log("subjectName", subjectName);
+  //   console.log("section", section);
+  //   console.log("credit", credit);
+  //   console.log("coordinator", coordinators);
+  // }, []);
 
   const handleSubmit = () => {
     // ตรวจสอบว่าข้อมูลครบทุกช่องหรือไม่

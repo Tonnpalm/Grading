@@ -1,4 +1,6 @@
 import * as React from "react";
+import toast, { Toaster } from "react-hot-toast";
+
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
@@ -62,6 +64,37 @@ export default function ModuleModal({ open, onClose, onSubmit, data, mode }) {
   // console.log("date picker", formattedEndDate);
 
   const [invalidDateError, setInvalidDateError] = React.useState(false);
+
+  const numOnly = () =>
+    toast.error("กรุณากรอกเป็นตัวเลขเท่านั้น", {
+      style: {
+        borderRadius: "10px",
+        background: "red",
+        color: "#fff",
+      },
+    });
+  const handleChangeYear = (event) => {
+    const inputYear = event.target.value;
+    // ตรวจสอบว่าเป็นตัวเลขหรือไม่
+    if (!isNaN(inputYear)) {
+      console.log("ตัวเลขจ้า");
+      setYear(inputYear);
+    } else {
+      // แสดงข้อความแจ้งเตือน
+      numOnly();
+    }
+  };
+  const handleChangeDuration = (event) => {
+    const inputYear = event.target.value;
+    // ตรวจสอบว่าเป็นตัวเลขหรือไม่
+    if (!isNaN(inputYear)) {
+      console.log("ตัวเลขจ้า");
+      setDuration(inputYear);
+    } else {
+      // แสดงข้อความแจ้งเตือน
+      numOnly();
+    }
+  };
 
   let title = "";
   switch (mode) {
@@ -131,10 +164,10 @@ export default function ModuleModal({ open, onClose, onSubmit, data, mode }) {
           />
           <TextField
             variant="standard"
-            label="ปีการศึกษา"
+            label="ปีการศึกษา (ค.ศ.)"
             value={year}
             onChange={(event) => {
-              setYear(event.target.value);
+              handleChangeYear(event);
             }}
           />
           <FormControl variant="standard">
@@ -157,7 +190,7 @@ export default function ModuleModal({ open, onClose, onSubmit, data, mode }) {
             label="ระยะเวลาที่สอน (ชั่วโมง)"
             value={duration}
             onChange={(event) => {
-              setDuration(event.target.value);
+              handleChangeDuration(event);
             }}
           />
           <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -214,6 +247,7 @@ export default function ModuleModal({ open, onClose, onSubmit, data, mode }) {
           </Button>
         </DialogActions>
       </Dialog>
+      <Toaster />
     </>
   );
 }

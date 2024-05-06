@@ -7,7 +7,6 @@ import { useCookies } from "react-cookie";
 import { Typography } from "@mui/material";
 
 function SelectSubject() {
-  // eslint-disable-next-line no-unused-vars
   const [cookies, setCookie] = useCookies([]);
   const year = cookies["year"];
   const semester = cookies["semester"];

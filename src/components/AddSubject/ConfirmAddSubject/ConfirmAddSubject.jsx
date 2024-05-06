@@ -5,6 +5,7 @@ import TaskAltIcon from "@mui/icons-material/TaskAlt";
 import { GreenPallette, PinkPallette } from "../../../assets/pallettes";
 import { Typography, Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { useCookies } from "react-cookie";
 
 function ConfirmAddSubject() {
   const [confirmCrsID, setConfirmCrsID] = React.useState([]);
@@ -14,10 +15,30 @@ function ConfirmAddSubject() {
   const [confirmCoordinators, setConfirmCoordinators] = React.useState([]);
   const navigate = useNavigate();
 
+  const [cookies, setCookie] = useCookies([]);
+  const year = cookies["year"];
+  const semester = cookies["semester"];
+
   React.useEffect(() => {
+    let semesterValue = "";
+    switch (semester) {
+      case "ภาคต้น":
+        semesterValue = "1";
+        break;
+      case "ภาคปลาย":
+        semesterValue = "2";
+        break;
+      case "ภาคฤดูร้อน":
+        semesterValue = "3";
+        break;
+      default:
+        semesterValue = "0";
+    }
     const fetchData = async () => {
       try {
-        const response = await axios.get("http://localhost:8000/api/courses/");
+        const response = await axios.get(
+          `http://localhost:8000/api/courses?year=${year}&semester=${semesterValue}`
+        );
         console.log("data to show", response.data);
         console.log("data to show with courses", response.data.courses);
 

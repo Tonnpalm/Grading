@@ -27,7 +27,6 @@ function Scoring() {
           >
             กลับ
           </Button>
-          {/* <BasicModal></BasicModal> */}
         </div>
         <div className="scoring-table-container">
           <Example />

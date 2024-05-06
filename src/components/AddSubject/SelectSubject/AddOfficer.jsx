@@ -26,7 +26,10 @@ const Example = () => {
   const [editSubjectModalOpen, setEditSubjectModalOpen] = useState(false);
   const [idForDelete, setIdForDelete] = useState();
   const [idForEdit, setIdForEdit] = useState();
+  const [rowToDelete, setRowToDelete] = useState();
+  const [crsID, setCrsID] = useState();
   const [rowData, setRowData] = useState({});
+  const [rowIndex, setRowIndex] = useState();
 
   const navigate = useNavigate();
   const [cookies] = useCookies([]);
@@ -35,7 +38,7 @@ const Example = () => {
 
   function getStaffs() {
     axios
-      .get(`http://localhost:8000/api/staffs/?name=&page=1&perPage=10`)
+      .get(`http://localhost:8000/api/staffs/allStaffs`)
       .then((response) => {
         let staffObject = [];
 
@@ -58,17 +61,65 @@ const Example = () => {
   }
 
   function getCourses() {
-    axios.get(`http://localhost:8000/api/courses/`).then((response) => {
-      console.log("data in getCourses", response.data.courses);
-      const updatedCoordinators = response.data.courses.map((course) => {
-        const fullname = course.coordinators.map((item) => {
-          const staffFullName = item.staffName + " " + item.staffSurname;
-          return staffFullName;
+    let semesterValue = "";
+    switch (semester) {
+      case "ภาคต้น":
+        semesterValue = "1";
+        break;
+      case "ภาคปลาย":
+        semesterValue = "2";
+        break;
+      case "ภาคฤดูร้อน":
+        semesterValue = "3";
+        break;
+      default:
+        semesterValue = "0";
+    }
+    axios
+      .get(
+        `http://localhost:8000/api/courses?year=${year}&semester=${semesterValue}`
+      )
+      .then((response) => {
+        console.log("data in getCourses", response.data.courses);
+        const updatedCoordinators = response.data.courses.map((course) => {
+          const fullname = course.coordinators.map((item) => {
+            const staffFullName = item.staffName + " " + item.staffSurname;
+            return staffFullName;
+          });
+          return { ...course, joinedCoordinators: fullname.join(" / ") };
         });
-        return { ...course, joinedCoordinators: fullname.join(" / ") };
+        setExcelData(updatedCoordinators); // ใช้ updatedCoordinators แทน response.data.courses
       });
-      setExcelData(updatedCoordinators); // ใช้ updatedCoordinators แทน response.data.courses
-    });
+  }
+
+  function getCoursesID() {
+    let semesterValue = "";
+    switch (semester) {
+      case "ภาคต้น":
+        semesterValue = "1";
+        break;
+      case "ภาคปลาย":
+        semesterValue = "2";
+        break;
+      case "ภาคฤดูร้อน":
+        semesterValue = "3";
+        break;
+      default:
+        semesterValue = "0";
+    }
+    axios
+      .get(
+        `http://localhost:8000/api/courses?year=${year}&semester=${semesterValue}`
+      )
+      .then((response) => {
+        console.log("data in getCourses", response.data.courses);
+        const crs_id = response.data.courses.map((course) => {
+          const id = course[course.length - 1]._id;
+          return id;
+        });
+        console.log(crs_id);
+        setCrsID(crs_id); // ใช้ crs_id แทน response.data.courses
+      });
   }
 
   useEffect(() => {
@@ -127,6 +178,8 @@ const Example = () => {
       axios
         .post(`http://localhost:8000/api/courses/`, coursesData)
         .then((res) => {
+          getCoursesID();
+          // console.log("crsID", crsID);
           console.log(res);
         });
     }
@@ -163,31 +216,56 @@ const Example = () => {
     handleSaveButtonClick(data, "add");
   };
 
-  const handleDeleteSubjectModalOpen = () => {
+  const handleDeleteSubjectModalOpen = (row) => {
     setDeleteSubjectModalOpen(true);
-    console.log("testDelete");
   };
 
   const handleDeleteSubjectModalClose = () => {
     setDeleteSubjectModalOpen(false);
   };
 
+  const doingDelete = (mode) => {
+    if (mode === "inDB") {
+      axios
+        .delete(`http://localhost:8000/api/courses/${idForDelete}`)
+        .then((response) => {
+          getStaffs();
+          getCourses();
+          setIdForDelete("");
+          handleDeleteSubjectModalClose();
+        })
+        .catch((error) => {
+          console.log("error");
+        });
+    }
+    if (mode === "notInDB") {
+      const updatedExcelData = [...excelData]; // Create a copy of the state
+      updatedExcelData.splice(rowIndex, 1); // Remove the row at the specified index
+      setExcelData(updatedExcelData); // Update the state with the modified data
+      handleDeleteSubjectModalClose(); // Close modal after deletio
+    }
+  };
   const handleDeleteSubjectModalSubmit = () => {
-    axios
-      .delete(`http://localhost:8000/api/courses/${idForDelete}`)
-      .then((response) => {
-        getStaffs();
-        getCourses();
-        handleDeleteSubjectModalClose();
-      })
-      .catch((error) => {
-        console.log("error");
-      });
+    console.log(rowToDelete);
+    if (idForDelete) {
+      // Check if row.original and row.original._id exist
+      if (idForDelete === rowToDelete._id) {
+        doingDelete("inDB");
+      }
+      // else if ()
+    } else {
+      doingDelete("notInDB");
+    }
   };
 
   const handleCheckRowDataForDelete = (row) => {
-    setIdForDelete(row.original._id);
-    handleDeleteSubjectModalOpen();
+    if (row.original._id) {
+      setIdForDelete(row.original._id);
+      setRowToDelete(row.original);
+      handleDeleteSubjectModalOpen();
+    } else {
+      handleDeleteSubjectModalOpen();
+    }
   };
 
   const handleEditSubjectModalOpen = () => {
@@ -204,14 +282,15 @@ const Example = () => {
     data = newData;
     setExcelData((prevState) => {
       const newDataSet = [...prevState];
-      const rowIndex = newDataSet.findIndex((row) => row.crsID === data.crsID);
+
       if (rowIndex !== -1) {
+        console.log("rorwIndex", rowIndex);
         newDataSet[rowIndex] = newData;
       }
       return newDataSet;
     });
-    console.log("data in edit modal", data);
-    setEditSubjectModalOpen(false);
+    console.log("excelData", excelData);
+    // console.log("data in edit modal", data);
     if (idForEdit) {
       // ถ้ามี idForEdit ให้ส่ง "edit"
       handleSaveButtonClick(data, "edit");
@@ -219,6 +298,8 @@ const Example = () => {
       // ถ้าไม่มี idForEdit ให้ส่ง "add"
       handleSaveButtonClick(data, "add");
     }
+    setRowIndex("");
+    setEditSubjectModalOpen(false);
   };
 
   const handleCheckRowData = (row) => {
@@ -289,6 +370,7 @@ const Example = () => {
       {
         accessorKey: "joinedCoordinators",
         header: "ผู้ประสานงานรายวิชา",
+        enableEditing: true,
       },
     ],
     []
@@ -316,6 +398,8 @@ const Example = () => {
         <Tooltip title="Edit">
           <IconButton
             onClick={() => {
+              console.log(row.index);
+              setRowIndex(row.index);
               setRowData(row.original);
               handleCheckRowData(row);
               handleEditSubjectModalOpen();
@@ -328,6 +412,7 @@ const Example = () => {
           <IconButton
             color="error"
             onClick={() => {
+              setRowIndex(row.index);
               handleCheckRowDataForDelete(row);
             }}
           >

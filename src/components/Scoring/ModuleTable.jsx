@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, useContext } from "react";
+import { useCookies } from "react-cookie";
 import {
   MaterialReactTable,
   useMaterialReactTable,
@@ -30,24 +31,32 @@ const Example = () => {
   const [idForDelete, setIdForDelete] = useState();
   const [rowDataToDuplicate, setRowDataToDuplicate] = useState();
   const [rowData, setRowData] = useState({});
+  const [rowIndex, setRowIndex] = useState();
   const { data } = useContext(DataAcrossPages);
   const { setData } = useContext(DataAcrossPages);
+  const [cookies, setCookie] = useCookies([]);
+  const staffIDFromHomepage = cookies["staffIDFromHomepage"];
+  // const semester = cookies["semester"];
 
   function getModuleID() {
-    axios.get(`http://localhost:8000/api/modules/${data}`).then((res) => {
-      console.log("res.data", res.data);
-      const pushDataToModuleDetail = res.data.moduleID.map((item) => {
-        const date = item.startPeriod + " - " + item.endPeriod;
-        const term = item.year + "/" + item.semester;
-        return {
-          ...item,
-          selectedDate: date,
-          yearAndSemester: term,
-          duration: item.hours,
-        };
+    console.log(staffIDFromHomepage);
+
+    axios
+      .get(`http://localhost:8000/api/modules/${staffIDFromHomepage}`)
+      .then((res) => {
+        console.log("res.data", res.data);
+        const pushDataToModuleDetail = res.data.moduleID.map((item) => {
+          const date = item.startPeriod + " - " + item.endPeriod;
+          const term = item.year + "/" + item.semester;
+          return {
+            ...item,
+            selectedDate: date,
+            yearAndSemester: term,
+            duration: item.hours,
+          };
+        });
+        setModuleDetail(pushDataToModuleDetail);
       });
-      setModuleDetail(pushDataToModuleDetail);
-    });
   }
 
   useEffect(() => {
@@ -70,18 +79,18 @@ const Example = () => {
     handleAddSubmitSendingToServer(data);
   };
 
-  const handleAddSubmitSendingToServer = async (data) => {
+  const handleAddSubmitSendingToServer = async (datas) => {
     const formattedDataFromAddModule = {
-      moduleName: data.moduleName,
-      startPeriod: data.selectedDate.split(" - ")[0],
-      endPeriod: data.selectedDate.split(" - ")[1],
-      hours: data.duration,
-      year: data.yearAndSemester.split("/")[0],
-      semester: data.yearAndSemester.split("/")[1],
-      crsID: "6601138a5a0240478a1e078d",
-      instructorID: "65f90efa4ef7a70f80525050",
+      moduleName: datas.moduleName,
+      startPeriod: datas.selectedDate.split(" - ")[0],
+      endPeriod: datas.selectedDate.split(" - ")[1],
+      hours: datas.duration,
+      year: datas.yearAndSemester.split("/")[0],
+      semester: datas.yearAndSemester.split("/")[1],
+      crsID: null,
+      instructorID: staffIDFromHomepage,
     };
-    const res = axios
+    axios
       .post(`http://localhost:8000/api/modules/`, formattedDataFromAddModule, {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
@@ -89,6 +98,7 @@ const Example = () => {
       })
       .then((res) => {
         console.log("data", res);
+        getModuleID();
       });
   };
 
@@ -98,22 +108,22 @@ const Example = () => {
     if (rowData) handleEditModuleModalOpen();
   };
 
-  const handleSaveButtonClick = (data) => {
-    console.log("data", data);
-    const startDate = data.selectedDate.split(" - ")[0];
-    const endDate = data.selectedDate.split(" - ")[1];
-    const year = data.yearAndSemester.split("/")[0];
-    const semester = data.yearAndSemester.split("/")[1];
+  const handleSaveButtonClick = (datas) => {
+    console.log("data", datas);
+    const startDate = datas.selectedDate.split(" - ")[0];
+    const endDate = datas.selectedDate.split(" - ")[1];
+    const year = datas.yearAndSemester.split("/")[0];
+    const semester = datas.yearAndSemester.split("/")[1];
 
     const editDataSendToServer = {
-      moduleName: data.moduleName,
+      moduleName: datas.moduleName,
       startPeriod: startDate,
       endPeriod: endDate,
-      hours: data.duration,
+      hours: datas.duration,
       year: year,
       semester: semester,
       crsID: null,
-      instructorID: "65f90efa4ef7a70f80525050",
+      instructorID: staffIDFromHomepage,
     };
 
     console.log("editDataSendToServer", editDataSendToServer);
@@ -123,6 +133,7 @@ const Example = () => {
         editDataSendToServer
       )
       .then((res) => {
+        getModuleID();
         console.log(res);
       })
       .catch((error) => {
@@ -138,22 +149,33 @@ const Example = () => {
     setEditModuleModalOpen(false);
   };
 
-  const handleEditModuleModalSubmit = (data) => {
+  const handleEditModuleModalSubmit = (datas) => {
+    // setModuleDetail((prevState) => {
+    //   const newDataSet = [...prevState];
+    //   // ค้นหา index ของแถวที่ต้องการแก้ไข
+    //   const rowIndex = newDataSet.findIndex((row) => row.crsID === datas.crsID);
+    //   // หากพบแถวที่ต้องการแก้ไข
+    //   if (rowIndex !== -1) {
+    //     // ลบแถวเก่าออกจากข้อมูล
+    //     newDataSet[rowIndex] = datas;
+    //   }
+    //   // ส่งข้อมูลใหม่กลับ
+    //   return newDataSet;
+    // });
+
     setModuleDetail((prevState) => {
       const newDataSet = [...prevState];
-      // ค้นหา index ของแถวที่ต้องการแก้ไข
-      const rowIndex = newDataSet.findIndex((row) => row.crsID === data.crsID);
-      // หากพบแถวที่ต้องการแก้ไข
+
       if (rowIndex !== -1) {
-        // ลบแถวเก่าออกจากข้อมูล
-        newDataSet[rowIndex] = data;
+        console.log("rorwIndex", rowIndex);
+        newDataSet[rowIndex] = datas;
       }
-      // ส่งข้อมูลใหม่กลับ
       return newDataSet;
     });
+
     setAddModuleModalOpen(false);
     console.log(moduleDetail);
-    if (rowData) handleSaveButtonClick(data);
+    if (rowData) handleSaveButtonClick(datas);
     else return;
   };
 
@@ -196,8 +218,7 @@ const Example = () => {
     const newRow = { ...rowDataToDuplicate }; // คัดลอกข้อมูลของแถวที่ต้องการ duplicate
     console.log("row", rowDataToDuplicate);
     setModuleDetail((prevState) => [...prevState, newRow]); // เพิ่มแถวใหม่เข้าไปใน state
-    handleDuplicateModuleModalClose();
-    console.log("newRow", newRow);
+    // console.log("newRow", newRow);
 
     const startDate = newRow.selectedDate.split(" - ")[0];
     const endDate = newRow.selectedDate.split(" - ")[1];
@@ -212,13 +233,16 @@ const Example = () => {
       year: year,
       semester: semester,
       crsID: newRow.crsIDd,
-      instructorID: newRow.instructorID._id,
+      // instructorID: newRow.instructorID._id,
+      instructorID: staffIDFromHomepage,
     };
     axios
       .post(`http://localhost:8000/api/modules/`, duplicateDataSendToServer)
       .then((res) => {
         console.log("res", res);
+        getModuleID();
       });
+    handleDuplicateModuleModalClose();
   };
 
   const handleCheckRowDataToDuplicate = (row) => {
@@ -229,6 +253,7 @@ const Example = () => {
 
   const handleScoringClick = (row) => {
     setData(row);
+    setCookie("row", row);
     navigate("/scoringTable");
   };
 
@@ -250,6 +275,7 @@ const Example = () => {
       {
         accessorKey: "duration",
         header: "จำนวนชั่วโมงเรียน",
+        sortDescFirst: true,
       },
     ],
     []
@@ -270,13 +296,15 @@ const Example = () => {
         grow: false,
       },
     },
-    renderRowActionMenuItems: ({ row }) => (
+    renderRowActionMenuItems: ({ row, closeMenu }) => (
       <Box sx={{ display: "flex", flexDirection: "column" }}>
         <MenuItem
           key="edit"
           onClick={() => {
             setRowData(row.original);
+            setRowIndex(row.index);
             handleCheckRowData(row);
+            closeMenu();
           }}
           sx={{ display: "flex", flexDirection: "row", gap: "1rem" }}
         >
@@ -288,6 +316,7 @@ const Example = () => {
           key="delete"
           onClick={() => {
             handleCheckRowDataForDelete(row);
+            closeMenu();
           }}
           sx={{ display: "flex", flexDirection: "row", gap: "1rem" }}
         >
@@ -299,6 +328,8 @@ const Example = () => {
           key="duplicate"
           onClick={() => {
             handleCheckRowDataToDuplicate(row.original);
+
+            closeMenu();
           }}
           sx={{ display: "flex", flexDirection: "row", gap: "1rem" }}
         >
@@ -312,6 +343,7 @@ const Example = () => {
           onClick={() => {
             console.log("row.ori", row.original);
             handleScoringClick(row.original);
+            closeMenu();
           }}
           sx={{ display: "flex", flexDirection: "row", gap: "1rem" }}
         >

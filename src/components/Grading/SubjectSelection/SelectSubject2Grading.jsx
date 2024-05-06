@@ -34,15 +34,22 @@ export default function SelectSubject2Grading() {
   const [minimumPortion, setMinimumPortion] = useState("");
   const [idFromSelectedSubject, setIdFromSelectedSubject] = useState("");
   const [packedDataList, setPackedDataList] = useState([]);
-  const [cookies] = useCookies([]);
+  const [cookies, setCookie] = useCookies([]);
   const year = cookies["year"];
   const semester = cookies["semester"];
+  const staffIDFromHomepage = cookies["staffIDFromHomepage"];
+
   const { setData } = useContext(DataAcrossPages);
+  const { data } = useContext(DataAcrossPages);
 
   const handleClick = (excelData) => {
     const mergedPackedData = [...packedDataList, excelData, minimumPortion];
     setData(mergedPackedData);
-    console.log("moduleList", mergedPackedData);
+    // setCookie("mergedPackedData", mergedPackedData);
+    setCookie("year", year);
+    setCookie("semester", semester);
+    console.log("mergedPackedData", mergedPackedData);
+
     navigate("/gradeAdjustment");
   };
   const handleDeleteModule = (indexToDelete) => {
@@ -92,15 +99,42 @@ export default function SelectSubject2Grading() {
   };
 
   function getCourse() {
-    axios.get(`http://localhost:8000/api/courses/`).then((response) => {
-      let courseNameAndID = [];
-      response.data.courses.map((names) => {
-        let name = names.crsName;
-        let ID = names._id;
-        courseNameAndID.push({ crsName: name, crsID: ID });
+    let semesterValue = "";
+    switch (semester) {
+      case "ภาคต้น":
+        semesterValue = "1";
+        break;
+      case "ภาคปลาย":
+        semesterValue = "2";
+        break;
+      case "ภาคฤดูร้อน":
+        semesterValue = "3";
+        break;
+      default:
+        semesterValue = "0";
+    }
+
+    axios
+      .get(
+        `http://localhost:8000/api/courses?year=${year}&semester=${semesterValue}`
+      )
+      .then((response) => {
+        let courseNameAndID = [];
+        // console.log(data);
+        response.data.courses.map((item) => {
+          let cID = "";
+          item.coordinators.map((id) => {
+            cID = id._id;
+          });
+          console.log(staffIDFromHomepage);
+          if (staffIDFromHomepage === cID) {
+            let name = item.crsName;
+            let ID = item._id;
+            courseNameAndID.push({ crsName: name, crsID: ID });
+          }
+        });
+        setCourseNameAndID(courseNameAndID);
       });
-      setCourseNameAndID(courseNameAndID);
-    });
   }
 
   useEffect(() => {
@@ -332,31 +366,16 @@ function AddMoreModule({
 }) {
   const [moduleNameAndID, setModuleNameAndID] = useState([]);
   const [selectedModuleName, setSelectedModuleName] = useState("");
-  const [packedData, setPackedData] = useState([]);
+  const [packedPortionData, setPackedPortionData] = useState("");
   const [selectedModulePortion, setSelectedModulePortion] = useState("");
   const [selectedModuleID, setSelectedModuleID] = useState("");
   const [moduleData, setModuleData] = useState({}); // เก็บข้อมูลโมดูลทั้งหมด
 
   function getModules() {
-    let semesterValue = "";
-    switch (semester) {
-      case "ภาคต้น":
-        semesterValue = "1";
-        break;
-      case "ภาคปลาย":
-        semesterValue = "2";
-        break;
-      case "ภาคฤดูร้อน":
-        semesterValue = "3";
-        break;
-      default:
-        semesterValue = "0";
-    }
     axios
-      .get(
-        `http://localhost:8000/api/modules/?year=${year}&semester=${semesterValue}`
-      )
+      .get(`http://localhost:8000/api/modules/allModules`)
       .then((response) => {
+        console.log(response.data);
         let moduleNameAndID = [];
         response.data.modules.map((item) => {
           let name = item.moduleName;
@@ -389,33 +408,21 @@ function AddMoreModule({
       selectedModulePortion !== ""
     );
   };
-
   // กำหนดฟังก์ชัน handlePackedDataChangeLocal เพื่อส่งข้อมูลไปยัง onPackedDataChange เมื่อข้อมูลครบถ้วน
   const handlePackedDataChangeLocal = () => {
     if (isModuleDataComplete()) {
       onPackedDataChange(moduleData);
     }
   };
-
-  const Item = styled(Paper)(({ theme }) => ({
-    padding: theme.spacing(1),
-    paddingLeft: theme.spacing(2),
-    width: 1024,
-  }));
-
-  const handleDeleteButtonClick = () => {
-    onDelete(index); // เรียกใช้ฟังก์ชัน handleDeleteModule ที่ถูกส่งมาจาก SelectSubject2Grading
-  };
-
-  // const handlePackedDataChangeLocal = (newData) => {
-  //   onPackedDataChange(newData);
-  // };
-
   useEffect(() => {
     if (isModuleDataComplete()) {
       handlePackedDataChangeLocal();
     }
   }, [selectedModuleName, selectedModuleID, selectedModulePortion]);
+
+  const handleDeleteButtonClick = () => {
+    onDelete(index); // เรียกใช้ฟังก์ชัน handleDeleteModule ที่ถูกส่งมาจาก SelectSubject2Grading
+  };
 
   // ในฟังก์ชัน handleChange
   const handleChange = (event) => {
@@ -428,7 +435,23 @@ function AddMoreModule({
     handlePackedDataChangeLocal(); // เรียกใช้ handlePackedDataChangeLocal เมื่อมีการเปลี่ยนแปลงในข้อมูล portion
   };
 
-  // Rest of your component code...
+  // const handleBlur = () => {
+  //   console.log("selectedModulePortion : ", selectedModulePortion);
+  //   const newValue = selectedModulePortion;
+  //   setModuleData((prevData) => ({
+  //     ...prevData,
+  //     portion: newValue,
+  //   }));
+  //   setPackedPortionData(selectedModulePortion);
+  //   handlePackedDataChangeLocal();
+  // };
+
+  const Item = styled(Paper)(({ theme }) => ({
+    padding: theme.spacing(1),
+    paddingLeft: theme.spacing(2),
+    width: 1024,
+  }));
+
   return (
     <div style={{ display: "flex", flexDirection: "row", marginTop: "10px" }}>
       <Grid container spacing={1}>
@@ -490,13 +513,14 @@ function AddMoreModule({
                 placeholder="00.00"
                 value={selectedModulePortion}
                 onChange={(event) => {
-                  handleChange(event);
-                  const newValue = event.target.value;
+                  const newValue = selectedModulePortion;
                   setModuleData((prevData) => ({
                     ...prevData,
                     portion: newValue,
                   }));
+                  handleChange(event);
                 }}
+                // onBlur={handleBlur}
                 sx={{
                   width: "85px",
                   display: "flex",

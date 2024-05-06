@@ -2,7 +2,6 @@ import { Routes, Route } from "react-router-dom";
 import { MyProvider } from "./assets/DataAcrossPages";
 import TestAPI from "./components/EverythingTest/TestAPI";
 import Homepage from "./components/Homepage/Hompage";
-import Histogram from "./components/Grading/Histogram/Histogram";
 import AddSubject from "./components/AddSubject/AddSubjectCard/AddSubject";
 import SelectSubject from "./components/AddSubject/SelectSubject/SelectSubject";
 import Table from "./components/Excel/tableTest";
@@ -14,6 +13,8 @@ import ConfirmAddSubject from "./components/AddSubject/ConfirmAddSubject/Confirm
 import ConfirmScore from "./components/Grading/ConfirmScore/ConfirmScore";
 import YearAndSemester from "./components/Grading/SubjectSelection/YearAndSemester";
 import GradingResult from "./components/Grading/ConfirmScore/GradingResult";
+import TickPlacementBars from "./components/Grading/Histogram/TestPlacement";
+import ResponsiveDialog from "./components/EverythingTest/1";
 import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
 import { ThemeProvider, createTheme } from "@mui/material";
 import "./App.css";
@@ -31,7 +32,6 @@ function App() {
         <Routes>
           <Route path="/" element={<Homepage />} />
           <Route path="testAPI" element={<TestAPI />} />
-          <Route path="histogram" element={<Histogram />} />
           <Route path="addSubject" element={<AddSubject />} />
           <Route path="selectSubject" element={<SelectSubject />} />
           <Route path="table" element={<Table />} />
@@ -46,6 +46,8 @@ function App() {
           <Route path="confirmScore" element={<ConfirmScore />} />
           <Route path="yearAndSemester" element={<YearAndSemester />} />
           <Route path="gradingResult" element={<GradingResult />} />
+          <Route path="placement" element={<TickPlacementBars />} />
+          <Route path="responsiveDialog" element={<ResponsiveDialog />} />
         </Routes>
       </ThemeProvider>
     </MyProvider>

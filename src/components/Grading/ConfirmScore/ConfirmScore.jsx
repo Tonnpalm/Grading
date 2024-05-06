@@ -1,9 +1,11 @@
-import { useMemo } from "react";
+import { useEffect, useContext, useState } from "react";
 import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
 import ResponsiveAppBar from "../../AppBar/ButtonAppBar";
+import { MenuItem } from "@mui/material";
+import Modal from "../Histogram/Modal.jsx";
 import { Box, Button, Typography } from "@mui/material";
 import { mkConfig, generateCsv, download } from "export-to-csv";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
@@ -11,126 +13,8 @@ import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import OfflinePinIcon from "@mui/icons-material/OfflinePin";
 import { PinkPallette } from "../../../assets/pallettes";
 import { useNavigate } from "react-router-dom";
-
-const mockData = [
-  {
-    SID: 6334441823,
-    studentName: "นายสมชาย ใจดี",
-    lastName: 75,
-    address: 70,
-    state: 90,
-    country: 68,
-    studentGrade: "B+",
-  },
-  {
-    SID: 6334441923,
-    studentName: "นายสมจิตร ถูกใจ",
-    lastName: 90,
-    address: 80,
-    state: 80,
-    country: 67,
-    studentGrade: "A",
-  },
-  {
-    SID: 6334442023,
-    studentName: "นางสาวสมหญิง จริงใจ",
-    lastName: 85,
-    address: 65,
-    state: 77,
-    country: 55,
-    studentGrade: "B+",
-  },
-  {
-    SID: 6334458523,
-    studentName: "นายสมหมาย ใจรัก",
-    lastName: 82,
-    address: 60,
-    state: 64,
-    country: 97,
-    studentGrade: "B",
-  },
-  {
-    SID: 6334458623,
-    studentName: "นางสาวสมปอง พักใจ",
-    lastName: 72,
-    address: 75,
-    state: 66,
-    country: 90,
-    studentGrade: "C+",
-  },
-  {
-    SID: 6334467623,
-    studentName: "นายพงษ์พัฒน์ ดุจดี",
-    lastName: 52,
-    address: 55,
-    state: 66,
-    country: 60,
-    studentGrade: "D+",
-  },
-  {
-    SID: 6334467723,
-    studentName: "นางสาวรรรรร รรพรรณ",
-    lastName: 42,
-    address: 55,
-    state: 66,
-    country: 80,
-    studentGrade: "C+",
-  },
-  {
-    SID: 6334467823,
-    studentName: "นายบดินทร์ เดชา",
-    lastName: 72,
-    address: 85,
-    state: 76,
-    country: 90,
-    studentGrade: "B+",
-  },
-  {
-    SID: 6334467923,
-    studentName: "นางสาวฤทัย รักสอาด",
-    lastName: 52,
-    address: 85,
-    state: 66,
-    country: 90,
-    studentGrade: "B",
-  },
-  {
-    SID: 6334468023,
-    studentName: "นางสาวพรรณเพ็ญ รักเย็น",
-    lastName: 74,
-    address: 65,
-    state: 96,
-    country: 80,
-    studentGrade: "B",
-  },
-  {
-    SID: 6334478923,
-    studentName: "นายนรชาติ พิทักษ์",
-    lastName: 55,
-    address: 57,
-    state: 66,
-    country: 70,
-    studentGrade: "C",
-  },
-  {
-    SID: 6334478723,
-    studentName: "นายณัฐชัย บัวดำ",
-    lastName: 92,
-    address: 95,
-    state: 86,
-    country: 80,
-    studentGrade: "A",
-  },
-  {
-    SID: 6334489923,
-    studentName: "นางสาวขวัญฤทัย สุขสำราญ",
-    lastName: 72,
-    address: 85,
-    state: 86,
-    country: 60,
-    studentGrade: "B+",
-  },
-];
+import { DataAcrossPages } from "../../../assets/DataAcrossPages";
+import axios from "axios";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -141,12 +25,61 @@ const csvConfig = mkConfig({
 
 const ConfirmScore = () => {
   const navigate = useNavigate();
+  const { data } = useContext(DataAcrossPages);
+  const { setData } = useContext(DataAcrossPages);
+
   const handleExportData = () => {
-    const csv = generateCsv(csvConfig)(mockData);
+    const csv = generateCsv(csvConfig)(data.scoreInTable);
     download(csvConfig)(csv);
   };
-  const columns = useMemo(
-    () => [
+  const [columns, setColumns] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (!data) return;
+    console.log("data", data);
+    // สร้าง columns ที่มีหัวตารางเป็นชื่อ moduleName
+    let countLoop = 0;
+    let uniqueModuleNames = [];
+    data.scoreInTable.map((item) => {
+      Object.keys(item).forEach((key) => {
+        if (
+          key !== "SID" &&
+          key !== "studentName" &&
+          key !== "studentGrade" &&
+          key !== "calculatedTotalScore" &&
+          key !== "roundedTotalScore" &&
+          key !== "sumPortion"
+        ) {
+          if (countLoop <= data.scoreInTable.length) {
+            uniqueModuleNames.push(key);
+          }
+        }
+      });
+    });
+    const uniqueData = Array.from(new Set(uniqueModuleNames));
+    console.log(uniqueData);
+    const moduleNameColumns = uniqueData.map((moduleName) => ({
+      accessorKey: moduleName,
+      header: moduleName,
+      enableSorting: false,
+      enableColumnActions: true,
+      renderColumnActionsMenuItems: ({ closeMenu }) => (
+        <MenuItem
+          key={1}
+          onClick={() => {
+            handleHeaderClick();
+            closeMenu();
+          }}
+        >
+          ดูคะแนน
+        </MenuItem>
+      ),
+    }));
+    const handleHeaderClick = () => {
+      setIsModalOpen(true);
+    };
+    setColumns([
       {
         accessorKey: "rowNumbers",
         header: "ลำดับ",
@@ -169,24 +102,24 @@ const ConfirmScore = () => {
         disableSortBy: true,
         enableColumnActions: false,
       },
+      ...moduleNameColumns, // เพิ่ม columns ที่สร้างจาก moduleName ที่ได้จาก data
       {
-        accessorKey: "lastName",
-        header: "มอดูลที่ 1",
-        enableSorting: false,
+        accessorKey: "calculatedTotalScore",
+        header: "คะแนนรวม",
+        size: 120,
+        enableColumnActions: false,
+        muiTableBodyCellProps: {
+          align: "center",
+        },
       },
       {
-        accessorKey: "address",
-        header: "มอดูลที่ 2",
-        size: 300,
-        enableSorting: false,
-      },
-      {
-        accessorKey: "state",
-        header: "มอดูลที่ 3",
-      },
-      {
-        accessorKey: "country",
-        header: "มอดูลที่ 4",
+        accessorKey: "roundedTotalScore",
+        header: "ปรับคะแนน",
+        size: 120,
+        enableColumnActions: false,
+        muiTableBodyCellProps: {
+          align: "center",
+        },
       },
       {
         accessorKey: "studentGrade",
@@ -197,13 +130,12 @@ const ConfirmScore = () => {
           align: "center",
         },
       },
-    ],
-    []
-  );
+    ]);
+  }, [data.scoreInTable]);
 
   const table = useMaterialReactTable({
     columns,
-    data: mockData,
+    data: data.scoreInTable,
     renderTopToolbarCustomActions: ({ table }) => (
       <Box
         sx={{
@@ -228,12 +160,42 @@ const ConfirmScore = () => {
         </Button>
       </Box>
     ),
+    initialState: {
+      columnPinning: {
+        left: ["rowNumbers", "SID", "studentName"],
+        right: ["calculatedTotalScore", "roundedTotalScore", "studentGrade"],
+      },
+    },
   });
+
+  const handleConfirmButton = () => {
+    let dataToBack = data.shapedData;
+    let used = true;
+    let yearAndSemester = [
+      data.shapedData.year,
+      data.shapedData.semester,
+      data.crsID,
+    ];
+    Object.keys(data.shapedData).forEach((key) => {
+      if (key === "isused") {
+        dataToBack = { ...dataToBack, [key]: used };
+      }
+    });
+
+    axios
+      .post(`http://localhost:8000/api/grades/`, dataToBack)
+      .then((response) => {
+        console.log("success", response.data);
+        setData(yearAndSemester);
+        navigate("/gradingResult");
+      });
+  };
 
   return (
     <div>
       <div>
         <ResponsiveAppBar />
+        {isModalOpen && <Modal onClose={() => setIsModalOpen(false)} />}
       </div>
       <div>
         <Typography
@@ -268,6 +230,10 @@ const ConfirmScore = () => {
                 backgroundColor: PinkPallette.light,
               },
             }}
+            onClick={() => {
+              setData(data.scoreInTable);
+              navigate("/gradeAdjustment");
+            }}
           >
             กลับ
           </Button>
@@ -275,7 +241,7 @@ const ConfirmScore = () => {
             variant="contained"
             endIcon={<OfflinePinIcon />}
             onClick={() => {
-              navigate("/gradingResult");
+              handleConfirmButton();
             }}
             sx={{
               backgroundColor: PinkPallette.main,
