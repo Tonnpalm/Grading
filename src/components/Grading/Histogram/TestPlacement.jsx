@@ -176,6 +176,7 @@ export default function TickPlacementBars() {
         setTickPlacement={setTickPlacement}
         setTickLabelPlacement={setTickLabelPlacement}
       />
+      {console.log(tickPlacement)}
       <BarChart
         dataset={dataset}
         xAxis={[

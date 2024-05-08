@@ -35,6 +35,7 @@ export default function SelectSubject2Grading() {
   const [idFromSelectedSubject, setIdFromSelectedSubject] = useState("");
   const [packedDataList, setPackedDataList] = useState([]);
   const [cookies, setCookie] = useCookies([]);
+  const crsIDToConfirm = cookies["crsIDToConfirm"];
   const year = cookies["year"];
   const semester = cookies["semester"];
   const staffIDFromHomepage = cookies["staffIDFromHomepage"];
@@ -91,6 +92,7 @@ export default function SelectSubject2Grading() {
   };
 
   const handlePackedDataChange = (index, newData) => {
+    console.log(newData);
     setPackedDataList((prevState) => {
       const updatedDataList = [...prevState];
       updatedDataList[index] = newData;
@@ -120,20 +122,27 @@ export default function SelectSubject2Grading() {
       )
       .then((response) => {
         let courseNameAndID = [];
-        // console.log(data);
+        let crsIDToConfirm = [];
+        // console.log(semesterValue);
         response.data.courses.map((item) => {
           let cID = "";
           item.coordinators.map((id) => {
+            // console.log(id);
             cID = id._id;
           });
-          console.log(staffIDFromHomepage);
+          // console.log(staffIDFromHomepage);
+          // console.log(cID);
           if (staffIDFromHomepage === cID) {
             let name = item.crsName;
             let ID = item._id;
-            courseNameAndID.push({ crsName: name, crsID: ID });
+            let crsID = item.crsID;
+            courseNameAndID.push({ crsName: name, crsID: ID, id: crsID });
+            crsIDToConfirm.push(crsID);
           }
         });
         setCourseNameAndID(courseNameAndID);
+        // console.log(crsIDToConfirm);
+        setCookie("crsIDToConfirm", crsIDToConfirm);
       });
   }
 
@@ -198,20 +207,34 @@ export default function SelectSubject2Grading() {
                   disablePortal
                   id="combo-box-demo"
                   options={courseNameAndID.map((names) => {
-                    return names.crsName;
+                    return names.id + " " + names.crsName;
                   })}
                   sx={{ width: 510 }}
                   renderInput={(params) => (
                     <TextField {...params} placeholder="ค้นหารหัส/ชื่อวิชา" />
                   )}
                   onChange={(event, newValue) => {
-                    const selectedCourse = courseNameAndID.find(
-                      (course) => course.crsName === newValue
-                    );
-                    const selectedCrsID = selectedCourse
-                      ? selectedCourse.crsID
-                      : "";
-                    setIdFromSelectedSubject(selectedCrsID); // ตั้งค่า crsID ให้กับ state ใน SelectSubject2Grading
+                    const choice = newValue;
+                    console.log(newValue);
+                    if (choice) {
+                      const selectedCourse = courseNameAndID.find(
+                        (course) => course.id === choice.split(" ")[0]
+                      );
+                      console.log(selectedCourse);
+                      const selectedCrsID = selectedCourse
+                        ? selectedCourse.crsID
+                        : "";
+                      console.log(selectedCrsID);
+                      setIdFromSelectedSubject(selectedCrsID);
+                    }
+                    // const selectedCourse = courseNameAndID.find(
+                    //   (course) => course.id === choice.split(" ")[0]
+                    // );
+                    // console.log(selectedCourse);
+                    // const selectedCrsID = selectedCourse
+                    //   ? selectedCourse.crsID
+                    //   : "";
+                    // setIdFromSelectedSubject(selectedCrsID); // ตั้งค่า crsID ให้กับ state ใน SelectSubject2Grading
                   }}
                 />
                 <Typography

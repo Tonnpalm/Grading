@@ -171,7 +171,7 @@ export default function Grading() {
   // const mergedPackedData = cookies["mergedPackedData"];
   const year = cookies["year"];
   const semester = cookies["semester"];
-
+  const crsIDToConfirm = cookies["crsIDToConfirm"];
   const [columns, setColumns] = React.useState([]);
   const [histogramScore, setHistogramScore] = React.useState([]);
   const [scoreInTable, setScoreInTable] = React.useState([]);
@@ -192,14 +192,23 @@ export default function Grading() {
 
   const navigate = useNavigate();
 
+  const getHistory = () => {
+    axios
+      .get(`http://localhost:8000/api/grades/crsID/${crsIDToConfirm}`)
+      .then((res) => {
+        console.log(res.data);
+      });
+  };
+
   const getVersion = () => {
     let crsIDtoCheck = [];
     data.slice(0, data.length - 2).find((item) => {
       crsIDtoCheck.push(item.crsID);
     });
+    console.log(crsIDtoCheck);
 
     axios
-      .get(`http://localhost:8000/api/grades/${crsIDtoCheck[0]}`)
+      .get(`http://localhost:8000/api/grades/courses/${crsIDtoCheck[0]}`)
       .then((res) => {
         console.log(res.data);
         const grade = res.data.grades;
@@ -245,6 +254,7 @@ export default function Grading() {
   };
 
   React.useEffect(() => {
+    getHistory();
     getVersion();
     console.log("version 1", version1);
     console.log("version 2", version2);
@@ -270,7 +280,10 @@ export default function Grading() {
   const sxVersion2 = () => {
     if (version2.length !== 0) {
       if (versionSendToDB === "2") {
-        return { backgroundColor: PinkPallette.main };
+        return {
+          backgroundColor: PinkPallette.main,
+          "&:hover": { backgroundColor: PinkPallette.light },
+        };
       } else {
         return { backgroundColor: GreenPallette.main };
       }
@@ -286,7 +299,10 @@ export default function Grading() {
   const sxVersion3 = () => {
     if (version3.length !== 0) {
       if (versionSendToDB === "3") {
-        return { backgroundColor: PinkPallette.main };
+        return {
+          backgroundColor: PinkPallette.main,
+          "&:hover": { backgroundColor: PinkPallette.light },
+        };
       } else {
         return { backgroundColor: GreenPallette.main };
       }
@@ -759,6 +775,7 @@ export default function Grading() {
     const moduleNameColumns = uniqueModuleNames.map((moduleName) => ({
       accessorKey: moduleName,
       header: moduleName,
+      size: 100,
       enableSorting: false,
       enableColumnActions: true,
       renderColumnActionsMenuItems: ({ closeMenu }) => (
@@ -780,8 +797,7 @@ export default function Grading() {
     setColumns([
       {
         accessorKey: "rowNumbers",
-        header: "ลำดับ",
-        size: 70,
+        size: 10,
         Cell: ({ row }) => row.index + 1,
         enableColumnPinning: true,
         enableSorting: false,
@@ -790,21 +806,22 @@ export default function Grading() {
       {
         accessorKey: "studentName",
         header: "ชื่อ-นามสกุล",
+        size: 50,
         enableSorting: true,
         enableColumnActions: false,
       },
       {
         accessorKey: "SID",
         header: "รหัสนิสิต",
-        size: 120,
+        size: 80,
         disableSortBy: true,
         enableColumnActions: false,
       },
       ...moduleNameColumns, // เพิ่ม columns ที่สร้างจาก moduleName ที่ได้จาก dat
       {
         accessorKey: "calculatedTotalScore",
-        header: "คะแนนรวม",
-        size: 120,
+        header: "total",
+        size: 100,
         enableColumnActions: false,
         muiTableBodyCellProps: {
           align: "center",
@@ -812,8 +829,8 @@ export default function Grading() {
       },
       {
         accessorKey: "roundedTotalScore",
-        header: "ปรับคะแนน",
-        size: 120,
+        header: "rounded",
+        size: 100,
         enableColumnActions: false,
         muiTableBodyCellProps: {
           align: "center",
@@ -821,8 +838,8 @@ export default function Grading() {
       },
       {
         accessorKey: "studentGrade",
-        header: "เกรด",
-        size: 120,
+        header: "grade",
+        size: 80,
         enableColumnActions: false,
         muiTableBodyCellProps: {
           align: "center",
@@ -1006,6 +1023,7 @@ export default function Grading() {
     });
     const shapedData = {
       courses: crsID[0],
+      crsID: crsIDToConfirm,
       modules: modulesWithPortion,
       students: studentData,
       gradeAll: [
@@ -1394,7 +1412,7 @@ export default function Grading() {
                 // },
               ]
             }
-            xAxis={[{ data: y, scaleTyxpe: "linear", min: -0.514, max: 3 }]} // ไม่ได้ใช้ข้อมูล X เนื่องจากต้องการเส้นตรงแนวตั้งเท่านั้น
+            xAxis={[{ data: y, scaleTyxpe: "linear", min: -0.502, max: 3 }]} // ไม่ได้ใช้ข้อมูล X เนื่องจากต้องการเส้นตรงแนวตั้งเท่านั้น
             yAxis={[{ min: -2, max: 2 }]}
           >
             <CartesianAxis
@@ -1999,7 +2017,7 @@ export default function Grading() {
           </Item>
         </Grid>
       </div>
-      <div style={{ width: 1024 }}>
+      <div style={{ width: 1150 }}>
         <MaterialReactTable table={table} />
       </div>
       {moduleScoreModalOpen && (

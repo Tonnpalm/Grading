@@ -375,13 +375,13 @@ const Example = () => {
     ],
     []
   );
-
+  const [rowSelection, setRowSelection] = useState({});
   const table = useMaterialReactTable({
     columns,
     data: excelData,
     createDisplayMode: "modal", // ('modal', and 'custom' are also available)
     editDisplayMode: "modal", // ('modal', 'row', 'cell', and 'custom' are also
-    // enableEditing: true,
+    enableRowSelection: true,
     enableColumnActions: false,
     enableRowActions: true,
     positionActionsColumn: "last",
@@ -393,6 +393,9 @@ const Example = () => {
         grow: false,
       },
     },
+    onRowSelectionChange: setRowSelection,
+    state: { rowSelection },
+    // muiSelectCheckboxProps: ({ row, table }) => console.log(row.original),
     renderRowActions: ({ row }) => (
       <Box sx={{ display: "flex", gap: "1rem" }}>
         <Tooltip title="Edit">
@@ -458,7 +461,40 @@ const Example = () => {
         </Button>
       </Box>
     ),
+    renderTopToolbar: ({ table }) => {
+      const handleDeactivate = () => {
+        table.getSelectedRowModel().flatRows.map((row) => {
+          alert("deactivating " + row.getValue("name"));
+        });
+      };
+      return (
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "flex-end",
+            gap: "0.5rem",
+            paddingTop: "18px",
+            paddingRight: "18px",
+          }}
+        >
+          <Button
+            // sx={{ backgroundColor: PinkPallette.main }}
+            color="error"
+            disabled={!table.getIsSomeRowsSelected()}
+            onClick={handleDeactivate}
+            variant="contained"
+          >
+            ลบแถวที่เลือก
+          </Button>
+        </Box>
+      );
+    },
   });
+  //do something when the row selection changes...
+  useEffect(() => {
+    console.info({ rowSelection }); //read your managed row selection state
+    // console.info(table.getState().rowSelection); //alternate way to get the row selection state
+  }, [rowSelection]);
 
   const VisuallyHiddenInput = styled("input")({
     clip: "rect(0 0 0 0)",

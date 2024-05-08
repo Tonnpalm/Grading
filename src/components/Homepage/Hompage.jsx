@@ -34,7 +34,7 @@ function Homepage() {
     // ตรวจสอบว่ามีรหัสหรือไม่
     // ในกรณีที่มีรหัส ให้ตั้งค่าให้กับ stat
     // ในกรณีที่ไม่มีรหัส ปล่อยให้ state เป็นค่าว่าง
-    const storedCode = "35117"; // รหัสที่ต้องการตรวจสอ[]
+    const storedCode = "35136"; // รหัสที่ต้องการตรวจสอ[]
 
     axios.get(`http://localhost:8000/api/staffs/allStaffs`).then((response) => {
       console.log(response.data);

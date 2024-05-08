@@ -6,7 +6,7 @@ import {
 } from "material-react-table";
 import { Box, Button, Typography } from "@mui/material";
 import "./ModuleTable.css";
-import { Edit } from "@mui/icons-material";
+import { Assignment, Edit } from "@mui/icons-material";
 import { MenuItem } from "@mui/material";
 import ChecklistIcon from "@mui/icons-material/Checklist";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
@@ -29,6 +29,8 @@ const Example = () => {
     useState(false);
   const [idForEdit, setIdForEdit] = useState();
   const [idForDelete, setIdForDelete] = useState();
+  const [idScoreForDelete, setIdScoreForDelete] = useState();
+  const [idForDuplucate, setIdForDuplicate] = useState();
   const [rowDataToDuplicate, setRowDataToDuplicate] = useState();
   const [rowData, setRowData] = useState({});
   const [rowIndex, setRowIndex] = useState();
@@ -182,6 +184,13 @@ const Example = () => {
   const handleCheckRowDataForDelete = (row) => {
     console.log("row.original._id", row.original._id);
     setIdForDelete(row.original._id);
+    axios
+      .get(`http://localhost:8000/api/scores/${row.original._id}`)
+      .then((res) => {
+        const scoreID = res.data.scores._id;
+        console.log(scoreID);
+        setIdScoreForDelete(scoreID);
+      });
     handleDeleteModuleModalOpen();
   };
 
@@ -200,7 +209,12 @@ const Example = () => {
         getModuleID();
       })
       .catch((error) => {
-        console.log("error");
+        console.log("error", error);
+      });
+    axios
+      .delete(`http://localhost:8000/api/scores/${idScoreForDelete}`)
+      .then((res) => {
+        getModuleID();
       });
     handleDeleteModuleModalClose();
   };
@@ -242,13 +256,43 @@ const Example = () => {
         console.log("res", res);
         getModuleID();
       });
+    axios
+      .get(`http://localhost:8000/api/scores/${idForDuplucate}`)
+      .then((res) => {
+        const dupData = {
+          moduleObjectId: idForDuplucate,
+          assignments: res.data.scores.assignments.map((item) => ({
+            accessorKey: item.accessorKey,
+            headerName: item.headerName,
+            nType: item.nType,
+            fullScore: item.fullScore,
+          })),
+          students: [
+            {
+              sID: "",
+              sName: "",
+              totalScore: 0, // เก็บคะแนนรวม
+              scores: {},
+            },
+          ],
+        };
+        axios
+          .post(`http://localhost:8000/api/scores/`, dupData)
+          .then((res) => {
+            console.log("success", res);
+          })
+          .catch((error) => {
+            console.log("ว้ายยย", error);
+          });
+      });
     handleDuplicateModuleModalClose();
   };
 
   const handleCheckRowDataToDuplicate = (row) => {
     handleDuplicateModuleModalOpen(row);
     setRowDataToDuplicate(row);
-    console.log("row.orginal", row);
+    setIdForDuplicate(row._id);
+    console.log("row.orginal", row._id);
   };
 
   const handleScoringClick = (row) => {
@@ -328,7 +372,6 @@ const Example = () => {
           key="duplicate"
           onClick={() => {
             handleCheckRowDataToDuplicate(row.original);
-
             closeMenu();
           }}
           sx={{ display: "flex", flexDirection: "row", gap: "1rem" }}
