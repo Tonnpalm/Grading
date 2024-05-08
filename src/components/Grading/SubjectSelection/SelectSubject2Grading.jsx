@@ -1,6 +1,7 @@
 import { useState, useEffect, useContext } from "react";
 import { DataAcrossPages } from "../../../assets/DataAcrossPages";
 import "./SelectSubject2Grading.css";
+import toast, { Toaster } from "react-hot-toast";
 import ResponsiveAppBar from "../../AppBar/ButtonAppBar";
 import {
   Button,
@@ -35,6 +36,7 @@ export default function SelectSubject2Grading() {
   const [idFromSelectedSubject, setIdFromSelectedSubject] = useState("");
   const [packedDataList, setPackedDataList] = useState([]);
   const [cookies, setCookie] = useCookies([]);
+  const [fileName, setFileName] = useState(""); // เก็บชื่อไฟล์ที่เลือก
   const crsIDToConfirm = cookies["crsIDToConfirm"];
   const year = cookies["year"];
   const semester = cookies["semester"];
@@ -43,20 +45,57 @@ export default function SelectSubject2Grading() {
   const { setData } = useContext(DataAcrossPages);
   const { data } = useContext(DataAcrossPages);
 
-  const handleClick = (excelData) => {
-    const mergedPackedData = [...packedDataList, excelData, minimumPortion];
-    setData(mergedPackedData);
-    // setCookie("mergedPackedData", mergedPackedData);
-    setCookie("year", year);
-    setCookie("semester", semester);
-    console.log("mergedPackedData", mergedPackedData);
+  const notComplete = () =>
+    toast.error("กรุณากรอกข้อมูลให้ครบ", {
+      style: {
+        borderRadius: "10px",
+        background: "red",
+        color: "#fff",
+      },
+    });
 
-    navigate("/gradeAdjustment");
+  const repeatedlySelection = () =>
+    toast.error("กรุณาเลือกมอดูลให้ไม่ซ้ำกัน", {
+      style: {
+        borderRadius: "10px",
+        background: "red",
+        color: "#fff",
+      },
+    });
+
+  const handleClick = (excelData) => {
+    // Check if the module data is complete
+    if (!isModuleDataComplete()) {
+      notComplete(); // Display toast notification
+      return; // Exit function if data is incomplete
+    } else {
+      const mergedPackedData = [...packedDataList, excelData, minimumPortion];
+      setData(mergedPackedData);
+      // setCookie("mergedPackedData", mergedPackedData);
+      setCookie("year", year);
+      setCookie("semester", semester);
+      console.log("mergedPackedData", mergedPackedData);
+
+      navigate("/gradeAdjustment");
+    }
   };
+  // const handleDeleteModule = (indexToDelete) => {
+  //   setModuleList(
+  //     moduleList?.filter((item, index) => index != indexToDelete - 1)
+  //   );
+  // };
   const handleDeleteModule = (indexToDelete) => {
-    setModuleList(
-      moduleList?.filter((item, index) => index != indexToDelete - 1)
+    // อัปเดต moduleList โดยลบข้อมูลใน index ที่ต้องการลบ
+    const updatedModuleList = moduleList.filter(
+      (item, index) => index !== indexToDelete - 1
     );
+    setModuleList(updatedModuleList);
+
+    // อัปเดต packedDataList โดยลบข้อมูลที่เกี่ยวข้องออกไปด้วย
+    const updatedPackedDataList = packedDataList.filter(
+      (item, index) => index !== indexToDelete - 1
+    );
+    setPackedDataList(updatedPackedDataList);
   };
 
   const VisuallyHiddenInput = styled("input")({
@@ -70,8 +109,6 @@ export default function SelectSubject2Grading() {
     whiteSpace: "nowrap",
     width: 1,
   });
-
-  const [fileName, setFileName] = useState(""); // เก็บชื่อไฟล์ที่เลือก
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
@@ -89,6 +126,36 @@ export default function SelectSubject2Grading() {
     setCount(count + 1); // เพิ่มจำนวน Component ที่ต้องการแสดง
     // เพิ่มข้อมูลเปล่าๆ เพื่อรอการกรอกจากผู้ใช้
     setPackedDataList((prevState) => [...prevState, ["", "", "", ""]]);
+  };
+
+  const isModuleDataComplete = () => {
+    // Check if any module has incomplete data or duplicate moduleID
+    return moduleList.every((item, index) => {
+      // Check for incomplete data
+      if (
+        item.moduleName === "" ||
+        item.portion === "" ||
+        minimumPortion === "" ||
+        idFromSelectedSubject === "" ||
+        excelData.length === 0
+      ) {
+        return false;
+      }
+
+      // Check for duplicate moduleID
+      const currentModuleID = item.moduleID;
+      const isDuplicate =
+        moduleList.findIndex(
+          (module, idx) => idx !== index && module.moduleID === currentModuleID
+        ) !== -1;
+
+      if (isDuplicate) {
+        repeatedlySelection(); // Display toast notification for duplicate moduleID
+        return false;
+      }
+
+      return true;
+    });
   };
 
   const handlePackedDataChange = (index, newData) => {
@@ -370,6 +437,7 @@ export default function SelectSubject2Grading() {
                 >
                   ต่อไป
                 </Button>
+                <Toaster />
               </div>
             </div>
           </div>

@@ -15,6 +15,7 @@ import {
   MenuItem,
   FormControl,
   Select,
+  Autocomplete,
 } from "@mui/material";
 import dayjs from "dayjs";
 
@@ -25,6 +26,7 @@ export default function ModuleModal({ open, onClose, onSubmit, data, mode }) {
   const [semester, setSemester] = React.useState(
     data?.yearAndSemester ? data?.yearAndSemester.split("/")[1] : ""
   );
+  const [semesterToShow, setSemesterToShow] = React.useState();
   const [year, setYear] = React.useState(
     data?.yearAndSemester ? data?.yearAndSemester.split("/")[0] : ""
   );
@@ -138,10 +140,14 @@ export default function ModuleModal({ open, onClose, onSubmit, data, mode }) {
     setName("");
     setYear("");
     setSemester("");
+    setSemesterToShow("");
     setDuration("");
     setBeforeFormatStartDate(null); // เคลียร์ค่า selectedDateString เมื่อปิด Modal
     setBeforeFormatEndDate(null);
     onClose();
+  };
+  const handleAutocompleteChange = (event, value) => {
+    setSemester(value);
   };
 
   return (
@@ -170,7 +176,7 @@ export default function ModuleModal({ open, onClose, onSubmit, data, mode }) {
               handleChangeYear(event);
             }}
           />
-          <FormControl variant="standard">
+          {/* <FormControl variant="standard">
             <InputLabel>ภาคการศึกษา</InputLabel>
             <Select
               variant="standard"
@@ -184,7 +190,28 @@ export default function ModuleModal({ open, onClose, onSubmit, data, mode }) {
               <MenuItem value={2}>ภาคปลาย</MenuItem>
               <MenuItem value={3}>ภาคฤดูร้อน</MenuItem>
             </Select>
-          </FormControl>
+          </FormControl> */}
+          <Autocomplete
+            value={semesterToShow}
+            onChange={(event, newValue) => {
+              setSemester(newValue.value);
+              setSemesterToShow(newValue.label);
+            }}
+            options={[
+              { value: 1, label: "ภาคต้น" },
+              { value: 2, label: "ภาคปลาย" },
+              { value: 3, label: "ภาคฤดูร้อน" },
+            ]}
+            // getOptionLabel={(option) => option.label}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="ภาคการศึกษา"
+                variant="standard"
+                placeholder="ภาคการศึกษา"
+              />
+            )}
+          />
           <TextField
             variant="standard"
             label="ระยะเวลาที่สอน (ชั่วโมง)"

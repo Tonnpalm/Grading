@@ -187,9 +187,9 @@ const Example = () => {
     axios
       .get(`http://localhost:8000/api/scores/${row.original._id}`)
       .then((res) => {
-        const scoreID = res.data.scores._id;
-        console.log(scoreID);
-        setIdScoreForDelete(scoreID);
+        if (res.data.scores._id) {
+          setIdScoreForDelete(res.data.scores._id);
+        } else return;
       });
     handleDeleteModuleModalOpen();
   };
@@ -211,11 +211,13 @@ const Example = () => {
       .catch((error) => {
         console.log("error", error);
       });
-    axios
-      .delete(`http://localhost:8000/api/scores/${idScoreForDelete}`)
-      .then((res) => {
-        getModuleID();
-      });
+    if (idScoreForDelete) {
+      axios
+        .delete(`http://localhost:8000/api/scores/${idScoreForDelete}`)
+        .then((res) => {
+          getModuleID();
+        });
+    }
     handleDeleteModuleModalClose();
   };
 
