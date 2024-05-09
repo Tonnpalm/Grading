@@ -323,15 +323,6 @@ const ScoringTable = () => {
         >
           ลบส่วนคะแนน
         </MenuItem>,
-        // <MenuItem
-        //   key={2}
-        //   onClick={() => {
-        //     console.log("totalScore in excelData", excelData);
-        //     closeMenu();
-        //   }}
-        // >
-        //   แก้ไข
-        // </MenuItem>,
       ],
       fullScore: parseInt(newColumnName.score), // เพิ่ม property fullScore เข้าไปในข้อมูลของคอลัมน์ใหม่
     };
@@ -588,7 +579,7 @@ const ScoringTable = () => {
             scores.push("W");
           }
         } else {
-          scores.push(fullScore); // เพิ่มคะแนนรวมในแต่ละแถวเข้าไปใน scores
+          scores.push(fullScore.toFixed(2)); // เพิ่มคะแนนรวมในแต่ละแถวเข้าไปใน scores
         }
       });
       setRowScores(scores); // อัปเดตคะแนนรวมในแต่ละแถว

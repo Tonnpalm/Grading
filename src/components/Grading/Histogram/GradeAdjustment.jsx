@@ -39,6 +39,7 @@ export default function GradeAdjustment() {
         console.log(course[0].crsName);
         setCourseName(course[0].crsName);
         setCourseID(course[0].crsID);
+        setCookie("crsName", course[0].crsName);
       });
   }
 

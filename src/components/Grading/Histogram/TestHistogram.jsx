@@ -29,6 +29,7 @@ import {
   useXScale,
 } from "@mui/x-charts";
 import Modal from "./Modal";
+import HistoryModal from "./HistoryModal";
 import axios from "axios";
 import {
   GreenPallette,
@@ -180,23 +181,46 @@ export default function Grading() {
 
   const [countAmount, setCountAmount] = React.useState({}); // เปลี่ยนการประกาศ countAmount เป็น useState
   const [countAmountMore, setCountAmountMore] = React.useState({}); // เพิ่มการประกาศ useState สำหรับ countAmountMore
-  const [dataToCal, setDataToCal] = React.useState([]); // เพิ่มการประกาศ useState สำหรับ dataToCal
+  const [dataToCal, setDataToCal] = React.useState([]); // เพิ่มการประกาศ useState สำหรับ dataToCa
 
   const [moduleScoreModalOpen, setModuleScoreModalOpen] = React.useState(false);
-
+  const [historyCriteriaOpen, setHistoryCriteriaOpen] = React.useState(false);
+  const [dataToHistoryModal, setDataToHistoryModal] = React.useState();
   const [version1, setVersion1] = React.useState([]);
   const [version2, setVersion2] = React.useState([]);
   const [version3, setVersion3] = React.useState([]);
   const [focusVersion, setFocusVersion] = React.useState();
   const [versionSendToDB, setVersionSendToDB] = React.useState("1");
 
+  const [historyData, setHistoryData] = React.useState([]);
+
   const navigate = useNavigate();
 
   const getHistory = () => {
+    console.log(crsIDToConfirm);
     axios
       .get(`http://localhost:8000/api/grades/crsID/${crsIDToConfirm}`)
       .then((res) => {
-        console.log(res.data);
+        console.log(res.data.grades);
+
+        const yearHistory = res.data.grades.map((item) => item.year);
+        const semesterHistory = res.data.grades.map((item) => item.semester);
+        const gradeAll = res.data.grades.map((item) => item.gradeAll);
+        const isused = res.data.grades.map((item) => item.isused);
+        const combinedHistory = yearHistory
+          .map((year, index) => {
+            if (isused[index] === true) {
+              return {
+                year,
+                semester: semesterHistory[index],
+                criteria: gradeAll[index],
+              };
+            }
+            return null; // ถ้า isused เป็น false ให้ return null
+          })
+          .filter((item) => item !== null); // กรองข้อมูลที่เป็น null ออกไป
+
+        setHistoryData(combinedHistory);
       });
   };
 
@@ -205,12 +229,12 @@ export default function Grading() {
     data.slice(0, data.length - 2).find((item) => {
       crsIDtoCheck.push(item.crsID);
     });
-    console.log(crsIDtoCheck);
+    // console.log(crsIDtoCheck);
 
     axios
       .get(`http://localhost:8000/api/grades/courses/${crsIDtoCheck[0]}`)
       .then((res) => {
-        console.log(res.data);
+        // console.log(res.data);
         const grade = res.data.grades;
 
         grade.map((item) => {
@@ -256,23 +280,43 @@ export default function Grading() {
   React.useEffect(() => {
     getHistory();
     getVersion();
-    console.log("version 1", version1);
-    console.log("version 2", version2);
-    console.log("version 3", version3);
+    // console.log("version 1", version1);
+    // console.log("version 2", version2);
+    // console.log("version 3", version3);
   }, []);
 
   const sxVersion1 = () => {
     if (version1.length !== 0) {
       if (versionSendToDB === "1") {
-        return { backgroundColor: PinkPallette.main };
+        return {
+          marginBottom: "11px",
+          color: "#FFFFFF",
+          backgroundColor: PinkPallette.main,
+          "&:hover": { backgroundColor: PinkPallette.light },
+        };
       } else {
-        return { backgroundColor: GreenPallette.main };
+        return {
+          marginBottom: "11px",
+          color: "#FFFFFF",
+          backgroundColor: GreenPallette.main,
+          "&:hover": { backgroundColor: GreenPallette.light },
+        };
       }
     } else if (version1.length === 0) {
       if (versionSendToDB === "1") {
-        return { backgroundColor: PinkPallette.main };
+        return {
+          marginBottom: "11px",
+          color: "#FFFFFF",
+          backgroundColor: PinkPallette.main,
+          "&:hover": { backgroundColor: PinkPallette.light },
+        };
       } else {
-        return { backgroundColor: GreyPallette.main };
+        return {
+          marginBottom: "11px",
+          color: "#FFFFFF",
+          backgroundColor: GreyPallette.main,
+          "&:hover": { backgroundColor: GreyPallette.light },
+        };
       }
     }
   };
@@ -281,17 +325,34 @@ export default function Grading() {
     if (version2.length !== 0) {
       if (versionSendToDB === "2") {
         return {
+          marginBottom: "11px",
+          color: "#FFFFFF",
           backgroundColor: PinkPallette.main,
           "&:hover": { backgroundColor: PinkPallette.light },
         };
       } else {
-        return { backgroundColor: GreenPallette.main };
+        return {
+          marginBottom: "11px",
+          color: "#FFFFFF",
+          backgroundColor: GreenPallette.main,
+          "&:hover": { backgroundColor: GreenPallette.light },
+        };
       }
     } else if (version2.length === 0) {
       if (versionSendToDB === "2") {
-        return { backgroundColor: PinkPallette.main };
+        return {
+          marginBottom: "11px",
+          color: "#FFFFFF",
+          backgroundColor: PinkPallette.main,
+          "&:hover": { backgroundColor: PinkPallette.light },
+        };
       } else {
-        return { backgroundColor: GreyPallette.main };
+        return {
+          marginBottom: "11px",
+          color: "#FFFFFF",
+          backgroundColor: GreyPallette.main,
+          "&:hover": { backgroundColor: GreyPallette.light },
+        };
       }
     }
   };
@@ -300,20 +361,39 @@ export default function Grading() {
     if (version3.length !== 0) {
       if (versionSendToDB === "3") {
         return {
+          marginBottom: "11px",
+          color: "#FFFFFF",
           backgroundColor: PinkPallette.main,
           "&:hover": { backgroundColor: PinkPallette.light },
         };
       } else {
-        return { backgroundColor: GreenPallette.main };
+        return {
+          marginBottom: "11px",
+          color: "#FFFFFF",
+          backgroundColor: GreenPallette.main,
+          "&:hover": { backgroundColor: GreenPallette.light },
+        };
       }
     } else if (version3.length === 0) {
       if (versionSendToDB === "3") {
-        return { backgroundColor: PinkPallette.main };
+        return {
+          marginBottom: "11px",
+          color: "#FFFFFF",
+          backgroundColor: PinkPallette.main,
+          "&:hover": { backgroundColor: PinkPallette.light },
+        };
       } else {
-        return { backgroundColor: GreyPallette.main };
+        return {
+          marginBottom: "11px",
+          color: "#FFFFFF",
+          backgroundColor: GreyPallette.main,
+          "&:hover": { backgroundColor: GreyPallette.light },
+        };
       }
     }
   };
+
+  // historyCriteriaOpen
 
   const handleModuleScoreModalOpen = () => {
     setModuleScoreModalOpen(true);
@@ -325,6 +405,24 @@ export default function Grading() {
 
   const handleModuleScoreModalSubmit = () => {
     setModuleScoreModalOpen(false);
+  };
+
+  const handleHistoryCriteriaOpen = () => {
+    setHistoryCriteriaOpen(true);
+  };
+
+  const handleHistoryCriteriaClose = () => {
+    setHistoryCriteriaOpen(false);
+  };
+
+  const handleHistoryCriteriaSubmit = () => {
+    setHistoryCriteriaOpen(false);
+  };
+
+  const handleHistoryCriteriaClick = (index) => {
+    console.log(historyData[index]);
+    setDataToHistoryModal(historyData[index]);
+    handleHistoryCriteriaOpen();
   };
 
   function getAllScores() {
@@ -372,11 +470,11 @@ export default function Grading() {
             }
           }
         });
-        console.log("scores_portion", scores_portion);
+        // console.log("scores_portion", scores_portion);
         portionStorage.push(scores_portion);
       });
 
-      console.log("portionStorage", portionStorage);
+      // console.log("portionStorage", portionStorage);
       let studentWithSumPortion = [];
       portionStorage.forEach((item) => {
         item.forEach((temp) => {
@@ -541,7 +639,7 @@ export default function Grading() {
   }
 
   React.useEffect(() => {
-    console.log("data", data);
+    // console.log("data", data);
     getAllScores();
   }, []);
 
@@ -556,7 +654,7 @@ export default function Grading() {
   });
 
   const newAmount = () => {
-    console.log(countAmountMore);
+    // console.log(countAmountMore);
     const dataMap = new Map();
     histogramScore.map((value) => {
       dataMap.set(value, (dataMap.get(value) || 0) + 1);
@@ -574,7 +672,7 @@ export default function Grading() {
       }
     });
 
-    console.log(newCountAmountMore);
+    // console.log(newCountAmountMore);
     // อัพเดต state ของ countAmount และ countAmountMore
     setCountAmount(newCountAmount);
     // setCountAmountMore(newCountAmountMore);
@@ -650,7 +748,7 @@ export default function Grading() {
     sumCountAmount += countAmount[key];
   }
   for (let key in countAmountMore) {
-    console.log(countAmountMore);
+    // console.log(countAmountMore);
     sumCountAmountMore += countAmountMore[key];
   }
 
@@ -709,7 +807,8 @@ export default function Grading() {
       key === "C+" ||
       key === "C" ||
       key === "D+" ||
-      key === "D"
+      key === "D" ||
+      key === "F"
     ) {
       totalAmountWithLetterGrade += countAmount[key];
     }
@@ -771,7 +870,7 @@ export default function Grading() {
     //   .slice(0, data.length - 2)
     //   .map((item) => item.moduleID);
     // console.log(uniqueModuleID);
-    console.log(uniqueModuleNames);
+    // console.log(uniqueModuleNames);
     const moduleNameColumns = uniqueModuleNames.map((moduleName) => ({
       accessorKey: moduleName,
       header: moduleName,
@@ -933,7 +1032,7 @@ export default function Grading() {
 
       countLoop++;
     });
-    console.log("scoreUseInHistogram", scoreUseInHistogram);
+    // console.log("scoreUseInHistogram", scoreUseInHistogram);
     setHistogramScore(scoreUseInHistogram);
     setScoreInTable(newData); // เซ็ตข้อมูลใหม่ให้กับ state
   }
@@ -946,13 +1045,13 @@ export default function Grading() {
     // console.log(headerDetail);
     if (moduleName !== "") {
       Object.keys(moduleIDByName).forEach((key) => {
-        console.log(moduleIDByName[key]);
+        // console.log(moduleIDByName[key]);
         if (key === moduleName) {
           id = moduleIDByName[key];
         }
       });
     }
-    console.log("id", id);
+    // console.log("id", id);
     setHeaderDetail(id);
     handleModuleScoreModalOpen();
   };
@@ -964,6 +1063,7 @@ export default function Grading() {
   // }, [headerDetail, handleHeaderClick]);
 
   const handleSaveVersionButtonClick = (version) => {
+    console.log(crsIDToConfirm);
     let semesterValue = "";
     switch (semester) {
       case "ภาคต้น":
@@ -1023,7 +1123,7 @@ export default function Grading() {
     });
     const shapedData = {
       courses: crsID[0],
-      crsID: crsIDToConfirm,
+      crsID: crsIDToConfirm[0],
       modules: modulesWithPortion,
       students: studentData,
       gradeAll: [
@@ -1069,6 +1169,41 @@ export default function Grading() {
           sAmount: countAmount.D,
           sPercent: percentAmount.D,
         },
+        {
+          cName: "F",
+          sAmount: countAmount.F,
+          sPercent: percentAmount.F,
+        },
+        {
+          cName: "I",
+          sAmount: countAmountMore.I,
+          sPercent: percentAmountMore.I,
+        },
+        {
+          cName: "M",
+          sAmount: countAmountMore.M,
+          sPercent: percentAmountMore.M,
+        },
+        {
+          cName: "W",
+          sAmount: countAmountMore.W,
+          sPercent: percentAmountMore.W,
+        },
+        {
+          cName: "S",
+          sAmount: countAmountMore.S,
+          sPercent: percentAmountMore.S,
+        },
+        {
+          cName: "U",
+          sAmount: countAmountMore.U,
+          sPercent: percentAmountMore.V,
+        },
+        {
+          cName: "V",
+          sAmount: countAmountMore.V,
+          sPercent: percentAmountMore.V,
+        },
       ],
       version: version,
       isused: false,
@@ -1077,11 +1212,16 @@ export default function Grading() {
     };
 
     console.log("shapdata", shapedData);
-    axios.post(`http://localhost:8000/api/grades/`, shapedData).then((res) => {
-      console.log("success", res.data);
-      getVersion();
-      getAllScores;
-    });
+    axios
+      .post(`http://localhost:8000/api/grades/`, shapedData)
+      .then((res) => {
+        console.log("success", res.data);
+        getVersion();
+        getAllScores;
+      })
+      .catch((error) => {
+        console.log("error", error);
+      });
   };
   // // สร้าง state เพื่อเก็บค่าจำนวนซ้ำของเกรด I M W S U V ก่อนการเปลี่ยนแปลง
   // const [originalCountAmountMore, setOriginalCountAmountMore] = React.useState({
@@ -1208,7 +1348,7 @@ export default function Grading() {
 
       countLoop++;
     });
-    console.log("scoreUseInHistogram", scoreUseInHistogram);
+    // console.log("scoreUseInHistogram", scoreUseInHistogram);
     setHistogramScore(scoreUseInHistogram);
     setScoreInTable(newData); // เซ็ตข้อมูลใหม่ให้กับ state
   }
@@ -1250,7 +1390,7 @@ export default function Grading() {
       default:
         semesterValue = "0";
     }
-    console.log("scoreTable", scoreInTable);
+    // console.log("scoreTable", scoreInTable);
     let modulesWithPortion = [];
 
     let crsIDtoCheck = [];
@@ -1277,12 +1417,12 @@ export default function Grading() {
           key !== "roundedTotalScore" &&
           key !== "sumPortion"
         ) {
-          console.log("temps", key);
+          // console.log("temps", key);
           moduleOnly[key] = item[key];
         }
       });
 
-      console.log("moduleOnly", moduleOnly);
+      // console.log("moduleOnly", moduleOnly);
       studentData.push({
         sID: item.SID,
         sName: item.studentName,
@@ -1299,6 +1439,7 @@ export default function Grading() {
     });
     const shapedData = {
       courses: crsID[0],
+      crsID: crsIDToConfirm[0],
       modules: modulesWithPortion,
       students: studentData,
       gradeAll: [
@@ -1343,6 +1484,41 @@ export default function Grading() {
           cScore: cutOffGradeD,
           sAmount: countAmount.D,
           sPercent: percentAmount.D,
+        },
+        {
+          cName: "F",
+          sAmount: countAmount.F,
+          sPercent: percentAmount.F,
+        },
+        {
+          cName: "I",
+          sAmount: countAmountMore.I,
+          sPercent: percentAmountMore.I,
+        },
+        {
+          cName: "M",
+          sAmount: countAmountMore.M,
+          sPercent: percentAmountMore.M,
+        },
+        {
+          cName: "W",
+          sAmount: countAmountMore.W,
+          sPercent: percentAmountMore.W,
+        },
+        {
+          cName: "S",
+          sAmount: countAmountMore.S,
+          sPercent: percentAmountMore.S,
+        },
+        {
+          cName: "U",
+          sAmount: countAmountMore.U,
+          sPercent: percentAmountMore.V,
+        },
+        {
+          cName: "V",
+          sAmount: countAmountMore.V,
+          sPercent: percentAmountMore.V,
         },
       ],
       isused: true,
@@ -1412,7 +1588,7 @@ export default function Grading() {
                 // },
               ]
             }
-            xAxis={[{ data: y, scaleTyxpe: "linear", min: -0.502, max: 3 }]} // ไม่ได้ใช้ข้อมูล X เนื่องจากต้องการเส้นตรงแนวตั้งเท่านั้น
+            xAxis={[{ data: y, scaleTyxpe: "linear", min: -0.492, max: 3 }]} // ไม่ได้ใช้ข้อมูล X เนื่องจากต้องการเส้นตรงแนวตั้งเท่านั้น
             yAxis={[{ min: -2, max: 2 }]}
           >
             <CartesianAxis
@@ -1439,13 +1615,14 @@ export default function Grading() {
           // paddingRight: "10%",
         }}
       >
-        <Grid container spacing={2} paddingBottom={8}>
+        <Grid container spacing={2} paddingBottom={2}>
           <Grid item xs={4} md={5}>
             <Item
               style={{
                 textAlign: "center",
                 display: "flex",
                 flexDirection: "column",
+                width: 450,
               }}
             >
               <Grid container spacing={1}>
@@ -1463,7 +1640,8 @@ export default function Grading() {
                 >
                   <Typography>เกณฑ์คะแนน</Typography>
                   <IconButton
-                    color="primary"
+                    color="success"
+                    sx={{ marginTop: -2.5 }}
                     onClick={() => {
                       // setOriginalCountAmountMore();
                       handleSaveCutOffButton();
@@ -1709,6 +1887,7 @@ export default function Grading() {
                 textAlign: "center",
                 display: "flex",
                 flexDirection: "column",
+                width: 450,
               }}
             >
               <Grid container spacing={2}>
@@ -1716,10 +1895,16 @@ export default function Grading() {
                   <Typography>เกรด</Typography>
                 </Grid>
                 <Grid item xs={3}>
-                  <Typography>จำนวน (คน)</Typography>
+                  <Typography>
+                    จำนวน
+                    <br />
+                    (คน)
+                  </Typography>
                 </Grid>
                 <Grid item xs={3}>
-                  <Typography>คิดเป็น (%)</Typography>
+                  <Typography>
+                    คิดเป็น <br /> (%)
+                  </Typography>
                 </Grid>
               </Grid>
               <Grid container spacing={2} paddingTop={1}>
@@ -1842,8 +2027,15 @@ export default function Grading() {
               </Grid>
             </Item>
           </Grid>
-          <Grid item xs={4} md={2}>
-            <Item>
+          <Grid item xs={4} md={2} sx={{ marginLeft: "90px" }}>
+            <Item
+              style={{
+                textAlign: "center",
+                display: "flex",
+                flexDirection: "column",
+                width: 155,
+              }}
+            >
               <Button
                 sx={sxVersion1}
                 onClick={() => {
@@ -1876,8 +2068,7 @@ export default function Grading() {
               >
                 เวอร์ชัน 1
               </Button>
-            </Item>
-            <Item>
+
               <Button
                 sx={sxVersion2}
                 onClick={() => {
@@ -1910,8 +2101,7 @@ export default function Grading() {
               >
                 เวอร์ชัน 2
               </Button>
-            </Item>
-            <Item>
+
               <Button
                 sx={sxVersion3}
                 onClick={() => {
@@ -1945,19 +2135,96 @@ export default function Grading() {
                 เวอร์ชัน 3
               </Button>
             </Item>
-            <Button
-              variant="contained"
-              color="success"
-              sx={{
-                marginTop: 43,
-                marginLeft: 7,
-              }}
-              onClick={() => {
-                handleSaveVersionButtonClick(versionSendToDB);
-              }}
+
+            {/* <Box sx={{ width: "110px", maxHeight: "250px" }}> */}
+            <Box
+              sx={(theme) => ({
+                display: "flex",
+                flexDirection: "column",
+                justifyItems: "center",
+                width: 170,
+
+                "& > div": {
+                  overflow: "auto hidden",
+                  "&::-webkit-scrollbar": {
+                    height: 250,
+                    WebkitAppearance: "none",
+                  },
+                  "&::-webkit-scrollbar-thumb": {
+                    borderRadius: 8,
+                    border: "2px solid",
+                    borderColor: theme.palette.mode === "dark" ? "" : "#E7EBF0",
+                    backgroundColor: "rgba(0 0 0 / 0.5)",
+                  },
+                },
+              })}
             >
-              บันทึก
-            </Button>
+              <Typography
+                sx={{
+                  paddingBlock: 2,
+                  marginLeft: -0.5,
+                  justifyContent: "center",
+                }}
+              >
+                ผลการตัดเกรดย้อนหลัง
+              </Typography>
+              {/* <Button variant="contained">Test</Button>
+              <Button variant="contained">Test</Button>
+              <Button variant="contained">Test</Button>
+              <Button variant="contained">Test</Button>
+              <Button variant="contained">Test</Button>
+              <Button variant="contained">Test</Button>
+              <Button variant="contained">Test</Button>
+              <Button variant="contained">Test</Button>
+              <Button variant="contained">Test</Button> */}
+              {/* {historyData.map((historyItem, index) => (
+                <>
+                  <Item
+                    style={{
+                      textAlign: "center",
+                      display: "flex",
+                      flexDirection: "column",
+                      width: 100,
+                    }}
+                  >
+                    <Button
+                      key={index}
+                      sx={{
+                        color: "#FFFFFF",
+                        backgroundColor: GreenPallette.main,
+                        "&:hover": { backgroundColor: GreenPallette.light },
+                      }}
+                    >
+                      {historyItem.year} / {historyItem.semester}
+                    </Button>
+                  </Item>
+                </>
+              ))} */}
+              <Item
+                style={{
+                  textAlign: "center",
+                  display: "flex",
+                  flexDirection: "column",
+                  width: 155,
+                  height: 250,
+                }}
+              >
+                {historyData.map((historyItem, index) => (
+                  <Button
+                    key={index}
+                    sx={{
+                      color: "#FFFFFF",
+                      marginBottom: "10px",
+                      backgroundColor: GreenPallette.main,
+                      "&:hover": { backgroundColor: GreenPallette.light },
+                    }}
+                    onClick={() => handleHistoryCriteriaClick(index)}
+                  >
+                    {historyItem.year}/{historyItem.semester}
+                  </Button>
+                ))}
+              </Item>
+            </Box>
           </Grid>
         </Grid>
       </div>
@@ -1965,14 +2232,20 @@ export default function Grading() {
         style={{
           display: "flex",
           justifyContent: "flex-start",
-          marginTop: "-109px",
-          marginBottom: "30px",
         }}
       >
-        <Grid style={{ maxWidth: "1024px" }}>
+        <Grid
+          style={{
+            maxWidth: "1324px",
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+          }}
+          paddingBottom={2}
+        >
           <Item
             style={{
-              width: 820,
+              width: 954,
               display: "flex",
               flexDirection: "row",
               textAlign: "center",
@@ -2015,6 +2288,21 @@ export default function Grading() {
               </Grid>
             </Grid>
           </Item>
+          <Grid sx={{ marginLeft: "20px" }}>
+            <Button
+              variant="contained"
+              color="success"
+              sx={{
+                height: "37px",
+                marginLeft: 8,
+              }}
+              onClick={() => {
+                handleSaveVersionButtonClick(versionSendToDB);
+              }}
+            >
+              บันทึก
+            </Button>
+          </Grid>
         </Grid>
       </div>
       <div style={{ width: 1150 }}>
@@ -2028,7 +2316,15 @@ export default function Grading() {
           moduleID={headerDetail}
         />
       )}
-      {/* </div> */}
+      {historyCriteriaOpen && (
+        <HistoryModal
+          open={historyCriteriaOpen}
+          onClose={handleHistoryCriteriaClose}
+          onSubmit={handleHistoryCriteriaSubmit}
+          historyData={dataToHistoryModal}
+        />
+      )}
+
       <div
         style={{
           // paddingLeft: "10%",

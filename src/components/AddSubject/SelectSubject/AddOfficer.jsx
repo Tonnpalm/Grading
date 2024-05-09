@@ -30,6 +30,7 @@ const Example = () => {
   const [crsID, setCrsID] = useState();
   const [rowData, setRowData] = useState({});
   const [rowIndex, setRowIndex] = useState();
+  const [countNum, setCountNum] = useState(0);
 
   const navigate = useNavigate();
   const [cookies] = useCookies([]);
@@ -148,20 +149,6 @@ const Example = () => {
         semesterValue = "0";
     }
 
-    const courseDetail = {
-      coursesData: [
-        {
-          crsID: data.crsID,
-          crsName: data.crsName,
-          crsSec: data.crsSec,
-          crsCre: data.crsCre,
-          year: year.toString(),
-          semester: semesterValue,
-          coordinators: { staffID: staffIDs },
-        },
-      ],
-    };
-
     const coursesData = {
       crsID: data.crsID,
       crsName: data.crsName,
@@ -172,7 +159,7 @@ const Example = () => {
       coordinators: { staffID: staffIDs },
     };
 
-    console.log("courseDetail", courseDetail);
+    // console.log("courseDetail", courseDetail);
 
     if (state === "add") {
       axios
@@ -326,9 +313,66 @@ const Example = () => {
       const excelData = XLSX.utils.sheet_to_json(worksheet, { header: 2 });
       console.log("excelData", excelData);
       setExcelData(excelData);
+      setCountNum(countNum + 1);
     };
 
     reader.readAsArrayBuffer(file);
+    // sendExcelDataToDB();
+  };
+
+  // ใช้ useEffect เพื่อดำเนินการหลังจากที่ค่า state ถูกอัพเดต
+  useEffect(() => {
+    if (excelData.length > 0) {
+      // เรียก sendExcelDataToDB() เมื่อ excelData มีค่า
+      sendExcelDataToDB();
+    }
+  }, [countNum]);
+
+  const sendExcelDataToDB = () => {
+    let semesterValue = "";
+    switch (semester) {
+      case "ภาคต้น":
+        semesterValue = "1";
+        break;
+      case "ภาคปลาย":
+        semesterValue = "2";
+        break;
+      case "ภาคฤดูร้อน":
+        semesterValue = "3";
+        break;
+      default:
+        semesterValue = "0";
+    }
+    // ตรวจสอบว่า staffIDs ถูกกำหนดมาหรือไม่
+    let staffIDs = [];
+    if (typeof staffIDs !== "undefined" && staffIDs !== null) {
+      staffIDs = [];
+    }
+
+    const courseDetail = {
+      coursesData: excelData.map((item) => ({
+        crsID: item.crsID,
+        crsName: item.crsName,
+        crsSec: item.crsSec,
+        crsCre: item.crsCre,
+        year: year.toString(),
+        semester: semesterValue,
+        coordinators: { staffID: staffIDs },
+      })),
+    };
+
+    console.log(courseDetail);
+    axios
+      .post(`http://localhost:8000/api/courses/many`, courseDetail)
+      .then((res) => {
+        console.log(courseDetail);
+        console.log("success", res);
+        getCoursesID();
+        // console.log("crsID", crsID);
+      })
+      .catch((error) => {
+        console.log("error", error);
+      });
   };
 
   const columns = useMemo(
@@ -382,6 +426,7 @@ const Example = () => {
     createDisplayMode: "modal", // ('modal', and 'custom' are also available)
     editDisplayMode: "modal", // ('modal', 'row', 'cell', and 'custom' are also
     enableRowSelection: true,
+    positionToolbarAlertBanner: "bottom",
     enableColumnActions: false,
     enableRowActions: true,
     positionActionsColumn: "last",
@@ -395,7 +440,6 @@ const Example = () => {
     },
     onRowSelectionChange: setRowSelection,
     state: { rowSelection },
-    // muiSelectCheckboxProps: ({ row, table }) => console.log(row.original),
     renderRowActions: ({ row }) => (
       <Box sx={{ display: "flex", gap: "1rem" }}>
         <Tooltip title="Edit">
@@ -461,26 +505,43 @@ const Example = () => {
         </Button>
       </Box>
     ),
-    renderTopToolbar: ({ table }) => {
+    renderTopToolbarCustomActions: ({ table }) => {
       const handleDeactivate = () => {
+        let courseIDToDelete = [];
         table.getSelectedRowModel().flatRows.map((row) => {
-          alert("deactivating " + row.getValue("name"));
+          courseIDToDelete.push(row.original._id);
         });
+        const crssObjID = {
+          ids: courseIDToDelete,
+        };
+        axios
+          .delete(`http://localhost:8000/api/courses/many`, { data: crssObjID })
+          .then((res) => {
+            console.log(crssObjID);
+            console.log("success", res);
+            getStaffs();
+            getCourses();
+            setRowSelection({});
+          })
+          .catch((error) => {
+            console.log("error", error);
+          });
       };
       return (
         <Box
           sx={{
+            ml: "auto",
             display: "flex",
             justifyContent: "flex-end",
             gap: "0.5rem",
-            paddingTop: "18px",
-            paddingRight: "18px",
           }}
         >
           <Button
             // sx={{ backgroundColor: PinkPallette.main }}
             color="error"
-            disabled={!table.getIsSomeRowsSelected()}
+            disabled={
+              !table.getIsSomeRowsSelected() && !table.getIsAllRowsSelected()
+            }
             onClick={handleDeactivate}
             variant="contained"
           >

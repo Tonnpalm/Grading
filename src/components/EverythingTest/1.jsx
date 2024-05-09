@@ -1,106 +1,69 @@
-import React, { useState, useEffect } from "react";
+import { useMemo } from "react";
 import {
-  Grid,
-  Paper,
-  TextField,
-  Typography,
-  Button,
-  Box,
-  IconButton,
-} from "@mui/material";
-import { styled } from "@mui/material/styles";
+  MaterialReactTable,
+  useMaterialReactTable,
+} from "material-react-table";
+import { data } from "./makeData";
+import { MenuItem } from "@mui/material";
 
-const data = [1, 2, 3, 4];
+const Example = () => {
+  const columns = useMemo(
+    () => [
+      {
+        accessorKey: "id",
+        header: "ID",
+        enableColumnPinning: false, //disable column pinning for this column
 
-const CreateComponentByWantedAmount = () => {
-  const [count, setCount] = useState(0);
-
-  useEffect(() => {
-    if (count < data.length) {
-      setCount((prevCount) => prevCount + 1);
-    }
-  }, [count]);
-
-  const Item = styled(Paper)(({ theme }) => ({
-    backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
-    ...theme.typography.body2,
-    padding: theme.spacing(1),
-    alignContent: "center",
-
-    color: theme.palette.text.secondary,
-  }));
-
-  return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "row",
-        justifyContent: "center",
-        fontSize: 40,
-      }}
-    >
-      {data.slice(0, count).map((item, index) => (
-        <Typography key={index}>{item}</Typography>
-      ))}
-
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "flex-start",
-          // marginTop: "-109px",
-          // marginBottom: "30px",
-        }}
-      >
-        <Grid style={{ maxWidth: "1024px" }}>
-          <Item
-            style={{
-              width: 820,
-              display: "flex",
-              flexDirection: "row",
-              textAlign: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Grid
-              container
-              spacing={3.5}
-              paddingLeft={"10px"}
-              paddingBottom={"10px"}
-            >
-              <Grid item xs={1}>
-                <Typography sx={{ paddingTop: "10px" }}>Max</Typography>
-              </Grid>
-              <Grid item xs={2}>
-                <Typography sx={{ paddingTop: "10px" }}>maxScore</Typography>
-              </Grid>
-              <Grid item xs={1}>
-                <Typography sx={{ paddingTop: "10px" }}>Min</Typography>
-              </Grid>
-              <Grid item xs={2}>
-                <Typography sx={{ paddingTop: "10px" }}>minScore</Typography>
-              </Grid>
-              <Grid item xs={1}>
-                <Typography sx={{ paddingTop: "10px" }}>Mean</Typography>
-              </Grid>
-              <Grid item xs={2}>
-                <Typography sx={{ paddingTop: "10px" }}>
-                  meanScore.toFixed(2)
-                </Typography>
-              </Grid>
-              <Grid item xs={1}>
-                <Typography sx={{ paddingTop: "10px" }}>S.D.</Typography>
-              </Grid>
-              <Grid item xs={2}>
-                <Typography sx={{ paddingTop: "10px" }}>
-                  sd.toFixed(2)
-                </Typography>
-              </Grid>
-            </Grid>
-          </Item>
-        </Grid>
-      </div>
-    </div>
+        size: 50,
+      },
+      //column definitions...
+      {
+        accessorKey: "firstName",
+        header: "First Name",
+      },
+      {
+        accessorKey: "middleName",
+        header: "Middle Name",
+      },
+      {
+        accessorKey: "lastName",
+        header: "Last Name",
+      },
+      {
+        accessorKey: "address",
+        header: "Address",
+        size: 300,
+      },
+      //end
+      {
+        accessorKey: "city", //this column gets pinned to the right by default because of the initial state,
+        header: "City",
+      },
+      {
+        accessorKey: "state", //this column gets pinned left by default because of the the initial state,
+        header: "State",
+      },
+      {
+        accessorKey: "country",
+        header: "Country",
+      },
+    ],
+    []
   );
+
+  const table = useMaterialReactTable({
+    columns,
+    data,
+    enableColumnPinning: true,
+    // enableRowActions: true,
+    layoutMode: "grid-no-grow", //constant column widths
+    // renderRowActionMenuItems: () => [<MenuItem key="action">Action</MenuItem>],
+    initialState: {
+      columnPinning: { left: ["mrt-row-actions", "state"], right: ["city"] },
+    },
+  });
+
+  return <MaterialReactTable table={table} />;
 };
 
-export default CreateComponentByWantedAmount;
+export default Example;

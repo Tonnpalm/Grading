@@ -7,6 +7,7 @@ export const PinkPallette = {
 
 export const GreenPallette = {
   main: "#11D500",
+  light: "#A0FF98",
 };
 
 export const GreyPallette = {

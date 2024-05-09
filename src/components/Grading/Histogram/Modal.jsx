@@ -12,6 +12,7 @@ import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import CloseIcon from "@mui/icons-material/Close";
 import Slide from "@mui/material/Slide";
+import { PinkPallette } from "../../../assets/pallettes";
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -144,7 +145,7 @@ export default function Modal({ open, onClose, onSubmit, moduleID }) {
 
   return (
     <Dialog fullScreen open={open} onClose={onClose}>
-      <AppBar sx={{ position: "relative" }}>
+      <AppBar sx={{ position: "relative", backgroundColor: PinkPallette.main }}>
         <Toolbar>
           <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
             ภาพรวมคะแนน
@@ -173,13 +174,13 @@ export default function Modal({ open, onClose, onSubmit, moduleID }) {
           รายละเอียดคะแนน
         </Typography>
         <div style={{ padding: 30, paddingLeft: 260 }}>
-          <Typography>Max: {maxScore}</Typography>
+          <Typography>Max: {parseFloat(maxScore).toFixed(2)}</Typography>
           {/* <Typography>{maxScore}</Typography> */}
-          <Typography>Min: {minScore}</Typography>
+          <Typography>Min: {parseFloat(minScore).toFixed(2)}</Typography>
           {/* <Typography>{minScore}</Typography> */}
-          <Typography>Mean: {meanScore}</Typography>
+          <Typography>Mean: {parseFloat(meanScore).toFixed(2)}</Typography>
           {/* <Typography>{meanScore}</Typography> */}
-          <Typography>S.D.: {sdScore}</Typography>
+          <Typography>S.D.: {parseFloat(sdScore).toFixed(2)}</Typography>
         </div>
         <div>
           <MaterialReactTable table={table} />

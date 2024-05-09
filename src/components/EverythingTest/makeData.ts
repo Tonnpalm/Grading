@@ -1,127 +1,73 @@
-export type User = {
-    id: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-    state: string;
-  };
-  
-  export const fakeData: User[] = [
-    {
-      id: '9s41rp',
-      firstName: 'Kelvin',
-      lastName: 'Langosh',
-      email: 'Jerod14@hotmail.com',
-      state: 'Ohio',
-    },
-    {
-      id: '08m6rx',
-      firstName: 'Molly',
-      lastName: 'Purdy',
-      email: 'Hugh.Dach79@hotmail.com',
-      state: 'Rhode Island',
-    },
-    {
-      id: '5ymtrc',
-      firstName: 'Henry',
-      lastName: 'Lynch',
-      email: 'Camden.Macejkovic@yahoo.com',
-      state: 'California',
-    },
-    {
-      id: 'ek5b97',
-      firstName: 'Glenda',
-      lastName: 'Douglas',
-      email: 'Eric0@yahoo.com',
-      state: 'Montana',
-    },
-    {
-      id: 'xxtydd',
-      firstName: 'Leone',
-      lastName: 'Williamson',
-      email: 'Ericka_Mueller52@yahoo.com',
-      state: 'Colorado',
-    },
-    {
-      id: 'wzxj9m',
-      firstName: 'Mckenna',
-      lastName: 'Friesen',
-      email: 'Veda_Feeney@yahoo.com',
-      state: 'New York',
-    },
-    {
-      id: '21dwtz',
-      firstName: 'Wyman',
-      lastName: 'Jast',
-      email: 'Melvin.Pacocha@yahoo.com',
-      state: 'Montana',
-    },
-    {
-      id: 'o8oe4k',
-      firstName: 'Janick',
-      lastName: 'Willms',
-      email: 'Delfina12@gmail.com',
-      state: 'Nebraska',
-    },
-  ];
-  
-  //50 us states array
-  export const usStates = [
-    'Alabama',
-    'Alaska',
-    'Arizona',
-    'Arkansas',
-    'California',
-    'Colorado',
-    'Connecticut',
-    'Delaware',
-    'Florida',
-    'Georgia',
-    'Hawaii',
-    'Idaho',
-    'Illinois',
-    'Indiana',
-    'Iowa',
-    'Kansas',
-    'Kentucky',
-    'Louisiana',
-    'Maine',
-    'Maryland',
-    'Massachusetts',
-    'Michigan',
-    'Minnesota',
-    'Mississippi',
-    'Missouri',
-    'Montana',
-    'Nebraska',
-    'Nevada',
-    'New Hampshire',
-    'New Jersey',
-    'New Mexico',
-    'New York',
-    'North Carolina',
-    'North Dakota',
-    'Ohio',
-    'Oklahoma',
-    'Oregon',
-    'Pennsylvania',
-    'Rhode Island',
-    'South Carolina',
-    'South Dakota',
-    'Tennessee',
-    'Texas',
-    'Utah',
-    'Vermont',
-    'Virginia',
-    'Washington',
-    'West Virginia',
-    'Wisconsin',
-    'Wyoming',
-    'Puerto Rico',
-  ];
+export type Person = {
+  id: string;
+  firstName: string;
+  middleName: string;
+  lastName: string;
+  address: string;
+  city: string;
+  state: string;
+  country: string;
+};
 
-  export const staffName = [
-    'ปิง',
-    'ภค',
-    'โฟม'
-  ]
+export const data = [
+  {
+    id: "1",
+    firstName: "Dylan",
+    middleName: "Sprouse",
+    lastName: "Murray",
+    address: "261 Erdman Ford",
+    city: "East Daphne",
+    state: "Kentucky",
+    country: "United States",
+  },
+  {
+    id: "2",
+    firstName: "Raquel",
+    middleName: "Hakeem",
+    lastName: "Kohler",
+    address: "769 Dominic Grove",
+    city: "Columbus",
+    state: "Ohio",
+    country: "United States",
+  },
+  {
+    id: "3",
+    firstName: "Ervin",
+    middleName: "Kris",
+    lastName: "Reinger",
+    address: "566 Brakus Inlet",
+    city: "South Linda",
+    state: "West Virginia",
+    country: "United States",
+  },
+  {
+    id: "4",
+    firstName: "Brittany",
+    middleName: "Kathryn",
+    lastName: "McCullough",
+    address: "722 Emie Stream",
+    city: "Lincoln",
+    state: "Nebraska",
+    country: "United States",
+  },
+  {
+    id: "5",
+    firstName: "Branson",
+    middleName: "John",
+    lastName: "Frami",
+    address: "32188 Larkin Turnpike",
+    city: "Charleston",
+    state: "South Carolina",
+    country: "United States",
+  },
+  {
+    id: "6",
+    firstName: "Brandon",
+    middleName: "Joe",
+    lastName: "Kutch",
+    address: "5660 Kuhn Village",
+    city: "Vancouver",
+    state: "British Columbia",
+    country: "Canada",
+  },
+];

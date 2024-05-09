@@ -278,6 +278,7 @@ const Example = () => {
             },
           ],
         };
+        console.log(dupData);
         axios
           .post(`http://localhost:8000/api/scores/`, dupData)
           .then((res) => {

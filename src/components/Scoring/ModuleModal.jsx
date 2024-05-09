@@ -101,7 +101,7 @@ export default function ModuleModal({ open, onClose, onSubmit, data, mode }) {
   let title = "";
   switch (mode) {
     case "edit":
-      title = "แก้ไขรายวิชา";
+      title = "แก้ไขมอดูล";
       break;
     case "add":
       title = "เพิ่มมอดูล";

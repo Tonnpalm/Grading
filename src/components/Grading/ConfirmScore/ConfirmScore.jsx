@@ -37,7 +37,7 @@ const ConfirmScore = () => {
 
   useEffect(() => {
     if (!data) return;
-    console.log("data", data);
+    console.log("data.shapedata", data.shapedData);
     // สร้าง columns ที่มีหัวตารางเป็นชื่อ moduleName
     let countLoop = 0;
     let uniqueModuleNames = [];
@@ -169,6 +169,7 @@ const ConfirmScore = () => {
   });
 
   const handleConfirmButton = () => {
+    console.log(data.shapedData);
     let dataToBack = data.shapedData;
     let used = true;
     let yearAndSemester = [
