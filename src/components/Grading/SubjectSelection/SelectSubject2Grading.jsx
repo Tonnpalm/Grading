@@ -129,6 +129,7 @@ export default function SelectSubject2Grading() {
   };
 
   const isModuleDataComplete = () => {
+    console.log("ข้อมูลหลังจากเลือกมอดูลแล้ว", moduleList);
     // Check if any module has incomplete data or duplicate moduleID
     return moduleList.every((item, index) => {
       // Check for incomplete data

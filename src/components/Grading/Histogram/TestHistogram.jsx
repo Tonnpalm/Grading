@@ -61,7 +61,6 @@ const Item = styled(Paper)(({ theme }) => ({
   ...theme.typography.body2,
   padding: theme.spacing(1),
   alignContent: "center",
-
   color: theme.palette.text.secondary,
 }));
 
@@ -71,7 +70,7 @@ function CartesianAxis({ cutoff }) {
   const yAxisScale = useYScale();
   const xAxisScale = useXScale();
 
-  const yOrigin = yAxisScale(0);
+  // const yOrigin = yAxisScale(0);
   const xOrigin = xAxisScale(0);
 
   const cutOffGradeA = cutoff.cutOffGradeA;
@@ -81,13 +80,9 @@ function CartesianAxis({ cutoff }) {
   const cutOffGradeC = cutoff.cutOffGradeC;
   const cutOffGradeDPlus = cutoff.cutOffGradeDPlus;
   const cutOffGradeD = cutoff.cutOffGradeD;
-  const cutOffGradeF = cutoff.cutOffGradeF;
 
   return (
     <React.Fragment>
-      {/* {/* <StyledPath d={`M ${left} ${yOrigin} l ${width} 0`} color="primary" /> */}
-      {/* <StyledPath d={`M ${xOrigin} ${top} l 0 ${height}`} color="primary" /> */}
-      {/* cut off Grade A */}
       <line
         x1={xOrigin + cutOffGradeA * 10}
         y1={top + 40}
@@ -163,7 +158,6 @@ export default function Grading() {
   const [cutOffGradeC, setCutOffGradeC] = React.useState(60); // ค่าเริ่มต้นของ cut-off grade C
   const [cutOffGradeDPlus, setCutOffGradeDPlus] = React.useState(55); // ค่าเริ่มต้นของ cut-off grade D+
   const [cutOffGradeD, setCutOffGradeD] = React.useState(50); // ค่าเริ่มต้นของ cut-off grade D
-  const [haveVersion, setHaveVersion] = React.useState(); // ค่าเริ่มต้นของ cut-off grade F
 
   const { setData } = React.useContext(DataAcrossPages);
   const { data } = React.useContext(DataAcrossPages);
@@ -197,12 +191,10 @@ export default function Grading() {
   const navigate = useNavigate();
 
   const getHistory = () => {
-    console.log(crsIDToConfirm);
     axios
       .get(`http://localhost:8000/api/grades/crsID/${crsIDToConfirm}`)
       .then((res) => {
         console.log(res.data.grades);
-
         const yearHistory = res.data.grades.map((item) => item.year);
         const semesterHistory = res.data.grades.map((item) => item.semester);
         const gradeAll = res.data.grades.map((item) => item.gradeAll);
@@ -229,12 +221,11 @@ export default function Grading() {
     data.slice(0, data.length - 2).find((item) => {
       crsIDtoCheck.push(item.crsID);
     });
-    // console.log(crsIDtoCheck);
 
     axios
       .get(`http://localhost:8000/api/grades/courses/${crsIDtoCheck[0]}`)
       .then((res) => {
-        // console.log(res.data);
+        console.log("getVersion", res.data);
         const grade = res.data.grades;
 
         grade.map((item) => {
@@ -280,9 +271,6 @@ export default function Grading() {
   React.useEffect(() => {
     getHistory();
     getVersion();
-    // console.log("version 1", version1);
-    // console.log("version 2", version2);
-    // console.log("version 3", version3);
   }, []);
 
   const sxVersion1 = () => {
@@ -420,7 +408,6 @@ export default function Grading() {
   };
 
   const handleHistoryCriteriaClick = (index) => {
-    console.log(historyData[index]);
     setDataToHistoryModal(historyData[index]);
     handleHistoryCriteriaOpen();
   };
@@ -428,7 +415,7 @@ export default function Grading() {
   function getAllScores() {
     axios.get(`http://localhost:8000/api/scores/`).then((res) => {
       const apiScores = res.data.scores;
-      console.log("ข้อมูลจาก API", apiScores);
+      console.log("getAllScores", apiScores);
       // เพิ่มตัวแปร formattedData เพื่อเก็บข้อมูลที่จะนำเข้าตารา
       const formattedData = [];
       let calTotScore = 0;
@@ -470,11 +457,9 @@ export default function Grading() {
             }
           }
         });
-        // console.log("scores_portion", scores_portion);
         portionStorage.push(scores_portion);
       });
 
-      // console.log("portionStorage", portionStorage);
       let studentWithSumPortion = [];
       portionStorage.forEach((item) => {
         item.forEach((temp) => {
@@ -554,14 +539,49 @@ export default function Grading() {
                   // });
                 });
               }
-              // console.log(modulePortion);
-              // console.log(mergedStudent)
-              if (mergedStudent.sumPortion >= parseFloat(modulePortion)) {
-                // console.log(calTotScore);
+              if (mergedStudent.sumPortion === parseFloat(modulePortion)) {
                 relevantData.map((item) => {
                   if (moduleIDs === item.moduleID) {
                     if (!isNaN(calTotScore)) {
-                      // console.log(relevantData[0].moduleName);
+                      const rowData = {
+                        SID: studentData.SID,
+                        studentName: studentData.studentName,
+                        [item.moduleName]: calTotScore.toFixed(2) || 0,
+                        // sumPortion: parseFloat(modulePortion),
+                      };
+                      // เช็คว่า formattedData มีข้อมูลของนักเรียนนี้อยู่แล้วหรือไม่
+                      const existingStudentIndex = formattedData.findIndex(
+                        (item) => item.SID === rowData.SID
+                      );
+                      if (existingStudentIndex !== -1) {
+                        formattedData[existingStudentIndex][item.moduleName] =
+                          calTotScore.toFixed(2) || 0;
+                      } else {
+                        formattedData.push(rowData);
+                      }
+                    } else {
+                      const rowData = {
+                        SID: studentData.SID,
+                        studentName: studentData.studentName,
+                        [item.moduleName]: calTotScore || 0, // ใช้ชื่อโมดูลเป็น key ในการเก็บคะแนน
+                      };
+                      // เช็คว่า formattedData มีข้อมูลของนักเรียนนี้อยู่แล้วหรือไม่
+                      const existingStudentIndex = formattedData.findIndex(
+                        (item) => item.SID === rowData.SID
+                      );
+                      if (existingStudentIndex !== -1) {
+                        formattedData[existingStudentIndex][item.moduleName] =
+                          calTotScore || 0;
+                      } else {
+                        formattedData.push(rowData);
+                      }
+                    }
+                  }
+                });
+              } else if (mergedStudent.sumPortion > parseFloat(modulePortion)) {
+                relevantData.map((item) => {
+                  if (moduleIDs === item.moduleID) {
+                    if (!isNaN(calTotScore)) {
                       const rowData = {
                         SID: studentData.SID,
                         studentName: studentData.studentName,
@@ -621,14 +641,14 @@ export default function Grading() {
                 });
               }
             } else {
-              // console.log(
-              //   "No relevant data found for student SID:",
-              //   student.sID
-              // );
+              console.log(
+                "No relevant data found for student SID:",
+                student.sID
+              );
             }
           });
         } else {
-          // console.log("No relevant data found for moduleID:", moduleID);
+          console.log("No relevant data found for moduleID:");
         }
       });
       console.log("formattedData", formattedData);
@@ -639,7 +659,6 @@ export default function Grading() {
   }
 
   React.useEffect(() => {
-    // console.log("data", data);
     getAllScores();
   }, []);
 
@@ -654,7 +673,6 @@ export default function Grading() {
   });
 
   const newAmount = () => {
-    // console.log(countAmountMore);
     const dataMap = new Map();
     histogramScore.map((value) => {
       dataMap.set(value, (dataMap.get(value) || 0) + 1);
@@ -672,45 +690,12 @@ export default function Grading() {
       }
     });
 
-    // console.log(newCountAmountMore);
     // อัพเดต state ของ countAmount และ countAmountMore
     setCountAmount(newCountAmount);
     // setCountAmountMore(newCountAmountMore);
 
     // อัพเดต state ของ dataToCal
-    // setDataToCal(histogramScore.filter((value) => typeof value === "number"));
   };
-  // const dataMap = new Map();
-  // histogramScore.forEach((value) => {
-  //   console.log("ค่าในการลูปฮิสโตแกรม", value);
-  //   if (isNaN(value)) {
-  //     dataMap.set(value, (dataMap.get(value) || 0) + 1);
-  //     // console.log("ค่าในการลูปฮิสโตแกรม", value);
-  //   } else {
-  //     dataMap.set(value, (dataMap.get(value) || 0) + 1);
-  //   }
-  // });
-
-  // const [countAmount, setCountAmount] = React.useState({});
-  // // const countAmount = {};
-  // const countAmountMore = {};
-  // const dataToCal = [];
-
-  // histogramScore.forEach((value) => {
-  //   const grade = calculateGradeFromScore(value); // ให้ calculateGradeFromScore เป็นฟังก์ชันที่คำนวณเกรดจากคะแนนที่กำหนด
-  //   countAmount[grade] = (countAmount[grade] || 0) + 1 || 0;
-  //   if (
-  //     grade === "I" ||
-  //     grade === "M" ||
-  //     grade === "W" ||
-  //     grade === "S" ||
-  //     grade === "U" ||
-  //     grade === "V"
-  //   ) {
-  //     countAmountMore[grade] = (countAmountMore[grade] || 0) + 1 || 0;
-  //   }
-  //   dataToCal.push(value);
-  // });
 
   React.useEffect(() => {
     // ใช้ useEffect เพื่อคำนวณ countAmount และ countAmountMore เมื่อ histogramScore มีการเปลี่ยนแปลง
@@ -741,14 +726,12 @@ export default function Grading() {
 
   // ต่อด้วยโค้ดอื่น ๆ ที่ใช้ countAmount, countAmountMore และ dataToCal ในโค้ดอื่น ๆ ตามปกติ
 
-  // console.log(countAmount);
   let sumCountAmount = 0;
   let sumCountAmountMore = 0;
   for (let key in countAmount) {
     sumCountAmount += countAmount[key];
   }
   for (let key in countAmountMore) {
-    // console.log(countAmountMore);
     sumCountAmountMore += countAmountMore[key];
   }
 
@@ -835,7 +818,6 @@ export default function Grading() {
   );
 
   function calculateGradeFromScore(score) {
-    // console.log("เข้าฟังก์ชันเทียบเกรด เพื่อนับจำนวน", score);
     if (score >= cutOffGradeA) return "A";
     else if (score >= cutOffGradeBPlus) return "B+";
     else if (score >= cutOffGradeB) return "B";
@@ -861,16 +843,10 @@ export default function Grading() {
 
   React.useEffect(() => {
     if (!data) return;
-    // console.log("data", data);
     // สร้าง columns ที่มีหัวตารางเป็นชื่อ moduleName
     const uniqueModuleNames = data
       .slice(0, data.length - 2)
       .map((item) => item.moduleName);
-    // const uniqueModuleID = data
-    //   .slice(0, data.length - 2)
-    //   .map((item) => item.moduleID);
-    // console.log(uniqueModuleID);
-    // console.log(uniqueModuleNames);
     const moduleNameColumns = uniqueModuleNames.map((moduleName) => ({
       accessorKey: moduleName,
       header: moduleName,
@@ -881,10 +857,7 @@ export default function Grading() {
         <MenuItem
           key={1}
           onClick={() => {
-            // console.log("moduleName", moduleName);
-            // setHeaderDetail(moduleName);
             handleHeaderClick(moduleName);
-            // handleModuleScoreModalOpen();
             closeMenu();
           }}
         >
@@ -1004,8 +977,7 @@ export default function Grading() {
       } else {
         scoreUseInHistogram.push(totScoreStorage[0]);
       }
-      // console.log("totScoreStorage[0]", totScoreStorage[0]);
-      // คำนวณเกร
+      // คำนวณเกรด
       let grade = ""; // เกรด
       if (Math.round(totalCalScore) >= cutOffGradeA) grade = "A";
       else if (Math.round(totalCalScore) >= cutOffGradeBPlus) grade = "B+";
@@ -1032,7 +1004,6 @@ export default function Grading() {
 
       countLoop++;
     });
-    // console.log("scoreUseInHistogram", scoreUseInHistogram);
     setHistogramScore(scoreUseInHistogram);
     setScoreInTable(newData); // เซ็ตข้อมูลใหม่ให้กับ state
   }
@@ -1042,28 +1013,18 @@ export default function Grading() {
 
   const handleHeaderClick = (moduleName) => {
     let id = "";
-    // console.log(headerDetail);
     if (moduleName !== "") {
       Object.keys(moduleIDByName).forEach((key) => {
-        // console.log(moduleIDByName[key]);
         if (key === moduleName) {
           id = moduleIDByName[key];
         }
       });
     }
-    // console.log("id", id);
     setHeaderDetail(id);
     handleModuleScoreModalOpen();
   };
 
-  // React.useEffect(() => {
-  //   if (headerDetail !== "") {
-  //     handleHeaderClick();
-  //   }
-  // }, [headerDetail, handleHeaderClick]);
-
   const handleSaveVersionButtonClick = (version) => {
-    console.log(crsIDToConfirm);
     let semesterValue = "";
     switch (semester) {
       case "ภาคต้น":
@@ -1078,7 +1039,6 @@ export default function Grading() {
       default:
         semesterValue = "0";
     }
-    // console.log("scoreTable", scoreInTable);
     let modulesWithPortion = [];
 
     data.slice(0, data.length - 2).forEach((item) => {
@@ -1101,12 +1061,10 @@ export default function Grading() {
           key !== "roundedTotalScore" &&
           key !== "sumPortion"
         ) {
-          // console.log("temps", key);
           moduleOnly[key] = item[key];
         }
       });
 
-      // console.log("moduleOnly", moduleOnly);
       studentData.push({
         sID: item.SID,
         sName: item.studentName,
@@ -1116,7 +1074,6 @@ export default function Grading() {
         scoreModule: moduleOnly,
       });
     });
-    // console.log("studentData", studentData);
     let crsID = [];
     data.slice(0, data.length - 2).find((item) => {
       crsID.push(item.crsID);
@@ -1211,7 +1168,6 @@ export default function Grading() {
       semester: semesterValue,
     };
 
-    console.log("shapdata", shapedData);
     axios
       .post(`http://localhost:8000/api/grades/`, shapedData)
       .then((res) => {
@@ -1223,59 +1179,7 @@ export default function Grading() {
         console.log("error", error);
       });
   };
-  // // สร้าง state เพื่อเก็บค่าจำนวนซ้ำของเกรด I M W S U V ก่อนการเปลี่ยนแปลง
-  // const [originalCountAmountMore, setOriginalCountAmountMore] = React.useState({
-  //   I: countAmountMore.I,
-  //   M: countAmountMore.M,
-  //   W: countAmountMore.W,
-  //   S: countAmountMore.S,
-  //   U: countAmountMore.U,
-  //   V: countAmountMore.V,
-  // });
 
-  // // เมื่อมีการเปลี่ยนแปลงใน cut-off ของเกรด A-F
-  // const handleSaveCutOffButton = () => {
-  //   // ใช้ค่าจำนวนซ้ำของเกรด I M W S U V ก่อนการเปลี่ยนแปลงในการคำนวณค่าใหม่ของแต่ละเกรด A-F
-  //   const newCountAmount = {
-  //     A: countAmount.A,
-  //     "B+": countAmount["B+"],
-  //     B: countAmount.B,
-  //     "C+": countAmount["C+"],
-  //     C: countAmount.C,
-  //     "D+": countAmount["D+"],
-  //     D: countAmount.D,
-  //     F: countAmount.F,
-  //   };
-  //   let xx = 0;
-  //   for (let key in originalCountAmountMore) {
-  //     xx += originalCountAmountMore[key];
-  //   }
-  //   // คำนวณค่าใหม่ของแต่ละเกรด A-F โดยไม่รวมค่าจำนวนซ้ำของเกรด I M W S U V ที่คงที่
-  //   // นับค่าเกรดทั้งหมด (รวมเกรดที่ได้และเกรดที่ไม่ได้) และลบค่าจำนวนซ้ำของเกรด I M W S U V ที่คงที่ออก
-  //   newCountAmount.A -= xx;
-  //   newCountAmount["B+"] -= xx;
-  //   newCountAmount.B -= xx;
-  //   newCountAmount["C+"] -= xx;
-  //   newCountAmount.C -= xx;
-  //   newCountAmount["D+"] -= xx;
-
-  //   // อัพเดต state ของค่าจำนวนซ้ำของแต่ละเกรด A-F เพื่อแสดงการเปลี่ยนแปลง
-  //   setCountAmount(newCountAmount);
-
-  //   // อัพเดตค่าจำนวนซ้ำของเกรด I M W S U V ที่คงที่ ให้เป็นค่าปัจจุบัน
-  //   setOriginalCountAmountMore({
-  //     I: countAmountMore.I,
-  //     M: countAmountMore.M,
-  //     W: countAmountMore.W,
-  //     S: countAmountMore.S,
-  //     U: countAmountMore.U,
-  //     V: countAmountMore.V,
-  //   });
-
-  //   // เรียกใช้ฟังก์ชัน handleSaveCutOffButton ที่เขียนไว้ในโค้ดเดิม
-  //   // เพื่ออัพเดต cut-off และคำนวณเกรดใหม่
-  //   handleSaveCutOffButtonX();
-  // };
   // ฟังก์ชันคำนวณเกรด
   function calGradeAfterChangeCriteria() {
     const newData = []; // เก็บข้อมูลใหม่ที่จะเปลี่ยนแปล
@@ -1320,7 +1224,6 @@ export default function Grading() {
       } else {
         scoreUseInHistogram.push(totScoreStorage[0]);
       }
-      // console.log("totScoreStorage[0]", totScoreStorage[0]);
       // คำนวณเกร
       let grade = ""; // เกรด
       if (Math.round(totalCalScore) >= cutOffGradeA) grade = "A";
@@ -1348,7 +1251,6 @@ export default function Grading() {
 
       countLoop++;
     });
-    // console.log("scoreUseInHistogram", scoreUseInHistogram);
     setHistogramScore(scoreUseInHistogram);
     setScoreInTable(newData); // เซ็ตข้อมูลใหม่ให้กับ state
   }
@@ -1390,7 +1292,6 @@ export default function Grading() {
       default:
         semesterValue = "0";
     }
-    // console.log("scoreTable", scoreInTable);
     let modulesWithPortion = [];
 
     let crsIDtoCheck = [];
@@ -1417,12 +1318,10 @@ export default function Grading() {
           key !== "roundedTotalScore" &&
           key !== "sumPortion"
         ) {
-          // console.log("temps", key);
           moduleOnly[key] = item[key];
         }
       });
 
-      // console.log("moduleOnly", moduleOnly);
       studentData.push({
         sID: item.SID,
         sName: item.studentName,
@@ -1525,8 +1424,6 @@ export default function Grading() {
       year: year,
       semester: semesterValue,
     };
-
-    console.log("shapdata", shapedData);
 
     let mergedPackedDatas = {};
 
@@ -2138,25 +2035,11 @@ export default function Grading() {
 
             {/* <Box sx={{ width: "110px", maxHeight: "250px" }}> */}
             <Box
-              sx={(theme) => ({
+              sx={() => ({
                 display: "flex",
                 flexDirection: "column",
                 justifyItems: "center",
                 width: 170,
-
-                "& > div": {
-                  overflow: "auto hidden",
-                  "&::-webkit-scrollbar": {
-                    height: 250,
-                    WebkitAppearance: "none",
-                  },
-                  "&::-webkit-scrollbar-thumb": {
-                    borderRadius: 8,
-                    border: "2px solid",
-                    borderColor: theme.palette.mode === "dark" ? "" : "#E7EBF0",
-                    backgroundColor: "rgba(0 0 0 / 0.5)",
-                  },
-                },
               })}
             >
               <Typography
@@ -2168,38 +2051,6 @@ export default function Grading() {
               >
                 ผลการตัดเกรดย้อนหลัง
               </Typography>
-              {/* <Button variant="contained">Test</Button>
-              <Button variant="contained">Test</Button>
-              <Button variant="contained">Test</Button>
-              <Button variant="contained">Test</Button>
-              <Button variant="contained">Test</Button>
-              <Button variant="contained">Test</Button>
-              <Button variant="contained">Test</Button>
-              <Button variant="contained">Test</Button>
-              <Button variant="contained">Test</Button> */}
-              {/* {historyData.map((historyItem, index) => (
-                <>
-                  <Item
-                    style={{
-                      textAlign: "center",
-                      display: "flex",
-                      flexDirection: "column",
-                      width: 100,
-                    }}
-                  >
-                    <Button
-                      key={index}
-                      sx={{
-                        color: "#FFFFFF",
-                        backgroundColor: GreenPallette.main,
-                        "&:hover": { backgroundColor: GreenPallette.light },
-                      }}
-                    >
-                      {historyItem.year} / {historyItem.semester}
-                    </Button>
-                  </Item>
-                </>
-              ))} */}
               <Item
                 style={{
                   textAlign: "center",
@@ -2207,12 +2058,26 @@ export default function Grading() {
                   flexDirection: "column",
                   width: 155,
                   height: 250,
+                  overflowY: "auto",
+                  "&::-webkit-scrollbar": {
+                    width: "12px", // กำหนดความกว้างของ scrollbar
+                  },
+                  "&::-webkit-scrollbar-thumb": {
+                    backgroundColor: "#888", // กำหนดสีของ scrollbar thumb
+                    borderRadius: "6px", // กำหนดรูปร่างของ scrollbar thumb
+                  },
+                  "&::-webkit-scrollbar-track": {
+                    backgroundColor: "#f1f1f1", // กำหนดสีของ scrollbar track
+                    borderRadius: "6px", // กำหนดรูปร่างของ scrollbar track
+                  },
                 }}
               >
+                {" "}
                 {historyData.map((historyItem, index) => (
                   <Button
                     key={index}
                     sx={{
+                      // width: 130,
                       color: "#FFFFFF",
                       marginBottom: "10px",
                       backgroundColor: GreenPallette.main,

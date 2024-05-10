@@ -202,10 +202,10 @@ const Example = () => {
     setDeleteModuleModalOpen(false);
   };
 
-  const handleDeleteModuleModalSubmit = (row) => {
+  const handleDeleteModuleModalSubmit = () => {
     axios
       .delete(`http://localhost:8000/api/modules/${idForDelete}`)
-      .then((response) => {
+      .then(() => {
         getModuleID();
       })
       .catch((error) => {
@@ -214,14 +214,14 @@ const Example = () => {
     if (idScoreForDelete) {
       axios
         .delete(`http://localhost:8000/api/scores/${idScoreForDelete}`)
-        .then((res) => {
+        .then(() => {
           getModuleID();
         });
     }
     handleDeleteModuleModalClose();
   };
 
-  const handleDuplicateModuleModalOpen = (row) => {
+  const handleDuplicateModuleModalOpen = () => {
     // console.log("data", row);
     setDuplicateModuleModalOpen(true);
   };
@@ -234,7 +234,6 @@ const Example = () => {
     const newRow = { ...rowDataToDuplicate }; // คัดลอกข้อมูลของแถวที่ต้องการ duplicate
     console.log("row", rowDataToDuplicate);
     setModuleDetail((prevState) => [...prevState, newRow]); // เพิ่มแถวใหม่เข้าไปใน state
-    // console.log("newRow", newRow);
 
     const startDate = newRow.selectedDate.split(" - ")[0];
     const endDate = newRow.selectedDate.split(" - ")[1];
@@ -249,45 +248,47 @@ const Example = () => {
       year: year,
       semester: semester,
       crsID: newRow.crsIDd,
-      // instructorID: newRow.instructorID._id,
       instructorID: staffIDFromHomepage,
     };
     axios
       .post(`http://localhost:8000/api/modules/`, duplicateDataSendToServer)
       .then((res) => {
-        console.log("res", res);
+        console.log("success", res);
         getModuleID();
-      });
-    axios
-      .get(`http://localhost:8000/api/scores/${idForDuplucate}`)
-      .then((res) => {
-        const dupData = {
-          moduleObjectId: idForDuplucate,
-          assignments: res.data.scores.assignments.map((item) => ({
-            accessorKey: item.accessorKey,
-            headerName: item.headerName,
-            nType: item.nType,
-            fullScore: item.fullScore,
-          })),
-          students: [
-            {
-              sID: "",
-              sName: "",
-              totalScore: 0, // เก็บคะแนนรวม
-              scores: {},
-            },
-          ],
-        };
-        console.log(dupData);
         axios
-          .post(`http://localhost:8000/api/scores/`, dupData)
-          .then((res) => {
-            console.log("success", res);
-          })
-          .catch((error) => {
-            console.log("ว้ายยย", error);
+          .get(`http://localhost:8000/api/modules/allModules`)
+          .then((response) => {
+            const newModule = response.data.modules;
+            console.log("nweModule", newModule);
+            console.log("data", newModule[newModule.length - 1]._id);
+            axios
+              .get(`http://localhost:8000/api/scores/${idForDuplucate}`)
+              .then((res) => {
+                if (res.data !== null) {
+                  const dupData = {
+                    moduleObjectID: newModule[newModule.length - 1]._id,
+                    assignments: res.data.scores.assignments.map((item) => ({
+                      accessorKey: item.accessorKey,
+                      headerName: item.headerName,
+                      nType: item.nType,
+                      fullScore: item.fullScore,
+                    })),
+                    students: [],
+                  };
+                  console.log(dupData);
+                  axios
+                    .post(`http://localhost:8000/api/scores/`, dupData)
+                    .then((res) => {
+                      console.log("success", res);
+                    })
+                    .catch((error) => {
+                      console.log("ว้ายยย", error);
+                    });
+                }
+              });
           });
       });
+
     handleDuplicateModuleModalClose();
   };
 
@@ -300,7 +301,7 @@ const Example = () => {
 
   const handleScoringClick = (row) => {
     setData(row);
-    setCookie("row", row);
+    setCookie("rows", row);
     navigate("/scoringTable");
   };
 
@@ -398,7 +399,7 @@ const Example = () => {
         </MenuItem>
       </Box>
     ),
-    renderTopToolbarCustomActions: ({ table }) => (
+    renderTopToolbarCustomActions: () => (
       <Button
         variant="contained"
         sx={{

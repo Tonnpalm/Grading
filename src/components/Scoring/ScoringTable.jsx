@@ -51,7 +51,7 @@ const ScoringTable = () => {
   const { setData } = useContext(DataAcrossPages);
   const { data } = useContext(DataAcrossPages);
   const [cookies] = useCookies([]);
-  const row = cookies["row"];
+  const rows = cookies["row"];
   const [emptyArray, setEmptyArray] = useState([]);
   const [scoreDetail, setScoreDetail] = useState([]);
   const [afterUpload, setAfterUpload] = useState(0);
@@ -162,6 +162,7 @@ const ScoringTable = () => {
   const handleSaveButtonClick = () => {
     // console.log("scoreDetail in handleSaveButtonClick", scoreDetail);
     // ตรวจสอบว่ามี totalScore ที่ไม่ได้กำหนดค่าหรือไม่
+    console.log("excelData", excelData);
     if (excelData.some((row) => row.totalScore === undefined)) {
       console.log("มีค่า totalScore ที่ไม่ได้กำหนดค่าในข้อมูล");
       // แสดงข้อความหรือแจ้งเตือนให้ผู้ใช้ทราบว่ามีข้อมูลที่ไม่สมบูรณ์
@@ -170,7 +171,7 @@ const ScoringTable = () => {
     console.log(scoreDetail);
     const dataToSend = {
       // แก่้จาก context --> cookies --> data เป็น row
-      moduleObjectID: row._id,
+      moduleObjectID: rows._id,
       assignments: scoreDetail
         .map((item) => {
           return item.assignments.map((informations) => {
@@ -226,9 +227,9 @@ const ScoringTable = () => {
   let flag = 0;
 
   function getOldScore() {
-    console.log(data._id);
+    console.log(rows._id);
     axios
-      .get(`http://localhost:8000/api/scores/${data._id}`)
+      .get(`http://localhost:8000/api/scores/${rows._id}`)
       .then((response) => {
         console.log("scores.assignments", response.data.scores.assignments);
         console.log("scores.students", response.data.scores.students);
@@ -267,12 +268,6 @@ const ScoringTable = () => {
             ],
           })
         );
-
-        // const columnData = response.data.scores.assignments.map((item) => {
-        //   accessorKey: item.accessorKey,
-        //   headerName: item.accessorKey + " " +"("+item.fullScore+")"
-        //   nType: item.ac
-        // });
 
         const accessorKeyInAPI = newColumns.map((item) => {
           return item.accessorKey;
@@ -414,17 +409,8 @@ const ScoringTable = () => {
       prevColumns.filter((column) => column.accessorKey !== check)
     );
     var newData = excelData.map(({ [check]: removedKey, ...rest }) => rest);
-    console.log(columns);
-    // Object.keys(columns).map((item) => {
-    // if (
-    //   item !== "number" &&
-    //   item !== "ID" &&
-    //   item !== "ชื่อ-นามสกุล" &&
-    //   item !== "totalScore"
-    // ) {
-    //     console.log(item);
-    //   }
-    // });
+    // console.log(columns);
+
     columns.map((item) => {
       if (
         item.accessorKey !== "number" &&
@@ -537,7 +523,7 @@ const ScoringTable = () => {
   });
 
   let semester = "";
-  switch (row.semester) {
+  switch (rows.semester) {
     case "1":
       semester = "ภาคต้น";
       break;
@@ -552,8 +538,6 @@ const ScoringTable = () => {
   }
 
   React.useEffect(() => {
-    console.log("afterUpload", afterUpload);
-    console.log("afterDelete", afterDelete);
     if (afterUpload > 0 || afterDelete > 0) {
       let scores = []; // เก็บคะแนนรวมในแต่ละแถว
       excelData.forEach((rowData) => {
@@ -641,7 +625,7 @@ const ScoringTable = () => {
           style={{ paddingLeft: "10%", paddingRight: "10%", marginTop: "30px" }}
         >
           <Typography>
-            รายวิชา {row.moduleName} {semester} ปีการศึกษา {row.year}
+            รายวิชา {rows.moduleName} {semester} ปีการศึกษา {rows.year}
           </Typography>
         </div>
         <div

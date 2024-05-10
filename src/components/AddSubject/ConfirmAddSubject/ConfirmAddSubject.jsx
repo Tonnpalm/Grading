@@ -3,7 +3,7 @@ import ResponsiveAppBar from "../../AppBar/ButtonAppBar";
 import axios from "axios";
 import TaskAltIcon from "@mui/icons-material/TaskAlt";
 import { GreenPallette, PinkPallette } from "../../../assets/pallettes";
-import { Typography, Button } from "@mui/material";
+import { Typography, Button, Box, Grid } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
 
@@ -13,6 +13,8 @@ function ConfirmAddSubject() {
   const [confirmCrsSec, setConfirmCrsSec] = React.useState([]);
   const [confirmCrsCre, setConfirmCrsCre] = React.useState([]);
   const [confirmCoordinators, setConfirmCoordinators] = React.useState([]);
+
+  const [confirmData, setConfirmData] = React.useState([]);
   const navigate = useNavigate();
 
   const [cookies, setCookie] = useCookies([]);
@@ -42,6 +44,40 @@ function ConfirmAddSubject() {
         console.log("data to show", response.data);
         console.log("data to show with courses", response.data.courses);
 
+        let crsData = [];
+        response.data.courses.map((item) => {
+          let id = item.crsID;
+          let name = item.crsName;
+          let section = item.crsSec;
+          let credit = item.crsCre;
+
+          let coordinators = item.coordinators;
+          if (Array.isArray(coordinators) && coordinators.length > 1) {
+            let staffFullNames = coordinators.map(
+              (item) => `${item.staffName} ${item.staffSurname}`
+            );
+            crsData.push({
+              crsID: id,
+              crsName: name,
+              crsSec: section,
+              crsCre: credit,
+              coordinators: staffFullNames.join(", "),
+            });
+          } else {
+            coordinators.map((item) => {
+              let staffFullName = item.staffName + " " + item.staffSurname;
+              crsData.push({
+                crsID: id,
+                crsName: name,
+                crsSec: section,
+                crsCre: credit,
+                coordinators: staffFullName,
+              });
+            });
+          }
+        });
+        setConfirmData(crsData);
+        console.log(crsData);
         let crsID2Confirm = [];
         response.data.courses.map((ID) => {
           let id = ID.crsID;
@@ -89,7 +125,6 @@ function ConfirmAddSubject() {
             coordinators2Confirm.push(staffFullNames.join(", "));
           } else {
             coordinators.map((name) => {
-              console.log("something", name);
               let staffFullName = name.staffName + " " + name.staffSurname;
               coordinators2Confirm.push(staffFullName);
             });
@@ -128,53 +163,129 @@ function ConfirmAddSubject() {
           <div style={{ display: "flex", flexDirection: "row", marginTop: 30 }}>
             <Typography>
               รหัสวิชา
-              {confirmCrsID.map((id, index) => (
+              {/* {confirmCrsID.map((id, index) => (
                 <React.Fragment key={index}>
                   <br />
                   {id}
                 </React.Fragment>
-              ))}
+              ))} */}
             </Typography>
             <Typography sx={{ marginLeft: 7 }}>
               ชื่อวิชา
-              {confirmCrsName.map((name, index) => (
+              {/* {confirmCrsName.map((name, index) => (
                 <React.Fragment key={index}>
                   <br />
                   {name}
                 </React.Fragment>
-              ))}
+              ))} */}
             </Typography>
             <Typography
               sx={{
-                marginLeft: 7,
+                marginLeft: 10,
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
               }}
             >
               ตอนเรียน
-              {confirmCrsSec.map((section, index) => (
+              {/* {confirmCrsSec.map((section, index) => (
                 <React.Fragment key={index}>
                   <br />
                   {section}
                 </React.Fragment>
-              ))}
+              ))} */}
             </Typography>
-            <Typography sx={{ marginLeft: 7 }}>
+            <Typography sx={{ marginLeft: 3 }}>
               หน่วยกิต
-              {confirmCrsCre.map((credit, index) => (
+              {/* {confirmCrsCre.map((credit, index) => (
                 <React.Fragment key={index}>
                   <br />
                   {credit}
                 </React.Fragment>
-              ))}
+              ))} */}
             </Typography>
             <Typography sx={{ marginLeft: 7 }}>
               ผู้ประสานงาน
-              {confirmCoordinators.map((coordinators, index) => (
+              {/* {confirmCoordinators.map((coordinators, index) => (
                 <React.Fragment key={index}>
                   <br />
                   {coordinators}
+                </React.Fragment>
+              ))} */}
+            </Typography>
+          </div>
+          <div>
+            <Typography sx={{ display: "flex", flexDirection: "column" }}>
+              {confirmData.map((item, index) => (
+                <React.Fragment key={index}>
+                  <br />
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "row",
+                      marginBottom: -2,
+                    }}
+                  >
+                    <Grid container spacing={4}>
+                      <Grid item>
+                        <Typography
+                          sx={{
+                            display: "flex",
+                            flexDirection: "row",
+                            // marginLeft: 12,
+                          }}
+                        >
+                          {item.crsID}
+                        </Typography>
+                      </Grid>
+
+                      <Grid item>
+                        <Typography
+                          sx={{
+                            display: "flex",
+                            flexDirection: "row",
+                            // marginLeft: 10,
+                          }}
+                        >
+                          {item.crsName}
+                        </Typography>
+                      </Grid>
+
+                      <Grid item>
+                        <Typography
+                          sx={{
+                            display: "flex",
+                            flexDirection: "row",
+                            // marginLeft: 10,
+                          }}
+                        >
+                          {item.crsSec}
+                        </Typography>
+                      </Grid>
+                      <Grid item>
+                        <Typography
+                          sx={{
+                            display: "flex",
+                            flexDirection: "row",
+                            // marginLeft: 10,
+                          }}
+                        >
+                          {item.crsCre}
+                        </Typography>
+                      </Grid>
+                      <Grid item>
+                        <Typography
+                          sx={{
+                            display: "flex",
+                            flexDirection: "row",
+                            // marginLeft: 10,
+                          }}
+                        >
+                          {item.coordinators}
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                  </Box>
                 </React.Fragment>
               ))}
             </Typography>

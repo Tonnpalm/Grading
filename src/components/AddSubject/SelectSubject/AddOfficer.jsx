@@ -23,6 +23,8 @@ const Example = () => {
   const [staffs, setStaffs] = useState([]);
   const [addSubjectModalOpen, setAddSubjectModalOpen] = useState(false);
   const [deleteSubjectModalOpen, setDeleteSubjectModalOpen] = useState(false);
+  const [deleteSubjectAllModalOpen, setDeleteSubjectAllModalOpen] =
+    useState(false);
   const [editSubjectModalOpen, setEditSubjectModalOpen] = useState(false);
   const [idForDelete, setIdForDelete] = useState();
   const [idForEdit, setIdForEdit] = useState();
@@ -367,7 +369,8 @@ const Example = () => {
       .then((res) => {
         console.log(courseDetail);
         console.log("success", res);
-        getCoursesID();
+        getCourses();
+        getStaffs();
         // console.log("crsID", crsID);
       })
       .catch((error) => {
@@ -419,6 +422,42 @@ const Example = () => {
     ],
     []
   );
+  const handleDeleteSubjectAllModalOpen = () => {
+    setDeleteSubjectAllModalOpen(true);
+  };
+
+  const handleDeleteSubjectAllModalClose = () => {
+    setDeleteSubjectAllModalOpen(false);
+  };
+  const handleDeleteSubjectAllModalSubmit = () => {
+    // เก็บ ID ของรายวิชาที่เลือกไว้
+    let courseIDToDelete = [];
+    table.getSelectedRowModel().flatRows.map((row) => {
+      courseIDToDelete.push(row.original._id);
+    });
+
+    // ส่ง ID ของรายวิชาที่เลือกไปยัง API เพื่อทำการลบ
+    const crssObjID = {
+      ids: courseIDToDelete,
+    };
+
+    axios
+      .delete(`http://localhost:8000/api/courses/many`, { data: crssObjID })
+      .then((res) => {
+        console.log(crssObjID);
+        console.log("success", res);
+        getStaffs();
+        getCourses();
+        setRowSelection({});
+      })
+      .catch((error) => {
+        console.log("error", error);
+      });
+
+    // ปิด Modal หลังจากที่ดำเนินการเสร็จสิ้น
+    handleDeleteSubjectAllModalClose();
+  };
+
   const [rowSelection, setRowSelection] = useState({});
   const table = useMaterialReactTable({
     columns,
@@ -506,27 +545,27 @@ const Example = () => {
       </Box>
     ),
     renderTopToolbarCustomActions: ({ table }) => {
-      const handleDeactivate = () => {
-        let courseIDToDelete = [];
-        table.getSelectedRowModel().flatRows.map((row) => {
-          courseIDToDelete.push(row.original._id);
-        });
-        const crssObjID = {
-          ids: courseIDToDelete,
-        };
-        axios
-          .delete(`http://localhost:8000/api/courses/many`, { data: crssObjID })
-          .then((res) => {
-            console.log(crssObjID);
-            console.log("success", res);
-            getStaffs();
-            getCourses();
-            setRowSelection({});
-          })
-          .catch((error) => {
-            console.log("error", error);
-          });
-      };
+      // const handleDeactivate = () => {
+      //   let courseIDToDelete = [];
+      //   table.getSelectedRowModel().flatRows.map((row) => {
+      //     courseIDToDelete.push(row.original._id);
+      //   });
+      //   const crssObjID = {
+      //     ids: courseIDToDelete,
+      //   };
+      //   axios
+      //     .delete(`http://localhost:8000/api/courses/many`, { data: crssObjID })
+      //     .then((res) => {
+      //       console.log(crssObjID);
+      //       console.log("success", res);
+      //       getStaffs();
+      //       getCourses();
+      //       setRowSelection({});
+      //     })
+      //     .catch((error) => {
+      //       console.log("error", error);
+      //     });
+      // };
       return (
         <Box
           sx={{
@@ -542,7 +581,7 @@ const Example = () => {
             disabled={
               !table.getIsSomeRowsSelected() && !table.getIsAllRowsSelected()
             }
-            onClick={handleDeactivate}
+            onClick={handleDeleteSubjectAllModalOpen}
             variant="contained"
           >
             ลบแถวที่เลือก
@@ -595,6 +634,15 @@ const Example = () => {
           detail={"คุณยืนยันที่จะลบวิชานี้ใช่หรือไม่"}
           onClose={handleDeleteSubjectModalClose}
           onSubmit={handleDeleteSubjectModalSubmit}
+        />
+      )}
+      {deleteSubjectAllModalOpen && (
+        <ReCheckModal
+          open={deleteSubjectAllModalOpen}
+          title={"ลบรายวิชาที่เลือก"}
+          detail={"คุณยืนยันที่จะลบวิชาที่เลือกใช่หรือไม่"}
+          onClose={handleDeleteSubjectAllModalClose}
+          onSubmit={handleDeleteSubjectAllModalSubmit}
         />
       )}
       <Button
