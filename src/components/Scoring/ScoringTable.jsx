@@ -22,7 +22,7 @@ import { mkConfig, generateCsv, download } from "export-to-csv";
 
 import { PinkPallette } from "../../assets/pallettes";
 import ReCheckModal from "../utility/Recheck";
-import axios from "axios";
+import { axios } from "../../../utils/customAxios";
 import { useNavigate } from "react-router";
 
 const csvConfig = mkConfig({
@@ -213,7 +213,7 @@ const ScoringTable = () => {
     console.log("ข้อมูลที่จะส่งไป DB", dataToSend);
 
     axios
-      .post(`http://localhost:8000/api/scores/`, dataToSend)
+      .post(`/scores/`, dataToSend)
       .then((response) => {
         // ดำเนินการเมื่อส่งข้อมูลสำเร็จ
         console.log("Response from server:", response.data);
@@ -229,7 +229,7 @@ const ScoringTable = () => {
   function getOldScore() {
     console.log(rows._id);
     axios
-      .get(`http://localhost:8000/api/scores/${rows._id}`)
+      .get(`/scores/${rows._id}`)
       .then((response) => {
         console.log("scores.assignments", response.data.scores.assignments);
         console.log("scores.students", response.data.scores.students);

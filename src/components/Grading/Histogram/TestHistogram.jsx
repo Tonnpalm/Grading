@@ -30,7 +30,7 @@ import {
 } from "@mui/x-charts";
 import Modal from "./Modal";
 import HistoryModal from "./HistoryModal";
-import axios from "axios";
+import { axios } from "../../../utils/customAxios";
 import {
   GreenPallette,
   GreyPallette,
@@ -192,7 +192,7 @@ export default function Grading() {
 
   const getHistory = () => {
     axios
-      .get(`http://localhost:8000/api/grades/crsID/${crsIDToConfirm}`)
+      .get(`/grades/crsID/${crsIDToConfirm}`)
       .then((res) => {
         console.log(res.data.grades);
         const yearHistory = res.data.grades.map((item) => item.year);
@@ -223,7 +223,7 @@ export default function Grading() {
     });
 
     axios
-      .get(`http://localhost:8000/api/grades/courses/${crsIDtoCheck[0]}`)
+      .get(`/grades/courses/${crsIDtoCheck[0]}`)
       .then((res) => {
         console.log("getVersion", res.data);
         const grade = res.data.grades;
@@ -413,7 +413,7 @@ export default function Grading() {
   };
 
   function getAllScores() {
-    axios.get(`http://localhost:8000/api/scores/`).then((res) => {
+    axios.get(`/scores/`).then((res) => {
       const apiScores = res.data.scores;
       console.log("getAllScores", apiScores);
       // เพิ่มตัวแปร formattedData เพื่อเก็บข้อมูลที่จะนำเข้าตารา
@@ -1169,7 +1169,7 @@ export default function Grading() {
     };
 
     axios
-      .post(`http://localhost:8000/api/grades/`, shapedData)
+      .post(`/grades/`, shapedData)
       .then((res) => {
         console.log("success", res.data);
         getVersion();

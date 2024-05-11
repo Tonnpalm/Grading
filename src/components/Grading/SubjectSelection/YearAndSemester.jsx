@@ -14,7 +14,7 @@ import { TextField, Button, Box } from "@mui/material";
 import { PinkPallette } from "../../../assets/pallettes";
 import { DataAcrossPages } from "../../../assets/DataAcrossPages";
 import ResponsiveAppBar from "../../AppBar/ButtonAppBar";
-import axios from "axios";
+import { axios } from "../../../utils/customAxios";
 
 const contentSx = {
   textAlign: "right",
@@ -57,7 +57,7 @@ export default function AddSubjectCard() {
 
   const checkYear = (y, s) => {
     axios
-      .get(`http://localhost:8000/api/courses?year=${y}&semester=${s}`)
+      .get(`/courses?year=${y}&semester=${s}`)
       .then((res) => {
         // ตรวจสอบว่าเลขที่นิสิตเป็นตัวเลขจริง ๆ
         const isNumericYear = /^\d+$/.test(y);

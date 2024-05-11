@@ -1,6 +1,6 @@
 import * as React from "react";
 import ResponsiveAppBar from "../../AppBar/ButtonAppBar";
-import axios from "axios";
+import { axios } from "../../../utils/customAxios";
 import TaskAltIcon from "@mui/icons-material/TaskAlt";
 import { GreenPallette, PinkPallette } from "../../../assets/pallettes";
 import { Typography, Button } from "@mui/material";
@@ -23,7 +23,7 @@ function ConfirmAddSubject() {
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:8000/api/grades/?year=${data[0]}&semester=${data[1]}`
+          `/grades/?year=${data[0]}&semester=${data[1]}`
         );
         console.log("data to show", response.data.grades);
         console.log("year&Semester&crsID", data);
@@ -32,7 +32,7 @@ function ConfirmAddSubject() {
             if (data[3] === grade.courses) {
               axios
                 .get(
-                  `http://localhost:8000/api/courses/onceID?year=${data[0]}&semester=${data[1]}&_id=${data[2]}`
+                  `/courses/onceID?year=${data[0]}&semester=${data[1]}&_id=${data[2]}`
                 )
                 .then((res) => {
                   let crsID2Confirm = [];

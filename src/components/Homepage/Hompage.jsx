@@ -16,7 +16,7 @@ import { GreyPallette } from "../../assets/pallettes";
 import { useNavigate } from "react-router-dom";
 import { DataAcrossPages } from "../../assets/DataAcrossPages";
 
-import axios from "axios";
+import { axios } from "../../../utils/customAxios";
 import { useCookies } from "react-cookie";
 
 function Homepage() {
@@ -36,7 +36,7 @@ function Homepage() {
     // ในกรณีที่ไม่มีรหัส ปล่อยให้ state เป็นค่าว่าง
     const storedCode = "34131"; // รหัสที่ต้องการตรวจสอ[]
 
-    axios.get(`http://localhost:8000/api/staffs/allStaffs`).then((response) => {
+    axios.get(`/staffs/allStaffs`).then((response) => {
       console.log(response.data);
       response.data.staffs.map((staff) => {
         if (staff.isRegistraOfficer === true) {

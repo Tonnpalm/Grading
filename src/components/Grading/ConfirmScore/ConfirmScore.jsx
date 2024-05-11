@@ -14,7 +14,7 @@ import OfflinePinIcon from "@mui/icons-material/OfflinePin";
 import { PinkPallette } from "../../../assets/pallettes";
 import { useNavigate } from "react-router-dom";
 import { DataAcrossPages } from "../../../assets/DataAcrossPages";
-import axios from "axios";
+import { axios } from "../../../utils/customAxios.js";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -184,7 +184,7 @@ const ConfirmScore = () => {
     });
 
     axios
-      .post(`http://localhost:8000/api/grades/`, dataToBack)
+      .post(`/grades/`, dataToBack)
       .then((response) => {
         console.log("success", response.data);
         setData(yearAndSemester);

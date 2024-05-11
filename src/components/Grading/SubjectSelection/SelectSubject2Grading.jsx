@@ -24,7 +24,7 @@ import { PinkPallette } from "../../../assets/pallettes";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { useNavigate } from "react-router";
 import * as XLSX from "xlsx";
-import axios from "axios";
+import { axios } from "../../../utils/customAxios";
 import { useCookies } from "react-cookie";
 
 export default function SelectSubject2Grading() {
@@ -186,7 +186,7 @@ export default function SelectSubject2Grading() {
 
     axios
       .get(
-        `http://localhost:8000/api/courses?year=${year}&semester=${semesterValue}`
+        `/courses?year=${year}&semester=${semesterValue}`
       )
       .then((response) => {
         let courseNameAndID = [];
@@ -465,7 +465,7 @@ function AddMoreModule({
 
   function getModules() {
     axios
-      .get(`http://localhost:8000/api/modules/allModules`)
+      .get(`/modules/allModules`)
       .then((response) => {
         console.log(response.data);
         let moduleNameAndID = [];
