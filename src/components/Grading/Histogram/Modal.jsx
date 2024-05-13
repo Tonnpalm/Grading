@@ -83,23 +83,37 @@ export default function Modal({ open, onClose, onSubmit, moduleID }) {
 
         // Process old scores
         const processedData = students.map((student) => {
-          const row = {
-            ID: student.sID,
-            "ชื่อ-นามสกุล": student.sName,
-            totalScore: student.totalScore,
-          };
-          assignments.forEach((assignment) => {
-            row[assignment.accessorKey] =
-              student.scores[assignment.accessorKey] || "";
-          });
-          return row;
+          if (!isNaN(student.totalScore)) {
+            const row = {
+              ID: student.sID,
+              "ชื่อ-นามสกุล": student.sName,
+              totalScore: parseFloat(student.totalScore).toFixed(2),
+            };
+            assignments.forEach((assignment) => {
+              row[assignment.accessorKey] =
+                parseFloat(student.scores[assignment.accessorKey]).toFixed(2) ||
+                "-";
+            });
+            return row;
+          } else {
+            const row = {
+              ID: student.sID,
+              "ชื่อ-นามสกุล": student.sName,
+              totalScore: student.totalScore,
+            };
+            assignments.forEach((assignment) => {
+              row[assignment.accessorKey] =
+                student.scores[assignment.accessorKey] || "-";
+            });
+            return row;
+          }
         });
         setDataInTable(processedData);
 
         const totalScoreToCal = processedData.map((item) => {
           // item.totalScore.filter((value) => typeof value === "number");
           if (!isNaN(item.totalScore)) {
-            return item.totalScore;
+            return parseFloat(item.totalScore);
           } else {
             return 0;
           }
@@ -135,6 +149,7 @@ export default function Modal({ open, onClose, onSubmit, moduleID }) {
     columns,
     data: dataInTable,
     enableColumnPinning: true,
+    paginationDisplayMode: "pages",
     initialState: {
       columnPinning: {
         left: ["number", "ID", "ชื่อ-นามสกุล"],
@@ -142,9 +157,16 @@ export default function Modal({ open, onClose, onSubmit, moduleID }) {
       },
     },
   });
+  const fullWidth = true;
+  const maxWidth = "lg";
 
   return (
-    <Dialog fullScreen open={open} onClose={onClose}>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      fullWidth={fullWidth}
+      maxWidth={maxWidth}
+    >
       <AppBar sx={{ position: "relative", backgroundColor: PinkPallette.main }}>
         <Toolbar>
           <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">

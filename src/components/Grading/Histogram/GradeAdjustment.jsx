@@ -7,7 +7,7 @@ import { useCookies } from "react-cookie";
 import axios from "axios";
 
 export default function GradeAdjustment() {
-  const { data } = useContext(DataAcrossPages);
+  const { data, setData } = useContext(DataAcrossPages);
   const [cookies, setCookie] = useCookies([]);
   const year = cookies["year"];
   const semester = cookies["semester"];
@@ -44,10 +44,9 @@ export default function GradeAdjustment() {
   }
 
   useEffect(() => {
-    console.log(semester);
-
     getOnce();
   }, []);
+
   return (
     <div>
       <ResponsiveAppBar />

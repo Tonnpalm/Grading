@@ -163,7 +163,6 @@ export default function Grading() {
   const { data } = React.useContext(DataAcrossPages);
 
   const [cookies, setCookie] = useCookies();
-  // const mergedPackedData = cookies["mergedPackedData"];
   const year = cookies["year"];
   const semester = cookies["semester"];
   const crsIDToConfirm = cookies["crsIDToConfirm"];
@@ -190,11 +189,19 @@ export default function Grading() {
 
   const navigate = useNavigate();
 
+  const [storedData, setStoredData] = React.useState([]);
+
+  // React.useEffect(() => {
+  //   const storedData = localStorage.getItem("data")
+  //   if (storedData) {
+  //     setStoredData(JSON.parse(storedData));
+  //   }
+  // }, []);
+
   const getHistory = () => {
     axios
       .get(`http://localhost:8000/api/grades/crsID/${crsIDToConfirm}`)
       .then((res) => {
-        console.log(res.data.grades);
         const yearHistory = res.data.grades.map((item) => item.year);
         const semesterHistory = res.data.grades.map((item) => item.semester);
         const gradeAll = res.data.grades.map((item) => item.gradeAll);
@@ -225,7 +232,6 @@ export default function Grading() {
     axios
       .get(`http://localhost:8000/api/grades/courses/${crsIDtoCheck[0]}`)
       .then((res) => {
-        console.log("getVersion", res.data);
         const grade = res.data.grades;
 
         grade.map((item) => {
@@ -415,14 +421,12 @@ export default function Grading() {
   function getAllScores() {
     axios.get(`http://localhost:8000/api/scores/`).then((res) => {
       const apiScores = res.data.scores;
-      console.log("getAllScores", apiScores);
-      // เพิ่มตัวแปร formattedData เพื่อเก็บข้อมูลที่จะนำเข้าตารา
-      const formattedData = [];
-      let calTotScore = 0;
-      //คะแนนเต็มของแต่ละมอดู
-      let marks = {};
-      let portionStorage = [];
+      // console.log("getAllScores", apiScores);
       const apiData = res.data.scores;
+
+      // รวมคะแนนเต็มของส่วนการให้คะแนนของมอดูลนั้น ๆ
+      let marks = {};
+
       apiData.forEach((item) => {
         const moduleIDs = item.moduleObjectID;
         let fullScoresss = 0;
@@ -440,6 +444,8 @@ export default function Grading() {
         });
       });
 
+      // เก็บสัดส่วนคะแนน
+      let portionStorage = [];
       apiData.map((item) => {
         const moduleID = item.moduleObjectID;
         const sIDToStore = item.students.map((id) => id.sID);
@@ -460,6 +466,7 @@ export default function Grading() {
         portionStorage.push(scores_portion);
       });
 
+      // เก็บสัดส่วนคะแนนรวมของนิสิตแต่ละคน
       let studentWithSumPortion = [];
       portionStorage.forEach((item) => {
         item.forEach((temp) => {
@@ -481,10 +488,10 @@ export default function Grading() {
         });
       });
 
+      // เอาสัดส่วนคะแนนรวมของนิสิตแต่ละคนไว้กับแต่ละมอดูล
       let mergedStudentPortion = [];
-
       studentWithSumPortion.forEach((student) => {
-        // ตรวจสอบว่า SID ของนักเรียนนี้มีอยู่ใน mergedStudentPortion หรือไม
+        // ตรวจสอบว่า SID ของนักเรียนนี้มีอยู่ใน mergedStudentPortion หรือไม่
         const existingStudentIndex = mergedStudentPortion.findIndex(
           (item) => item.SID === student.SID
         );
@@ -501,6 +508,10 @@ export default function Grading() {
         }
       });
 
+      // Shaped ข้อมูลเพื่อแสดงผลบนตาราง
+      const formattedData = [];
+      let calTotScore = 0;
+
       apiScores.forEach((apiScore) => {
         // หา moduleID จาก API
         const moduleIDs = apiScore.moduleObjectID;
@@ -516,7 +527,6 @@ export default function Grading() {
               (item) => item.SID === student.sID
             ); // ค้นหาข้อมูลนักเรียนที่เกี่ยวข้องกับ SID ในตัวแปร data
             const modulePortion = data[data.length - 1];
-            // const name = relevantData.map((item) => item.moduleName);
             if (studentData) {
               const mergedStudent = mergedStudentPortion.find(
                 (item) => item.SID === studentData.SID
@@ -524,7 +534,6 @@ export default function Grading() {
               if (mergedStudent) {
                 const checking = student.totalScore;
                 relevantData.map((item) => {
-                  // Object.keys(item).forEach((temp) => {
                   if (moduleIDs === item.moduleID) {
                     if (!isNaN(checking)) {
                       calTotScore =
@@ -536,7 +545,6 @@ export default function Grading() {
                       calTotScore = student.totalScore;
                     }
                   }
-                  // });
                 });
               }
               if (mergedStudent.sumPortion === parseFloat(modulePortion)) {
@@ -641,10 +649,7 @@ export default function Grading() {
                 });
               }
             } else {
-              console.log(
-                "No relevant data found for student SID:",
-                student.sID
-              );
+              return;
             }
           });
         } else {
@@ -659,13 +664,33 @@ export default function Grading() {
   }
 
   React.useEffect(() => {
+    // if (data.length !== 0) {
+    //   console.log("มี", localStorage.getItem("data"));
+    //   const storedDataBefore = localStorage.getItem("data");
+    //   if (storedDataBefore) {
+    //     // console.log("เข้าจ้า", storedData);
+    //     setStoredData(JSON.parse(storedDataBefore));
+    //   }
+    //   if (storedData.length > 0) {
+    //     console.log("ทำได้", storedData);
     getAllScores();
+    // } else console.log("เออเร่อ");
+    // }
   }, []);
 
-  let moduleIDByName = {};
-  data.slice(0, data.length - 2).forEach((item) => {
-    moduleIDByName[item.moduleName] = item.moduleID;
-  });
+  // let moduleIDByName = {};
+  // data.slice(0, data.length - 2).forEach((item) => {
+  //   moduleIDByName[item.moduleName] = item.moduleID;
+  // });
+
+  const [moduleIDByName, setModuleIDByName] = React.useState({});
+  React.useEffect(() => {
+    const updatedModuleIDByName = {};
+    data.slice(0, data.length - 2).forEach((item) => {
+      updatedModuleIDByName[item.moduleName] = item.moduleID;
+    });
+    setModuleIDByName(updatedModuleIDByName);
+  }, [data]);
 
   const dataMap = new Map();
   histogramScore.map((value) => {
@@ -1013,10 +1038,24 @@ export default function Grading() {
 
   const handleHeaderClick = (moduleName) => {
     let id = "";
+    const splitModuleName = moduleName.split("_");
     if (moduleName !== "") {
       Object.keys(moduleIDByName).forEach((key) => {
-        if (key === moduleName) {
-          id = moduleIDByName[key];
+        const value = key.split("_");
+        console.log(moduleIDByName);
+
+        if (value.length > 2) {
+          if (
+            value.slice(0, value.length - 1).join("_") ===
+            splitModuleName.slice(0, value.length - 1).join("_")
+          ) {
+            id = moduleIDByName[value.slice(0, value.length - 1).join("_")];
+          }
+        }
+        if (value.length === 2) {
+          if (value[0] === splitModuleName[0]) {
+            id = moduleIDByName[key];
+          }
         }
       });
     }
@@ -1269,6 +1308,8 @@ export default function Grading() {
     columns,
     data: scoreInTable,
     enableColumnPinning: true,
+    paginationDisplayMode: "pages",
+
     initialState: {
       columnPinning: {
         left: ["rowNumbers", "SID", "studentName"],
@@ -1465,12 +1506,7 @@ export default function Grading() {
             },
           ]}
         />
-        {/* <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-          }}
-        > */}
+
         <OverlayContainer>
           {" "}
           {/* ส่วนทับ */}
@@ -1502,7 +1538,6 @@ export default function Grading() {
             <LinePlot />
           </ResponsiveChartContainer>
         </OverlayContainer>
-        {/* </div> */}
       </div>
       <div
         style={{
@@ -2059,14 +2094,14 @@ export default function Grading() {
                   width: 155,
                   height: 250,
                   overflowY: "auto",
-                  "&::-webkit-scrollbar": {
+                  "&::WebkitScrollbar": {
                     width: "12px", // กำหนดความกว้างของ scrollbar
                   },
-                  "&::-webkit-scrollbar-thumb": {
+                  "&::WebkitScrollbarThumb": {
                     backgroundColor: "#888", // กำหนดสีของ scrollbar thumb
                     borderRadius: "6px", // กำหนดรูปร่างของ scrollbar thumb
                   },
-                  "&::-webkit-scrollbar-track": {
+                  "&::WebkitScrollbarTrack": {
                     backgroundColor: "#f1f1f1", // กำหนดสีของ scrollbar track
                     borderRadius: "6px", // กำหนดรูปร่างของ scrollbar track
                   },

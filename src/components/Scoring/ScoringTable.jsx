@@ -48,26 +48,18 @@ const ScoringTable = () => {
   const [deleteColumnModalOpen, setDeleteModuleModalOpen] = useState(false);
   const [check, setCheck] = useState();
   const navigate = useNavigate();
-  const { setData } = useContext(DataAcrossPages);
-  const { data } = useContext(DataAcrossPages);
-  const [cookies] = useCookies([]);
-  const rows = cookies["row"];
+  const [cookies, setCookie] = useCookies([]);
+  const idToGet = cookies["idToGet"];
+  const cookieModuleName = cookies["cookieModuleName"];
+  const cookieSemester = cookies["cookieSemester"];
+  const cookieYear = cookies["cookieYear"];
   const [emptyArray, setEmptyArray] = useState([]);
   const [scoreDetail, setScoreDetail] = useState([]);
   const [afterUpload, setAfterUpload] = useState(0);
   const [afterDelete, setAfterDelete] = useState(0);
   const [afterUploadExist, setAfterUploadExist] = useState(0);
   const [rowScores, setRowScores] = useState([]); // เพิ่ม state เพื่อเก็บคะแนนรวมในแต่ละแถว
-  // const [rowScoresExistCase, setRowScoresExistCase] = useState([]); // เพิ่ม state เพื่อเก็บคะแนนรวมในแต่ละแถว
 
-  // const handleExportData = () => {
-  //   console.log("exceldata", excelData);
-
-  //   const csv = generateCsv(csvConfig)(excelData);
-  //   download(csvConfig)(csv);
-  // };
-
-  // Function to generate CSV data from accessor keys
   const generateAccessorKeysCSV = (columns) => {
     const csvConfig = mkConfig({
       fieldSeparator: ",",
@@ -120,7 +112,6 @@ const ScoringTable = () => {
       setExcelData(excelData);
       setAfterUpload(afterUpload + 1);
       setAfterUploadExist(afterUploadExist + 1);
-      // calTotScore();
       console.log("check", columnNameToCalulateScore);
     };
 
@@ -160,7 +151,6 @@ const ScoringTable = () => {
   };
 
   const handleSaveButtonClick = () => {
-    // console.log("scoreDetail in handleSaveButtonClick", scoreDetail);
     // ตรวจสอบว่ามี totalScore ที่ไม่ได้กำหนดค่าหรือไม่
     console.log("excelData", excelData);
     if (excelData.some((row) => row.totalScore === undefined)) {
@@ -171,7 +161,7 @@ const ScoringTable = () => {
     console.log(scoreDetail);
     const dataToSend = {
       // แก่้จาก context --> cookies --> data เป็น row
-      moduleObjectID: rows._id,
+      moduleObjectID: idToGet,
       assignments: scoreDetail
         .map((item) => {
           return item.assignments.map((informations) => {
@@ -205,11 +195,6 @@ const ScoringTable = () => {
       })),
     };
 
-    // const studentsData = excelData.map((row) => {
-    //   console.log("totalScore in log", row.totalScore); // ล็อกค่าของ row ที่ถูกแปลง
-    //   return "test ระบบ";
-    // });
-
     console.log("ข้อมูลที่จะส่งไป DB", dataToSend);
 
     axios
@@ -227,26 +212,39 @@ const ScoringTable = () => {
   let flag = 0;
 
   function getOldScore() {
-    console.log(rows._id);
+    console.log(cookieSemester);
     axios
-      .get(`http://localhost:8000/api/scores/${rows._id}`)
+      .get(`http://localhost:8000/api/scores/${idToGet}`)
       .then((response) => {
         console.log("scores.assignments", response.data.scores.assignments);
         console.log("scores.students", response.data.scores.students);
         // Process oldScoreData to match the structure of excelData
+        // Process old scores
         const processedData = response.data.scores.students.map((student) => {
-          const row = {
-            ID: student.sID,
-            "ชื่อ-นามสกุล": student.sName,
-            totalScore: student.totalScore,
-          };
-
-          response.data.scores.assignments.map((assignment) => {
-            row[assignment.accessorKey] =
-              student.scores[assignment.accessorKey] || "";
-          });
-
-          return row;
+          if (!isNaN(student.totalScore)) {
+            const row = {
+              ID: student.sID,
+              "ชื่อ-นามสกุล": student.sName,
+              totalScore: parseFloat(student.totalScore).toFixed(2),
+            };
+            response.data.scores.assignments.forEach((assignment) => {
+              row[assignment.accessorKey] =
+                parseFloat(student.scores[assignment.accessorKey]).toFixed(2) ||
+                "-";
+            });
+            return row;
+          } else {
+            const row = {
+              ID: student.sID,
+              "ชื่อ-นามสกุล": student.sName,
+              totalScore: student.totalScore,
+            };
+            response.data.scores.assignments.forEach((assignment) => {
+              row[assignment.accessorKey] =
+                student.scores[assignment.accessorKey] || "-";
+            });
+            return row;
+          }
         });
 
         // Update excelData state with the processed data
@@ -294,12 +292,9 @@ const ScoringTable = () => {
   }
 
   React.useEffect(() => {
-    console.log("flag", flag);
     if (flag === 0) {
       getOldScore();
     }
-    // console.log("exceldata", excelData);
-    // console.log(columnNameToCalulateScore);
   }, []);
 
   const handleAddColumn = () => {
@@ -385,8 +380,6 @@ const ScoringTable = () => {
         fullScore: column.fullScore, // ใส่คะแนนเต็มของแต่ละส่วนการให้คะแนน
       })),
     };
-    console.log("scoreData", scoreData);
-    console.log("scoreDetail", scoreDetail);
     setEmptyArray([]);
     setScoreDetail((prevScoreDetail) => {
       const newDataSet = [...prevScoreDetail, scoreData];
@@ -403,14 +396,10 @@ const ScoringTable = () => {
   };
 
   const handleDeleteColumnModalSubmit = () => {
-    console.log("ยังไงเนี่ยย", check);
-    console.log("excelData", excelData);
     setColumns((prevColumns) =>
       prevColumns.filter((column) => column.accessorKey !== check)
     );
     var newData = excelData.map(({ [check]: removedKey, ...rest }) => rest);
-    // console.log(columns);
-
     columns.map((item) => {
       if (
         item.accessorKey !== "number" &&
@@ -421,10 +410,6 @@ const ScoringTable = () => {
         columnNameToCalulateScore.push(item.accessorKey);
       }
     });
-
-    console.log(columnNameToCalulateScore);
-
-    console.log(newData);
     setExcelData(newData);
     setAfterDelete(afterDelete + 1);
     handleDeleteColumnModalClose();
@@ -440,35 +425,22 @@ const ScoringTable = () => {
   const table = useMaterialReactTable({
     columns,
     data: excelData,
-    // enablePagination: false,
     createDisplayMode: "row",
     editDisplayMode: "cell",
-    // enableCellActions: true,
     enableClickToCopy: "context-menu",
     enableColumnPinning: true,
     enableColumnFilterModes: true,
     // enableEditing: true,
-    // enableFacetedValues: true,
     getRowId: (row) => row.id,
     initialState: {
-      // showColumnFilters: true,
-      // showGlobalFilter: true,
       columnPinning: {
         left: ["number", "ID", "ชื่อ-นามสกุล", "Section"],
         right: ["totalScore"],
       },
     },
     paginationDisplayMode: "pages",
-    // positionToolbarAlertBanner: "bottom",
-    // muiPaginationProps: {
-    //   color: "primary",
-    //   rowsPerPageOptions: [10, 20, 30],
-    //   shape: "rounded",
-    //   variant: "outlined",
-    // },
     renderTopToolbarCustomActions: () => (
       <>
-        {/* <div style={{ position: "relative", display: "inline-block" }}> */}
         <Button
           component="label"
           variant="contained"
@@ -498,7 +470,6 @@ const ScoringTable = () => {
               backgroundColor: PinkPallette.light,
             },
           }}
-          // onClick={handleExportData}
           onClick={() => handleExportAccessorKeys(columns)}
           startIcon={<FileDownloadIcon />}
         >
@@ -523,14 +494,14 @@ const ScoringTable = () => {
   });
 
   let semester = "";
-  switch (rows.semester) {
-    case "1":
+  switch (cookieSemester) {
+    case 1:
       semester = "ภาคต้น";
       break;
-    case "2":
+    case 2:
       semester = "ภาคปลาย";
       break;
-    case "3":
+    case 3:
       semester = "ภาคฤดูร้อน";
       break;
     default:
@@ -625,7 +596,7 @@ const ScoringTable = () => {
           style={{ paddingLeft: "10%", paddingRight: "10%", marginTop: "30px" }}
         >
           <Typography>
-            รายวิชา {rows.moduleName} {semester} ปีการศึกษา {rows.year}
+            รายวิชา {cookieModuleName} {semester} ปีการศึกษา {cookieYear}
           </Typography>
         </div>
         <div
@@ -753,7 +724,6 @@ const ScoringTable = () => {
           variant="contained"
           color="inherit"
           onClick={() => {
-            setData("65f90efa4ef7a70f80525051");
             navigate("/scoring");
           }}
         >

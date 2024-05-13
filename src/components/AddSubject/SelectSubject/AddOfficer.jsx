@@ -470,6 +470,8 @@ const Example = () => {
     enableRowActions: true,
     positionActionsColumn: "last",
     getRowId: (row) => row.id,
+    paginationDisplayMode: "pages",
+
     displayColumnDefOptions: {
       "mrt-row-actions": {
         header: "", //change header text

@@ -64,7 +64,6 @@ export default function SelectSubject2Grading() {
     });
 
   const handleClick = (excelData) => {
-    // Check if the module data is complete
     if (!isModuleDataComplete()) {
       notComplete(); // Display toast notification
       return; // Exit function if data is incomplete
@@ -123,6 +122,7 @@ export default function SelectSubject2Grading() {
     setModuleList((prevState) => {
       return [...prevState, {}];
     });
+    console.log("moduleList", moduleList);
     setCount(count + 1); // เพิ่มจำนวน Component ที่ต้องการแสดง
     // เพิ่มข้อมูลเปล่าๆ เพื่อรอการกรอกจากผู้ใช้
     setPackedDataList((prevState) => [...prevState, ["", "", "", ""]]);
@@ -130,9 +130,7 @@ export default function SelectSubject2Grading() {
 
   const isModuleDataComplete = () => {
     console.log("ข้อมูลหลังจากเลือกมอดูลแล้ว", moduleList);
-    // Check if any module has incomplete data or duplicate moduleID
-    return moduleList.every((item, index) => {
-      // Check for incomplete data
+    return packedDataList.every((item, index) => {
       if (
         item.moduleName === "" ||
         item.portion === "" ||
@@ -146,7 +144,7 @@ export default function SelectSubject2Grading() {
       // Check for duplicate moduleID
       const currentModuleID = item.moduleID;
       const isDuplicate =
-        moduleList.findIndex(
+        packedDataList.findIndex(
           (module, idx) => idx !== index && module.moduleID === currentModuleID
         ) !== -1;
 
@@ -160,7 +158,8 @@ export default function SelectSubject2Grading() {
   };
 
   const handlePackedDataChange = (index, newData) => {
-    console.log(newData);
+    console.log("newData", newData);
+    console.log("index", index);
     setPackedDataList((prevState) => {
       const updatedDataList = [...prevState];
       updatedDataList[index] = newData;
@@ -472,6 +471,7 @@ function AddMoreModule({
         response.data.modules.map((item) => {
           let name = item.moduleName;
           let id = item._id;
+
           moduleNameAndID.push({ moduleName: name, moduleID: id });
         });
         setModuleNameAndID(moduleNameAndID);
@@ -513,7 +513,7 @@ function AddMoreModule({
   }, [selectedModuleName, selectedModuleID, selectedModulePortion]);
 
   const handleDeleteButtonClick = () => {
-    onDelete(index); // เรียกใช้ฟังก์ชัน handleDeleteModule ที่ถูกส่งมาจาก SelectSubject2Grading
+    onDelete(index);
   };
 
   // ในฟังก์ชัน handleChange
@@ -526,17 +526,6 @@ function AddMoreModule({
     }));
     handlePackedDataChangeLocal(); // เรียกใช้ handlePackedDataChangeLocal เมื่อมีการเปลี่ยนแปลงในข้อมูล portion
   };
-
-  // const handleBlur = () => {
-  //   console.log("selectedModulePortion : ", selectedModulePortion);
-  //   const newValue = selectedModulePortion;
-  //   setModuleData((prevData) => ({
-  //     ...prevData,
-  //     portion: newValue,
-  //   }));
-  //   setPackedPortionData(selectedModulePortion);
-  //   handlePackedDataChangeLocal();
-  // };
 
   const Item = styled(Paper)(({ theme }) => ({
     padding: theme.spacing(1),
@@ -572,17 +561,41 @@ function AddMoreModule({
               id="moduleName"
               value={selectedModuleName === "" ? null : selectedModuleName}
               options={moduleNameAndID.map((name) => {
-                return name.moduleName;
+                let semesterValue = "";
+                switch (semester) {
+                  case "ภาคต้น":
+                    semesterValue = "1";
+                    break;
+                  case "ภาคปลาย":
+                    semesterValue = "2";
+                    break;
+                  case "ภาคฤดูร้อน":
+                    semesterValue = "3";
+                    break;
+                  default:
+                    semesterValue = "0";
+                }
+                return name.moduleName + "_" + year + "/" + semesterValue;
               })}
               sx={{ width: 600 }}
               renderInput={(params) => (
                 <TextField {...params} placeholder="ชื่อมอดูล" />
               )}
               onChange={(event, newValue) => {
-                setSelectedModuleName(newValue);
-                const selectedModule = moduleNameAndID.find(
-                  (module) => module.moduleName === newValue
-                );
+                const valueToShow = newValue;
+                const value = newValue.split("_");
+                setSelectedModuleName(valueToShow);
+                const selectedModule = moduleNameAndID.find((module) => {
+                  if (value.length > 2) {
+                    return (
+                      module.moduleName ===
+                      value.slice(0, value.length - 1).join("_")
+                    );
+                  } else if (value.length === 2) {
+                    return module.moduleName === value[0];
+                  }
+                });
+                console.log(selectedModule);
                 setSelectedModuleID(
                   selectedModule ? selectedModule.moduleID : ""
                 );

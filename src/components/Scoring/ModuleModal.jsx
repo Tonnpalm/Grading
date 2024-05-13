@@ -162,6 +162,7 @@ export default function ModuleModal({ open, onClose, onSubmit, data, mode }) {
         <DialogContent style={{ display: "flex", flexDirection: "column" }}>
           <TextField
             variant="standard"
+            // label="ชื่อมอดูล (ชื่อมอดูล_ตอนเรียน_ปี/ภาคการศึกษา)"
             label="ชื่อมอดูล"
             value={name}
             onChange={(event) => {

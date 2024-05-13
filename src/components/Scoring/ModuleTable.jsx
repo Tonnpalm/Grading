@@ -300,8 +300,13 @@ const Example = () => {
   };
 
   const handleScoringClick = (row) => {
-    setData(row);
-    setCookie("rows", row);
+    // setData(row);
+
+    setCookie("idToGet", row._id);
+    setCookie("cookieModuleName", row.moduleName);
+    setCookie("cookieSemester", row.semester);
+    setCookie("cookieYear", row.year);
+    console.log(`${cookies["rows"]}`);
     navigate("/scoringTable");
   };
 
@@ -337,6 +342,8 @@ const Example = () => {
     enableRowActions: true,
     positionActionsColumn: "last",
     getRowId: (row) => row.id,
+    paginationDisplayMode: "pages",
+
     displayColumnDefOptions: {
       "mrt-row-actions": {
         header: "", //change header text
@@ -386,7 +393,6 @@ const Example = () => {
 
         <MenuItem
           key="scoring"
-          // onClick={() => navigate("/scoringTable")}
           onClick={() => {
             console.log("row.ori", row.original);
             handleScoringClick(row.original);

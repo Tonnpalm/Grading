@@ -13,6 +13,7 @@ import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import OfflinePinIcon from "@mui/icons-material/OfflinePin";
 import { PinkPallette } from "../../../assets/pallettes";
 import { useNavigate } from "react-router-dom";
+// import { useHistory } from "react-router-dom";
 import { DataAcrossPages } from "../../../assets/DataAcrossPages";
 import axios from "axios";
 
@@ -232,7 +233,7 @@ const ConfirmScore = () => {
               },
             }}
             onClick={() => {
-              setData(data.scoreInTable);
+              // setData(data.scoreInTable);
               navigate("/gradeAdjustment");
             }}
           >

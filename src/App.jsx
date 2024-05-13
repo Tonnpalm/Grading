@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import { Routes, Route } from "react-router-dom";
 import { MyProvider } from "./assets/DataAcrossPages";
 import TestAPI from "./components/EverythingTest/TestAPI";
@@ -14,7 +15,7 @@ import ConfirmScore from "./components/Grading/ConfirmScore/ConfirmScore";
 import YearAndSemester from "./components/Grading/SubjectSelection/YearAndSemester";
 import GradingResult from "./components/Grading/ConfirmScore/GradingResult";
 import TickPlacementBars from "./components/Grading/Histogram/TestPlacement";
-import ResponsiveDialog from "./components/EverythingTest/1";
+// import ResponsiveDialog from "./components/EverythingTest/1";
 import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
 import { ThemeProvider, createTheme } from "@mui/material";
 import "./App.css";
@@ -47,7 +48,7 @@ function App() {
           <Route path="yearAndSemester" element={<YearAndSemester />} />
           <Route path="gradingResult" element={<GradingResult />} />
           <Route path="placement" element={<TickPlacementBars />} />
-          <Route path="responsiveDialog" element={<ResponsiveDialog />} />
+          {/* <Route path="responsiveDialog" element={<ResponsiveDialog />} /> */}
         </Routes>
       </ThemeProvider>
     </MyProvider>

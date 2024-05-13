@@ -31,9 +31,6 @@ function Homepage() {
   const [goToScoringWithStaffID, setGoToScoringWithStaffID] = useState();
 
   useEffect(() => {
-    // ตรวจสอบว่ามีรหัสหรือไม่
-    // ในกรณีที่มีรหัส ให้ตั้งค่าให้กับ stat
-    // ในกรณีที่ไม่มีรหัส ปล่อยให้ state เป็นค่าว่าง
     const storedCode = "34131"; // รหัสที่ต้องการตรวจสอ[]
 
     axios.get(`http://localhost:8000/api/staffs/allStaffs`).then((response) => {
