@@ -4,7 +4,7 @@ import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import axios from "axios";
+import { axios } from "../../../utils/customAxios";
 import { useState, useEffect, forwardRef } from "react";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
@@ -67,7 +67,7 @@ export default function Modal({ open, onClose, onSubmit, moduleID }) {
     async function fetchData() {
       try {
         const response = await axios.get(
-          `http://localhost:8000/api/scores/${moduleID}`
+          `/scores/${moduleID}`
         );
         const assignments = response.data.scores.assignments;
         const students = response.data.scores.students;

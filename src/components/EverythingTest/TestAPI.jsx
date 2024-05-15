@@ -1,4 +1,4 @@
-import axios from 'axios'
+import { axios } from '../../utils/customAxios';
 import { Button } from '@mui/material'
 import * as React from 'react';
 
@@ -6,7 +6,7 @@ function TestAPI() {
     const [staff, setStaff] = React.useState();
 
     function getStaff() {
-        axios.get(`http://localhost:8000/api/staffs/?staffName=&page=1&perPage=5`)
+        axios.get(`/staffs/?staffName=&page=1&perPage=5`)
             .then((response) => {
                 console.log(response.data.staffs[0].staffName)
                 setStaff(response.data.staffs[0].staffName)

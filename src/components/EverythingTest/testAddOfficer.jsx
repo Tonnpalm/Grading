@@ -35,7 +35,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 // import { useCookies } from "react-cookie";
-import axios from 'axios';
+import { axios } from "../../utils/customAxios";
 import ModalForAddSubject from "./DialogAddSubject";
 
 const Example = () => {
@@ -49,7 +49,7 @@ const Example = () => {
   // const [cookies, setCookie] = useCookies([]);
 
   function getStaffs() {
-    axios.get(`http://localhost:8000/api/staffs/?staffName=&page=1&perPage=5`)
+    axios.get(`/staffs/?staffName=&page=1&perPage=5`)
         .then((response) => {
             const staffNameList = []
             response.data.staffs.map((item) => {

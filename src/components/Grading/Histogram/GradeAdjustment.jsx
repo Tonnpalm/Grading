@@ -4,7 +4,7 @@ import { useContext, useEffect, useState } from "react";
 import { Typography, Button } from "@mui/material";
 import { DataAcrossPages } from "../../../assets/DataAcrossPages";
 import { useCookies } from "react-cookie";
-import axios from "axios";
+import { axios } from "../../../utils/customAxios";
 
 export default function GradeAdjustment() {
   const { data, setData } = useContext(DataAcrossPages);
@@ -32,7 +32,7 @@ export default function GradeAdjustment() {
     }
     axios
       .get(
-        `http://localhost:8000/api/courses/onceID?year=${year}&semester=${semesterValue}&_id=${data[0].crsID}`
+        `/courses/onceID?year=${year}&semester=${semesterValue}&_id=${data[0].crsID}`
       )
       .then((res) => {
         const course = res.data.courses;

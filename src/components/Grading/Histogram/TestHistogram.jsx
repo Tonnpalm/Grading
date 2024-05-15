@@ -30,7 +30,7 @@ import {
 } from "@mui/x-charts";
 import Modal from "./Modal";
 import HistoryModal from "./HistoryModal";
-import axios from "axios";
+import { axios } from "../../../utils/customAxios";
 import {
   GreenPallette,
   GreyPallette,
@@ -200,7 +200,7 @@ export default function Grading() {
 
   const getHistory = () => {
     axios
-      .get(`http://localhost:8000/api/grades/crsID/${crsIDToConfirm}`)
+      .get(`/grades/crsID/${crsIDToConfirm}`)
       .then((res) => {
         const yearHistory = res.data.grades.map((item) => item.year);
         const semesterHistory = res.data.grades.map((item) => item.semester);
@@ -230,7 +230,7 @@ export default function Grading() {
     });
 
     axios
-      .get(`http://localhost:8000/api/grades/courses/${crsIDtoCheck[0]}`)
+      .get(`/grades/courses/${crsIDtoCheck[0]}`)
       .then((res) => {
         const grade = res.data.grades;
 
@@ -419,7 +419,7 @@ export default function Grading() {
   };
 
   function getAllScores() {
-    axios.get(`http://localhost:8000/api/scores/`).then((res) => {
+    axios.get(`/scores/`).then((res) => {
       const apiScores = res.data.scores;
       // console.log("getAllScores", apiScores);
       const apiData = res.data.scores;
@@ -1208,7 +1208,7 @@ export default function Grading() {
     };
 
     axios
-      .post(`http://localhost:8000/api/grades/`, shapedData)
+      .post(`/grades/`, shapedData)
       .then((res) => {
         console.log("success", res.data);
         getVersion();

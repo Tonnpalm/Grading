@@ -14,7 +14,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { PinkPallette } from "../../assets/pallettes";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { axios } from "../../../utils/customAxios";
 import ModuleModal from "./ModuleModal";
 import ReCheckModal from "../utility/Recheck";
 import { DataAcrossPages } from "../../assets/DataAcrossPages.jsx";
@@ -44,7 +44,7 @@ const Example = () => {
     console.log(staffIDFromHomepage);
 
     axios
-      .get(`http://localhost:8000/api/modules/${staffIDFromHomepage}`)
+      .get(`/modules/${staffIDFromHomepage}`)
       .then((res) => {
         console.log("res.data", res.data);
         const pushDataToModuleDetail = res.data.moduleID.map((item) => {
@@ -93,7 +93,7 @@ const Example = () => {
       instructorID: staffIDFromHomepage,
     };
     axios
-      .post(`http://localhost:8000/api/modules/`, formattedDataFromAddModule, {
+      .post(`/modules/`, formattedDataFromAddModule, {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },
@@ -131,7 +131,7 @@ const Example = () => {
     console.log("editDataSendToServer", editDataSendToServer);
     axios
       .put(
-        `http://localhost:8000/api/modules/${idForEdit}`,
+        `/modules/${idForEdit}`,
         editDataSendToServer
       )
       .then((res) => {
@@ -185,7 +185,7 @@ const Example = () => {
     console.log("row.original._id", row.original._id);
     setIdForDelete(row.original._id);
     axios
-      .get(`http://localhost:8000/api/scores/${row.original._id}`)
+      .get(`/scores/${row.original._id}`)
       .then((res) => {
         if (res.data.scores._id) {
           setIdScoreForDelete(res.data.scores._id);
@@ -204,7 +204,7 @@ const Example = () => {
 
   const handleDeleteModuleModalSubmit = () => {
     axios
-      .delete(`http://localhost:8000/api/modules/${idForDelete}`)
+      .delete(`/modules/${idForDelete}`)
       .then(() => {
         getModuleID();
       })
@@ -213,7 +213,7 @@ const Example = () => {
       });
     if (idScoreForDelete) {
       axios
-        .delete(`http://localhost:8000/api/scores/${idScoreForDelete}`)
+        .delete(`/scores/${idScoreForDelete}`)
         .then(() => {
           getModuleID();
         });
@@ -251,18 +251,18 @@ const Example = () => {
       instructorID: staffIDFromHomepage,
     };
     axios
-      .post(`http://localhost:8000/api/modules/`, duplicateDataSendToServer)
+      .post(`/modules/`, duplicateDataSendToServer)
       .then((res) => {
         console.log("success", res);
         getModuleID();
         axios
-          .get(`http://localhost:8000/api/modules/allModules`)
+          .get(`/modules/allModules`)
           .then((response) => {
             const newModule = response.data.modules;
             console.log("nweModule", newModule);
             console.log("data", newModule[newModule.length - 1]._id);
             axios
-              .get(`http://localhost:8000/api/scores/${idForDuplucate}`)
+              .get(`/scores/${idForDuplucate}`)
               .then((res) => {
                 if (res.data !== null) {
                   const dupData = {
@@ -277,7 +277,7 @@ const Example = () => {
                   };
                   console.log(dupData);
                   axios
-                    .post(`http://localhost:8000/api/scores/`, dupData)
+                    .post(`/scores/`, dupData)
                     .then((res) => {
                       console.log("success", res);
                     })

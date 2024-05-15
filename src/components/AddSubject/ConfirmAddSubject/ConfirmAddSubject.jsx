@@ -1,6 +1,6 @@
 import * as React from "react";
 import ResponsiveAppBar from "../../AppBar/ButtonAppBar";
-import axios from "axios";
+import { axios } from "../../../utils/customAxios";
 import TaskAltIcon from "@mui/icons-material/TaskAlt";
 import { GreenPallette, PinkPallette } from "../../../assets/pallettes";
 import { Typography, Button, Box, Grid } from "@mui/material";
@@ -39,7 +39,7 @@ function ConfirmAddSubject() {
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:8000/api/courses?year=${year}&semester=${semesterValue}`
+          `/courses?year=${year}&semester=${semesterValue}`
         );
         console.log("data to show", response.data);
         console.log("data to show with courses", response.data.courses);

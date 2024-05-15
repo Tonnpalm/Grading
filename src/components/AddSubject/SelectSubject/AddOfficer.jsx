@@ -14,7 +14,7 @@ import { Delete as DeleteIcon } from "@mui/icons-material";
 import { PinkPallette } from "../../../assets/pallettes";
 import { Box, Button, IconButton, Tooltip } from "@mui/material";
 import { useCookies } from "react-cookie";
-import axios from "axios";
+import { axios } from "../../../utils/customAxios";
 import ModalForAddSubject from "./DialogAddSubject";
 import ReCheckModal from "../../utility/Recheck";
 
@@ -41,7 +41,7 @@ const Example = () => {
 
   function getStaffs() {
     axios
-      .get(`http://localhost:8000/api/staffs/allStaffs`)
+      .get(`/staffs/allStaffs`)
       .then((response) => {
         let staffObject = [];
 
@@ -80,7 +80,7 @@ const Example = () => {
     }
     axios
       .get(
-        `http://localhost:8000/api/courses?year=${year}&semester=${semesterValue}`
+        `/courses?year=${year}&semester=${semesterValue}`
       )
       .then((response) => {
         console.log("data in getCourses", response.data.courses);
@@ -112,7 +112,7 @@ const Example = () => {
     }
     axios
       .get(
-        `http://localhost:8000/api/courses?year=${year}&semester=${semesterValue}`
+        `/courses?year=${year}&semester=${semesterValue}`
       )
       .then((response) => {
         console.log("data in getCourses", response.data.courses);
@@ -165,7 +165,7 @@ const Example = () => {
 
     if (state === "add") {
       axios
-        .post(`http://localhost:8000/api/courses/`, coursesData)
+        .post(`/courses/`, coursesData)
         .then((res) => {
           getCoursesID();
           // console.log("crsID", crsID);
@@ -174,7 +174,7 @@ const Example = () => {
     }
     if (state === "edit") {
       axios
-        .put(`http://localhost:8000/api/courses/${idForEdit}`, coursesData)
+        .put(`/courses/${idForEdit}`, coursesData)
         .then((res) => {
           getCourses();
           getStaffs();
@@ -216,7 +216,7 @@ const Example = () => {
   const doingDelete = (mode) => {
     if (mode === "inDB") {
       axios
-        .delete(`http://localhost:8000/api/courses/${idForDelete}`)
+        .delete(`/courses/${idForDelete}`)
         .then((response) => {
           getStaffs();
           getCourses();
@@ -365,7 +365,7 @@ const Example = () => {
 
     console.log(courseDetail);
     axios
-      .post(`http://localhost:8000/api/courses/many`, courseDetail)
+      .post(`/courses/many`, courseDetail)
       .then((res) => {
         console.log(courseDetail);
         console.log("success", res);
@@ -442,7 +442,7 @@ const Example = () => {
     };
 
     axios
-      .delete(`http://localhost:8000/api/courses/many`, { data: crssObjID })
+      .delete(`/courses/many`, { data: crssObjID })
       .then((res) => {
         console.log(crssObjID);
         console.log("success", res);
