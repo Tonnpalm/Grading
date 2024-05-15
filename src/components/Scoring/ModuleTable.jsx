@@ -14,7 +14,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { PinkPallette } from "../../assets/pallettes";
 import { useNavigate } from "react-router-dom";
-import { axios } from "../../../utils/customAxios";
+import { axios } from "../../utils/customAxios.js";
 import ModuleModal from "./ModuleModal";
 import ReCheckModal from "../utility/Recheck";
 import { DataAcrossPages } from "../../assets/DataAcrossPages.jsx";

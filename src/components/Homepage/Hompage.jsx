@@ -15,8 +15,7 @@ import { GreyPallette } from "../../assets/pallettes";
 
 import { useNavigate } from "react-router-dom";
 import { DataAcrossPages } from "../../assets/DataAcrossPages";
-
-import { axios } from "../../../utils/customAxios";
+import { axios } from "../../utils/customAxios";
 import { useCookies } from "react-cookie";
 
 function Homepage() {
@@ -212,6 +211,12 @@ function Homepage() {
               </CardContent>
             </CardActionArea>
           </Card>
+          <button onClick={() => {
+             axios.get(`/`).then((response) => {
+              console.log(response?.data);
+             })
+
+          }}>test api</button>
         </div>
       </section>
     </div>

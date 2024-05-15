@@ -22,7 +22,7 @@ import { mkConfig, generateCsv, download } from "export-to-csv";
 
 import { PinkPallette } from "../../assets/pallettes";
 import ReCheckModal from "../utility/Recheck";
-import { axios } from "../../../utils/customAxios";
+import { axios } from "../../utils/customAxios.js";
 import { useNavigate } from "react-router";
 
 const csvConfig = mkConfig({
