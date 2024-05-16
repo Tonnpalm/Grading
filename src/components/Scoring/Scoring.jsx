@@ -22,7 +22,7 @@ function Scoring() {
             sx={{ backgroundColor: "white", color: "black" }}
             startIcon={<ArrowBackIosIcon />}
             onClick={() => {
-              navigate("/");
+              navigate("/homepage");
             }}
           >
             กลับ

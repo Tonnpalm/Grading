@@ -1,4 +1,3 @@
-// eslint-disable-next-line no-unused-vars
 import React, { useContext, useEffect, useState } from "react";
 import "./HomepageC.css";
 import ResponsiveAppBar from "../AppBar/ButtonAppBar";
@@ -23,6 +22,7 @@ function Homepage() {
   const navigate = useNavigate();
   const { setData } = useContext(DataAcrossPages);
   const [cookies, setCookie] = useCookies([]);
+  const storedCode = cookies["storedCode"];
   const [staffIDFromHomepage, setStaffIDFromHomepage] = React.useState("");
   // const [semester, setSemester] = React.useState("");
 
@@ -31,7 +31,7 @@ function Homepage() {
   const [goToScoringWithStaffID, setGoToScoringWithStaffID] = useState();
 
   useEffect(() => {
-    const storedCode = "34131"; // รหัสที่ต้องการตรวจสอ[]
+    // const storedCode = "34131"; // รหัสที่ต้องการตรวจสอ[]
 
     axios.get(`http://localhost:8000/api/staffs/allStaffs`).then((response) => {
       console.log(response.data);
@@ -39,13 +39,13 @@ function Homepage() {
         if (staff.isRegistraOfficer === true) {
           console.log(staff.staffID);
           console.log(storedCode);
-          if (staff.staffID === storedCode) {
+          if (staff.staffID === storedCode.toString()) {
             setRegisterOfficer(true);
             setGoToImportWithStaffID(staff.staffID);
             setGoToScoringWithStaffID(staff._id);
           }
         } else {
-          if (staff.staffID === storedCode) {
+          if (staff.staffID === storedCode.toString()) {
             // setRegisterOfficer(true);
             console.log("staff id", staff._id);
             setGoToImportWithStaffID(staff.staffID);

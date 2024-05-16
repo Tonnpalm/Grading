@@ -232,7 +232,7 @@ export default function AddSubjectCard() {
                   },
                 }}
                 onClick={() => {
-                  navigate("/");
+                  navigate("/homepage");
                 }}
               >
                 ยกเลิก

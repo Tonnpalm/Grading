@@ -15,7 +15,7 @@ import ConfirmScore from "./components/Grading/ConfirmScore/ConfirmScore";
 import YearAndSemester from "./components/Grading/SubjectSelection/YearAndSemester";
 import GradingResult from "./components/Grading/ConfirmScore/GradingResult";
 import TickPlacementBars from "./components/Grading/Histogram/TestPlacement";
-// import ResponsiveDialog from "./components/EverythingTest/1";
+import InputStaffID from "./components/Homepage/InputStaffID";
 import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
 import { ThemeProvider, createTheme } from "@mui/material";
 import "./App.css";
@@ -31,7 +31,9 @@ function App() {
     <MyProvider>
       <ThemeProvider theme={theme}>
         <Routes>
-          <Route path="/" element={<Homepage />} />
+          <Route path="/" element={<InputStaffID />} />
+
+          <Route path="/homepage" element={<Homepage />} />
           <Route path="testAPI" element={<TestAPI />} />
           <Route path="addSubject" element={<AddSubject />} />
           <Route path="selectSubject" element={<SelectSubject />} />

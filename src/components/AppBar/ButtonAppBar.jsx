@@ -10,14 +10,14 @@ import Avatar from "@mui/material/Avatar";
 import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
 import { PinkPallette } from "../../assets/pallettes";
-// import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 
 // import AdbIcon from '@mui/icons-material/Adb';
 
 const settings = ["Profile", "Account", "Dashboard", "Logout"];
 
 function ResponsiveAppBar() {
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
   const [anchorElUser, setAnchorElUser] = React.useState(null);
 
   const handleOpenUserMenu = (event) => {
@@ -36,7 +36,7 @@ function ResponsiveAppBar() {
             variant="h6"
             noWrap
             component="a"
-            href="/"
+            href="/homepage"
             sx={{
               mr: 2,
               display: { xs: "none", md: "flex" },
@@ -56,7 +56,7 @@ function ResponsiveAppBar() {
             variant="h5"
             noWrap
             component="a"
-            href="/"
+            href="/homepage"
             sx={{
               mr: 2,
               display: { xs: "flex", md: "none" },
@@ -66,6 +66,9 @@ function ResponsiveAppBar() {
               letterSpacing: ".3rem",
               color: "inherit",
               textDecoration: "none",
+              "&:hover": {
+                color: PinkPallette.light,
+              },
             }}
           >
             Grading
@@ -109,11 +112,18 @@ function ResponsiveAppBar() {
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}
             >
-              {settings.map((setting) => (
+              {/* {settings.map((setting) => (
                 <MenuItem key={setting} onClick={handleCloseUserMenu}>
                   <Typography textAlign="center">{setting}</Typography>
                 </MenuItem>
-              ))}
+              ))} */}
+              <MenuItem
+                onClick={() => {
+                  navigate("/");
+                }}
+              >
+                <Typography textAlign="center">ลงชื่อออก</Typography>
+              </MenuItem>
             </Menu>
           </Box>
         </Toolbar>
