@@ -56,88 +56,86 @@ export default function AddSubjectCard() {
     });
 
   const checkYear = (y, s) => {
-    axios
-      .get(`/courses?year=${y}&semester=${s}`)
-      .then((res) => {
-        // ตรวจสอบว่าเลขที่นิสิตเป็นตัวเลขจริง ๆ
-        const isNumericYear = /^\d+$/.test(y);
-        if (!isNumericYear) {
-          numOnly();
-          return;
-        }
+    axios.get(`/courses?year=${y}&semester=${s}`).then((res) => {
+      // ตรวจสอบว่าเลขที่นิสิตเป็นตัวเลขจริง ๆ
+      const isNumericYear = /^\d+$/.test(y);
+      if (!isNumericYear) {
+        numOnly();
+        return;
+      }
 
-        let foundStaff = false;
+      let foundStaff = false;
 
-        // วนลูปหาผู้ประสานงานในรายวิชา
-        res.data.courses.some((item) => {
-          return item.coordinators.some((id) => {
-            if (id._id === data) {
-              console.log("ID จาก API", id._id);
-              console.log(("ID จากหน้าก่อนหน้า", data));
+      // วนลูปหาผู้ประสานงานในรายวิชา
+      res.data.courses.some((item) => {
+        return item.coordinators.some((id) => {
+          if (id._id === data) {
+            console.log("ID จาก API", id._id);
+            console.log(("ID จากหน้าก่อนหน้า", data));
 
-              console.log("เจอจ้า");
-              foundStaff = true;
-              return true; // หยุดการวนลูปเมื่อเจอค่า true
-            } else {
-              console.log("ไม่เจอจ้า");
-              return false; // ไม่เจอจะทำการวนลูปต่อ
-            }
-          });
-        });
-        // ตรวจสอบว่าค่า year และ semester ที่ผู้ใช้ป้อนตรงกับข้อมูลในฐานข้อมูลหรือไม
-        const foundCourse = res.data.courses.find((course) => {
-          return course.year === y && parseFloat(course.semester) === s;
-        });
-
-        if (!foundCourse && foundStaff === true) {
-          console.log(foundCourse);
-          console.log("ไม่่เจอคอร์สจ้า");
-
-          notInDB();
-          return;
-        }
-        if (!foundCourse && foundStaff === false) {
-          console.log("ไม่่เจอคอร์สจ้า");
-
-          notInDB();
-          return;
-        }
-
-        if (foundStaff === false && foundCourse) {
-          console.log(foundStaff);
-          console.log("ไม่เจอพนักงานจ้า");
-          notStaff();
-          return;
-        } else if (foundCourse && foundStaff === true) {
-          console.log(foundCourse);
-          console.log(foundStaff);
-          console.log("เข้าจ้า");
-
-          setCookie("year", y);
-          let semesterValue;
-          switch (s) {
-            case 1:
-              semesterValue = "ภาคต้น";
-              break;
-            case 2:
-              semesterValue = "ภาคปลาย";
-              break;
-            case 3:
-              semesterValue = "ภาคฤดูร้อน";
-              break;
-            default:
-              semesterValue = "";
+            console.log("เจอจ้า");
+            foundStaff = true;
+            return true; // หยุดการวนลูปเมื่อเจอค่า true
+          } else {
+            console.log("ไม่เจอจ้า");
+            return false; // ไม่เจอจะทำการวนลูปต่อ
           }
-          if (semesterValue) {
-            // setData(data);
-            // setStaffIDFromHomepage(data);
-            console.log(data);
-            setCookie("staffIDFromHomepage", data);
-            setCookie("semester", semesterValue);
-            navigate("/selectSubject2Grading");
-          }
-        }
+        });
       });
+      // ตรวจสอบว่าค่า year และ semester ที่ผู้ใช้ป้อนตรงกับข้อมูลในฐานข้อมูลหรือไม
+      const foundCourse = res.data.courses.find((course) => {
+        return course.year === y && parseFloat(course.semester) === s;
+      });
+
+      if (!foundCourse && foundStaff === true) {
+        console.log(foundCourse);
+        console.log("ไม่่เจอคอร์สจ้า");
+
+        notInDB();
+        return;
+      }
+      if (!foundCourse && foundStaff === false) {
+        console.log("ไม่่เจอคอร์สจ้า");
+
+        notInDB();
+        return;
+      }
+
+      if (foundStaff === false && foundCourse) {
+        console.log(foundStaff);
+        console.log("ไม่เจอพนักงานจ้า");
+        notStaff();
+        return;
+      } else if (foundCourse && foundStaff === true) {
+        console.log(foundCourse);
+        console.log(foundStaff);
+        console.log("เข้าจ้า");
+
+        setCookie("year", y);
+        let semesterValue;
+        switch (s) {
+          case 1:
+            semesterValue = "ภาคต้น";
+            break;
+          case 2:
+            semesterValue = "ภาคปลาย";
+            break;
+          case 3:
+            semesterValue = "ภาคฤดูร้อน";
+            break;
+          default:
+            semesterValue = "";
+        }
+        if (semesterValue) {
+          // setData(data);
+          // setStaffIDFromHomepage(data);
+          console.log(data);
+          setCookie("staffIDFromHomepage", data);
+          setCookie("semester", semesterValue);
+          navigate("/selectSubject2Grading");
+        }
+      }
+    });
   };
 
   const [cookies, setCookie] = useCookies([]);
@@ -232,7 +230,7 @@ export default function AddSubjectCard() {
                   },
                 }}
                 onClick={() => {
-                  navigate("/");
+                  navigate("/homepage");
                 }}
               >
                 ยกเลิก

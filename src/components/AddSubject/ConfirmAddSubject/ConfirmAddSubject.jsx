@@ -302,7 +302,7 @@ function ConfirmAddSubject() {
               width: 200,
             }}
             onClick={() => {
-              navigate("/");
+              navigate("/homepage");
             }}
           >
             กลับหน้าหลัก

@@ -184,9 +184,7 @@ export default function SelectSubject2Grading() {
     }
 
     axios
-      .get(
-        `/courses?year=${year}&semester=${semesterValue}`
-      )
+      .get(`/courses?year=${year}&semester=${semesterValue}`)
       .then((response) => {
         let courseNameAndID = [];
         let crsIDToConfirm = [];
@@ -242,7 +240,7 @@ export default function SelectSubject2Grading() {
           sx={{ backgroundColor: "white", color: "black" }}
           startIcon={<ArrowBackIosIcon />}
           onClick={() => {
-            navigate("/");
+            navigate("/homepage");
           }}
         >
           กลับ
@@ -463,19 +461,17 @@ function AddMoreModule({
   const [moduleData, setModuleData] = useState({}); // เก็บข้อมูลโมดูลทั้งหมด
 
   function getModules() {
-    axios
-      .get(`/modules/allModules`)
-      .then((response) => {
-        console.log(response.data);
-        let moduleNameAndID = [];
-        response.data.modules.map((item) => {
-          let name = item.moduleName;
-          let id = item._id;
+    axios.get(`/modules/allModules`).then((response) => {
+      console.log(response.data);
+      let moduleNameAndID = [];
+      response.data.modules.map((item) => {
+        let name = item.moduleName;
+        let id = item._id;
 
-          moduleNameAndID.push({ moduleName: name, moduleID: id });
-        });
-        setModuleNameAndID(moduleNameAndID);
+        moduleNameAndID.push({ moduleName: name, moduleID: id });
       });
+      setModuleNameAndID(moduleNameAndID);
+    });
   }
 
   useEffect(() => {

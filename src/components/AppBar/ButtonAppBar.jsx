@@ -10,14 +10,10 @@ import Avatar from "@mui/material/Avatar";
 import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
 import { PinkPallette } from "../../assets/pallettes";
-// import { useNavigate } from 'react-router-dom';
-
-// import AdbIcon from '@mui/icons-material/Adb';
-
-const settings = ["Profile", "Account", "Dashboard", "Logout"];
+import { useNavigate } from "react-router-dom";
 
 function ResponsiveAppBar() {
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
   const [anchorElUser, setAnchorElUser] = React.useState(null);
 
   const handleOpenUserMenu = (event) => {
@@ -66,6 +62,9 @@ function ResponsiveAppBar() {
               letterSpacing: ".3rem",
               color: "inherit",
               textDecoration: "none",
+              "&:hover": {
+                color: PinkPallette.light,
+              },
             }}
           >
             Grading
@@ -109,11 +108,13 @@ function ResponsiveAppBar() {
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}
             >
-              {settings.map((setting) => (
-                <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                  <Typography textAlign="center">{setting}</Typography>
-                </MenuItem>
-              ))}
+              <MenuItem
+                onClick={() => {
+                  navigate("/");
+                }}
+              >
+                <Typography>ลงชื่ออออก</Typography>
+              </MenuItem>
             </Menu>
           </Box>
         </Toolbar>
