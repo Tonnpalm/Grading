@@ -13,7 +13,6 @@ import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import OfflinePinIcon from "@mui/icons-material/OfflinePin";
 import { PinkPallette } from "../../../assets/pallettes";
 import { useNavigate } from "react-router-dom";
-// import { useHistory } from "react-router-dom";
 import { DataAcrossPages } from "../../../assets/DataAcrossPages";
 import { axios } from "../../../utils/customAxios.js";
 
@@ -137,7 +136,7 @@ const ConfirmScore = () => {
   const table = useMaterialReactTable({
     columns,
     data: data.scoreInTable,
-    renderTopToolbarCustomActions: ({ table }) => (
+    renderTopToolbarCustomActions: () => (
       <Box
         sx={{
           display: "flex",
@@ -184,13 +183,11 @@ const ConfirmScore = () => {
       }
     });
 
-    axios
-      .post(`/grades/`, dataToBack)
-      .then((response) => {
-        console.log("success", response.data);
-        setData(yearAndSemester);
-        navigate("/gradingResult");
-      });
+    axios.post(`/grades/`, dataToBack).then((response) => {
+      console.log("success", response.data);
+      setData(yearAndSemester);
+      navigate("/gradingResult");
+    });
   };
 
   return (

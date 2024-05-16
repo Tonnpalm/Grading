@@ -78,11 +78,6 @@ export default function SelectSubject2Grading() {
       navigate("/gradeAdjustment");
     }
   };
-  // const handleDeleteModule = (indexToDelete) => {
-  //   setModuleList(
-  //     moduleList?.filter((item, index) => index != indexToDelete - 1)
-  //   );
-  // };
   const handleDeleteModule = (indexToDelete) => {
     // อัปเดต moduleList โดยลบข้อมูลใน index ที่ต้องการลบ
     const updatedModuleList = moduleList.filter(
@@ -455,7 +450,7 @@ function AddMoreModule({
 }) {
   const [moduleNameAndID, setModuleNameAndID] = useState([]);
   const [selectedModuleName, setSelectedModuleName] = useState("");
-  const [packedPortionData, setPackedPortionData] = useState("");
+  // const [packedPortionData, setPackedPortionData] = useState("");
   const [selectedModulePortion, setSelectedModulePortion] = useState("");
   const [selectedModuleID, setSelectedModuleID] = useState("");
   const [moduleData, setModuleData] = useState({}); // เก็บข้อมูลโมดูลทั้งหมด
