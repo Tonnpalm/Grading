@@ -211,12 +211,6 @@ function Homepage() {
               </CardContent>
             </CardActionArea>
           </Card>
-          <button onClick={() => {
-             axios.get(`/`).then((response) => {
-              console.log(response?.data);
-             })
-
-          }}>test api</button>
         </div>
       </section>
     </div>

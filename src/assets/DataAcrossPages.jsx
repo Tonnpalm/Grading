@@ -7,14 +7,14 @@ const DataAcrossPages = createContext();
 // สร้าง Provider
 export const MyProvider = ({ children }) => {
   const storedData = localStorage.getItem("data");
-  const initialData = storedData ? JSON.parse(storedData) : null;
+  const initialData = (storedData === null || storedData === undefined) ?  null : JSON.parse(storedData);
 
   const [data, setData] = useState(initialData);
 
   // เมื่อคอมโพเนนต์ถูกทำลาย
   useEffect(() => {
     // บันทึกข้อมูลลงใน localStorage
-    localStorage.setItem("data", JSON.stringify(data));
+    localStorage.setItem("data", (data === undefined || data === null) ? null : JSON.stringify(data));
     // Cleanup function
     return () => {
       // ลบข้อมูลออกจาก localStorage เมื่อคอมโพเนนต์ถูกทำลาย
