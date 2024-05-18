@@ -11,7 +11,7 @@ import { TextField, Button, Box, Toolbar, Container } from "@mui/material";
 import Groups2Icon from "@mui/icons-material/Groups2";
 import { PinkPallette } from "../../assets/pallettes";
 import { AppBar } from "@mui/material";
-import axios from "axios";
+import { axios } from "../../utils/customAxios";
 
 export default function InputStaffID() {
   const navigate = useNavigate();
@@ -38,6 +38,9 @@ export default function InputStaffID() {
 
   const handleSubmit = () => {
     axios.get(`/staffs/${staffID}`).then((res) => {
+      console.log('check', res?.data);
+      // if null -> notInDB
+      // if !numuric -> numOnly()
       if (res.data.staffs !== null) {
         const isNumericID = /^\d+$/.test(staffID);
         if (!isNumericID) {
@@ -54,7 +57,7 @@ export default function InputStaffID() {
   };
 
   const handleKeyDown = (event) => {
-    if (isDisabled) {
+    if (!isDisabled) {
       if (event.key === "Enter") {
         handleSubmit();
       }
