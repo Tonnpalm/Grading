@@ -38,9 +38,7 @@ export default function InputStaffID() {
 
   const handleSubmit = () => {
     axios.get(`/staffs/${staffID}`).then((res) => {
-      console.log('check', res?.data);
-      // if null -> notInDB
-      // if !numuric -> numOnly()
+      // console.log('check', res?.data);
       if (res.data.staffs !== null) {
         const isNumericID = /^\d+$/.test(staffID);
         if (!isNumericID) {
