@@ -60,6 +60,9 @@ export default function InputStaffID() {
         handleSubmit();
       }
     }
+    // } else {
+    //   return;
+    // }
   };
 
   const isDisabled = !/^\d{5}$/.test(staffID);
