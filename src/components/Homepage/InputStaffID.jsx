@@ -54,8 +54,10 @@ export default function InputStaffID() {
   };
 
   const handleKeyDown = (event) => {
-    if (event.key === "Enter") {
-      handleSubmit();
+    if (isDisabled) {
+      if (event.key === "Enter") {
+        handleSubmit();
+      }
     }
   };
 
